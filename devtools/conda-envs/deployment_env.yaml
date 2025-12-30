@@ -1,0 +1,25 @@
+name: build
+channels:
+  - conda-forge
+  - mdtools
+dependencies:
+  # Base dependencies
+  - python
+  - pip
+  - numpy
+  - pyyaml
+
+  # Conda build
+  - anaconda-client
+  - conda-build
+  - boa
+
+  # Machine learning dependencies
+  - pytorch
+  - lightning
+  - opt-einsum
+
+  # PyPI build
+  - pip:
+    - build
+    - twine

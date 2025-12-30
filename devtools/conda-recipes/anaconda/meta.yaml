@@ -1,0 +1,44 @@
+{% set version = environ['COSMOLAYER_VERSION'][1:] %}
+
+package:
+  name: cosmolayer
+  version: {{ version }}
+
+source:
+  git_url: ../../../
+
+build:
+  noarch: python
+  number: 0
+  script: python -m pip install --no-deps --ignore-installed .
+
+requirements:
+  host:
+    - python
+    - setuptools
+    - versioningit
+    - pip
+  run:
+    - python
+    - numpy
+    - pytorch
+    - lightning
+    - opt-einsum
+    - pyyaml
+
+test:
+  imports:
+    - cosmolayer
+
+about:
+  home: https://github.com/craabreu/cosmolayer
+  summary: Differentiable COSMO-Type Activity Coefficient Layer
+  license: MIT
+  license_family: MIT
+  license_file: LICENSE.md
+  doc_url: https://craabreu.github.io/cosmolayer/latest
+  dev_url: https://github.com/craabreu/cosmolayer
+
+extra:
+  recipe-maintainers:
+    - craabreu
