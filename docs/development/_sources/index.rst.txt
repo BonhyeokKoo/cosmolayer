@@ -1,0 +1,36 @@
+===========================
+CosmoLayer
+===========================
+
+.. image:: https://img.shields.io/badge/License-MIT-yellowgreen.svg
+   :target: https://github.com/craabreu/cosmolayer/blob/main/LICENSE.md
+
+.. image:: https://badgen.net/badge/icon/github?icon=github&label
+   :target: https://github.com/craabreu/cosmolayer
+
+.. raw:: html
+
+   <a class="github-button" href="https://github.com/craabreu/cosmolayer" data-show-count="true" aria-label="Star craabreu/cosmolayer on GitHub">Star</a>
+
+
+Contents
+========
+
+.. toctree::
+   :maxdepth: 3
+
+   getting_started
+   api/index
+   references
+
+
+Indices and tables
+==================
+
+* :ref:`genindex`
+* :ref:`modindex`
+* :ref:`search`
+
+.. raw:: html
+
+   <script async defer src="https://buttons.github.io/buttons.js"></script>
