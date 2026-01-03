@@ -151,8 +151,8 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_f_decay</span> <span class="o">=</span> <span class="n">f_decay</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_0</span> <span class="o">=</span> <span class="n">sigma_0</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">=</span> <span class="n">parse_cosmo_file</span><span class="p">(</span>
-            <span class="n">cosmo_file_path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">parse_cosmo_file</span><span class="p">(</span><span class="n">cosmo_file_path</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="n">averaged_sigmas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_average_sigmas</span><span class="p">()</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">averaged_sigmas</span> <span class="o">&lt;</span> <span class="n">min_sigma</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">averaged_sigmas</span> <span class="o">&gt;</span> <span class="n">max_sigma</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
@@ -323,6 +323,32 @@
 <span class="sd">            Cavity volume in Å³.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span></div>
+
+
+<div class="viewcode-block" id="Component.get_format">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.Component.get_format">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the COSMO file format that was parsed.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            The detected file format. Either &quot;TURBOMOLE&quot; or &quot;DMol-3&quot;.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
+<span class="sd">        &gt;&gt;&gt; from cosmolayer.sac import Component</span>
+<span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(path)</span>
+<span class="sd">        &gt;&gt;&gt; component.get_format()</span>
+<span class="sd">        &#39;TURBOMOLE&#39;</span>
+<span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(path)</span>
+<span class="sd">        &gt;&gt;&gt; component.get_format()</span>
+<span class="sd">        &#39;DMol-3&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span></div>
 
 
 <div class="viewcode-block" id="Component.get_sigma_grid">

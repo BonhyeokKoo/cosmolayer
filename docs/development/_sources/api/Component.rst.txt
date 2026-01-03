@@ -8,6 +8,7 @@ Component
     .. rubric:: Methods
 
     .. automethod:: get_area
+    .. automethod:: get_format
     .. automethod:: get_segment_type_distribution
     .. automethod:: get_sigma_grid
     .. automethod:: get_sigma_profile
