@@ -231,6 +231,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinxcontrib.bibtex",
     "sphinx_copybutton",
+    "matplotlib.sphinxext.plot_directive",
 ]
 
 autosummary_generate = False
@@ -395,3 +396,7 @@ extlinks = {
 # Copy button configuration
 copybutton_prompt_text = r">>> |\.\.\. "
 copybutton_prompt_is_regexp = True
+
+
+# Set the default for all plot directives to include source code
+plot_include_source = True
