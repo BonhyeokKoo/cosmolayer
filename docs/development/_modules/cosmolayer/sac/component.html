@@ -1,0 +1,465 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../../../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>cosmolayer.sac.component &#8212; CosmoLayer dev  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/css/custom.css?v=572d9513" />
+    <script src="../../../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../../../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../../../_static/copybutton.js?v=ccdb6887"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+   
+  <link rel="stylesheet" href="../../../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <h1>Source code for cosmolayer.sac.component</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">pandas</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pd</span>
+<span class="kn">import</span><span class="w"> </span><span class="nn">periodictable</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">pt</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">..parser</span><span class="w"> </span><span class="kn">import</span> <span class="n">parse_cosmo_file</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.segment_groups</span><span class="w"> </span><span class="kn">import</span> <span class="n">NHB</span><span class="p">,</span> <span class="n">OH</span><span class="p">,</span> <span class="n">OT</span><span class="p">,</span> <span class="n">SEGMENT_GROUPS</span>
+
+<span class="n">COVALENT_FACTOR</span> <span class="o">=</span> <span class="mf">1.3</span>  <span class="c1"># Same as in RDKit</span>
+
+
+<div class="viewcode-block" id="Component">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.Component">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">Component</span><span class="p">:</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Molecular component for the COSMO-SAC activity coefficient model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    cosmo_file_path : str or os.PathLike</span>
+<span class="sd">        Path to the COSMO output file from quantum mechanical calculations.</span>
+
+<span class="sd">    Keyword Arguments</span>
+<span class="sd">    -----------------</span>
+<span class="sd">    min_sigma : float, optional</span>
+<span class="sd">        Minimum screening charge density in e/Å². Default is -0.025 e/Å².</span>
+<span class="sd">    max_sigma : float, optional</span>
+<span class="sd">        Maximum screening charge density in e/Å². Default is 0.025 e/Å².</span>
+<span class="sd">    num_points : int, optional</span>
+<span class="sd">        Number of discrete points in the sigma profile. Default is 51.</span>
+<span class="sd">    averaging_squared_radius : float, optional</span>
+<span class="sd">        Effective squared radius for distance-weighted sigma averaging in Å².</span>
+<span class="sd">        Default is (7.25 / π) Å² :cite:`Bell2020`.</span>
+<span class="sd">    f_decay : float, optional</span>
+<span class="sd">        Decay factor for exponential distance weighting in the sigma averaging</span>
+<span class="sd">        procedure. Default is 3.57 :cite:`Bell2020`.</span>
+<span class="sd">    sigma_0 : float, optional</span>
+<span class="sd">        Standard deviation of the Gaussian probability of a segment to form a hydrogen</span>
+<span class="sd">        bond. Default is 0.007 e/Å² :cite:`Bell2020`.</span>
+
+<span class="sd">    Raises</span>
+<span class="sd">    ------</span>
+<span class="sd">    FileNotFoundError</span>
+<span class="sd">        If the specified file does not exist.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If the file contents are not in the expected format.</span>
+<span class="sd">    ValueError</span>
+<span class="sd">        If averaged charge densities fall outside the specified sigma range.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">    &gt;&gt;&gt; from importlib.resources import files</span>
+<span class="sd">    &gt;&gt;&gt; from cosmolayer.sac import Component</span>
+<span class="sd">    &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
+<span class="sd">    &gt;&gt;&gt; component = Component(path)</span>
+<span class="sd">    &gt;&gt;&gt; component.get_area()</span>
+<span class="sd">    97.34554...</span>
+<span class="sd">    &gt;&gt;&gt; component.get_volume()</span>
+<span class="sd">    80.07160...</span>
+<span class="sd">    &gt;&gt;&gt; sigma_profile = component.get_sigma_profile()</span>
+<span class="sd">    &gt;&gt;&gt; print(sum(sigma_profile))</span>
+<span class="sd">    97.34554...</span>
+<span class="sd">    &gt;&gt;&gt; sigma_profiles = {</span>
+<span class="sd">    ...     s: component.get_sigma_profile(s)</span>
+<span class="sd">    ...     for s in [&quot;NHB&quot;, &quot;OH&quot;, &quot;OT&quot;]</span>
+<span class="sd">    ... }</span>
+<span class="sd">    &gt;&gt;&gt; for s in [&quot;NHB&quot;, &quot;OH&quot;, &quot;OT&quot;]:</span>
+<span class="sd">    ...     print(s, sum(sigma_profiles[s]))</span>
+<span class="sd">    NHB 72.31802...</span>
+<span class="sd">    OH 12.25732...</span>
+<span class="sd">    OT 12.77019...</span>
+
+<span class="sd">    Plotting the sigma profiles:</span>
+
+<span class="sd">    .. plot::</span>
+<span class="sd">        :context: close-figs</span>
+
+<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
+<span class="sd">        &gt;&gt;&gt; from cosmolayer.sac import Component</span>
+<span class="sd">        &gt;&gt;&gt; from matplotlib import pyplot as plt</span>
+<span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(path)</span>
+<span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots(figsize=(8, 4))</span>
+<span class="sd">        &gt;&gt;&gt; grid = component.get_sigma_grid()</span>
+<span class="sd">        &gt;&gt;&gt; for s in [&quot;NHB&quot;, &quot;OH&quot;, &quot;OT&quot;]:</span>
+<span class="sd">        ...     _ = ax.plot(grid, component.get_sigma_profile(s), label=s)</span>
+<span class="sd">        &gt;&gt;&gt; _ = ax.plot(grid, component.get_sigma_profile(), label=&quot;Overall&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; _ = ax.set_xlabel(&quot;Charge density (e/Å²)&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; _ = ax.set_ylabel(&quot;Surface area contribution (Å²)&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; _ = ax.legend()</span>
+<span class="sd">        &gt;&gt;&gt; fig.tight_layout()</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">cosmo_file_path</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span>
+        <span class="o">*</span><span class="p">,</span>
+        <span class="n">min_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.025</span><span class="p">,</span>  <span class="c1"># e/A^2</span>
+        <span class="n">max_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.025</span><span class="p">,</span>  <span class="c1"># e/A^2</span>
+        <span class="n">num_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">51</span><span class="p">,</span>
+        <span class="n">hydrogen_bonding_profiles</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
+        <span class="n">averaging_squared_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.25</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span><span class="p">,</span>  <span class="c1"># A^2</span>
+        <span class="n">f_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.57</span><span class="p">,</span>
+        <span class="n">sigma_0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.007</span><span class="p">,</span>  <span class="c1"># e/A^2</span>
+    <span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_min_sigma</span> <span class="o">=</span> <span class="n">min_sigma</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_sigma</span><span class="p">,</span> <span class="n">max_sigma</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bin_width</span> <span class="o">=</span> <span class="p">(</span><span class="n">max_sigma</span> <span class="o">-</span> <span class="n">min_sigma</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">num_points</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_squared_radius</span> <span class="o">=</span> <span class="n">averaging_squared_radius</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_f_decay</span> <span class="o">=</span> <span class="n">f_decay</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_0</span> <span class="o">=</span> <span class="n">sigma_0</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">=</span> <span class="n">parse_cosmo_file</span><span class="p">(</span>
+            <span class="n">cosmo_file_path</span>
+        <span class="p">)</span>
+        <span class="n">averaged_sigmas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_average_sigmas</span><span class="p">()</span>
+        <span class="k">if</span> <span class="p">(</span><span class="n">averaged_sigmas</span> <span class="o">&lt;</span> <span class="n">min_sigma</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">averaged_sigmas</span> <span class="o">&gt;</span> <span class="n">max_sigma</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Averaged charge densities out of range.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_area</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_sigma_profiles</span><span class="p">(</span><span class="n">averaged_sigmas</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_covalent_radius</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get scaled covalent radius for bond detection.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        element : str</span>
+<span class="sd">            Chemical element symbol.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Covalent radius in Å, scaled by factor 1.3.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">covalent_radius</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">COVALENT_FACTOR</span> <span class="o">*</span> <span class="n">radius</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_get_hydrogen_bonding_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Classify atoms into hydrogen bonding types (OH, OT, NHB).</span>
+
+<span class="sd">        Determines bonds from interatomic distances and assigns hydrogen bonding</span>
+<span class="sd">        classes: OH (O-H bonds), OT (N-H, F-H bonds or isolated N/F/O), and</span>
+<span class="sd">        NHB (all other atoms).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.Series</span>
+<span class="sd">            Hydrogen bonding class label for each atom.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">]</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_covalent_radius</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">bonds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">distances</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">radii</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">radii</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">hb_class</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">element</span><span class="p">:</span> <span class="n">OT</span> <span class="k">if</span> <span class="n">element</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">NHB</span>
+        <span class="p">)</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bonds</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">elements_ij</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elements</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]])</span>
+            <span class="k">if</span> <span class="n">elements_ij</span> <span class="ow">in</span> <span class="p">[{</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">}]:</span>
+                <span class="n">hb_class</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hb_class</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">OH</span> <span class="k">if</span> <span class="s2">&quot;O&quot;</span> <span class="ow">in</span> <span class="n">elements_ij</span> <span class="k">else</span> <span class="n">OT</span>
+        <span class="k">return</span> <span class="n">hb_class</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_average_sigmas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply distance-weighted averaging to segment charge densities.</span>
+
+<span class="sd">        Smooths raw screening charge densities (σ = q/A) using exponentially</span>
+<span class="sd">        decaying weights based on distances between segment centroids.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Averaged screening charge density for each segment in e/Å.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sigmas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;charge&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">squared_distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">squared_radii</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+
+        <span class="n">sums</span> <span class="o">=</span> <span class="n">squared_radii</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_squared_radius</span>
+        <span class="n">prods</span> <span class="o">=</span> <span class="n">squared_radii</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_squared_radius</span>
+        <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_f_decay</span> <span class="o">*</span> <span class="n">squared_distances</span> <span class="o">/</span> <span class="n">sums</span><span class="p">)</span> <span class="o">*</span> <span class="n">prods</span> <span class="o">/</span> <span class="n">sums</span>
+        <span class="n">result</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">result</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_sigma_profile</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">averaged_sigmas</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">areas</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bin segment areas by charge density using linear interpolation.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        averaged_sigmas : np.ndarray</span>
+<span class="sd">            Averaged screening charge densities in e/Å².</span>
+<span class="sd">        areas : np.ndarray</span>
+<span class="sd">            Surface areas in Å².</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Sigma profile histogram. Shape: (num_points,).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">profile</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">sigma</span><span class="p">,</span> <span class="n">area</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">averaged_sigmas</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="n">sigma</span> <span class="o">-</span> <span class="bp">self</span><span class="o">.</span><span class="n">_min_sigma</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_width</span><span class="p">)</span>
+            <span class="n">weight</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">-</span> <span class="n">sigma</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bin_width</span>
+            <span class="n">profile</span><span class="p">[</span><span class="n">index</span><span class="p">]</span> <span class="o">+=</span> <span class="n">area</span> <span class="o">*</span> <span class="n">weight</span>
+            <span class="n">profile</span><span class="p">[</span><span class="n">index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+=</span> <span class="n">area</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">weight</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">profile</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_sigma_profiles</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">averaged_sigmas</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute sigma profiles separated by hydrogen bonding type.</span>
+
+<span class="sd">        Classifies segments by H-bonding type (OH, OT, NHB) based on parent atom</span>
+<span class="sd">        and sigma sign, then applies a Gaussian probability weighting function.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        averaged_sigmas : np.ndarray</span>
+<span class="sd">            Averaged screening charge densities for all segments in e/Å².</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Dictionary with keys &quot;NHB&quot;, &quot;OH&quot;, &quot;OT&quot; and values as sigma profile</span>
+<span class="sd">            arrays. Each profile has shape (num_points,).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">atom_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;atom&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">element</span> <span class="o">=</span> <span class="n">atom_indices</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">])</span>
+        <span class="n">is_hb_candidate</span> <span class="o">=</span> <span class="p">(</span><span class="n">element</span> <span class="o">==</span> <span class="s2">&quot;H&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">averaged_sigmas</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">hb_class</span> <span class="o">=</span> <span class="n">atom_indices</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_hydrogen_bonding_classes</span><span class="p">())</span>
+        <span class="n">mask_oh</span> <span class="o">=</span> <span class="n">is_hb_candidate</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">hb_class</span> <span class="o">==</span> <span class="n">OH</span><span class="p">)</span>
+        <span class="n">mask_ot</span> <span class="o">=</span> <span class="n">is_hb_candidate</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">hb_class</span> <span class="o">==</span> <span class="n">OT</span><span class="p">)</span>
+        <span class="n">mask_nhb</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">mask_oh</span> <span class="o">|</span> <span class="n">mask_ot</span><span class="p">)</span>
+        <span class="n">areas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">profile_oh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_sigma_profile</span><span class="p">(</span>
+            <span class="n">averaged_sigmas</span><span class="p">[</span><span class="n">mask_oh</span><span class="p">],</span> <span class="n">areas</span><span class="p">[</span><span class="n">mask_oh</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">profile_ot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_sigma_profile</span><span class="p">(</span>
+            <span class="n">averaged_sigmas</span><span class="p">[</span><span class="n">mask_ot</span><span class="p">],</span> <span class="n">areas</span><span class="p">[</span><span class="n">mask_ot</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">profile_nhb</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_sigma_profile</span><span class="p">(</span>
+            <span class="n">averaged_sigmas</span><span class="p">[</span><span class="n">mask_nhb</span><span class="p">],</span> <span class="n">areas</span><span class="p">[</span><span class="n">mask_nhb</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">hb_probability</span> <span class="o">=</span> <span class="mf">1.0</span> <span class="o">-</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="mf">0.5</span> <span class="o">*</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_0</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">NHB</span><span class="p">:</span> <span class="n">profile_nhb</span> <span class="o">+</span> <span class="p">(</span><span class="n">profile_oh</span> <span class="o">+</span> <span class="n">profile_ot</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="mf">1.0</span> <span class="o">-</span> <span class="n">hb_probability</span><span class="p">),</span>
+            <span class="n">OH</span><span class="p">:</span> <span class="n">profile_oh</span> <span class="o">*</span> <span class="n">hb_probability</span><span class="p">,</span>
+            <span class="n">OT</span><span class="p">:</span> <span class="n">profile_ot</span> <span class="o">*</span> <span class="n">hb_probability</span><span class="p">,</span>
+        <span class="p">}</span>
+
+<div class="viewcode-block" id="Component.get_area">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.Component.get_area">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_area</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the cavity surface area of the molecule in Å².</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Cavity surface area in Å². This is the sum of the areas of all</span>
+<span class="sd">            segments from the COSMO calculation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span></div>
+
+
+<div class="viewcode-block" id="Component.get_volume">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.Component.get_volume">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the cavity volume of the molecule in Å³.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        float</span>
+<span class="sd">            Cavity volume in Å³.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span></div>
+
+
+<div class="viewcode-block" id="Component.get_sigma_grid">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.Component.get_sigma_grid">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_sigma_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the charge density grid in e/Å².</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Charge density grid in e/Å².</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span></div>
+
+
+<div class="viewcode-block" id="Component.get_sigma_profile">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.Component.get_sigma_profile">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_sigma_profile</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">segment_class</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the sigma profile for a given segment class or the overall sigma profile.</span>
+
+<span class="sd">        The segment classes are:</span>
+<span class="sd">        - NHB: Non-hydrogen-bonding segments</span>
+<span class="sd">        - OH: Segments associated with hydroxyl groups</span>
+<span class="sd">        - OT: Segments associated with other hydrogen-bonding groups</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        segment_class : str, optional</span>
+<span class="sd">            Segment class. If None, returns the total sigma profile.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Sigma profile for the given segment class or the overall sigma profile.</span>
+<span class="sd">            Shape: (num_points,). Units: Å².</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">segment_class</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">profile</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span><span class="p">[</span>
+                    <span class="n">segment_class</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+                <span class="p">]</span>
+                <span class="k">return</span> <span class="n">profile</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid segment class: </span><span class="si">{</span><span class="n">segment_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
+        <span class="n">total_profile</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">total_profile</span></div>
+
+
+<div class="viewcode-block" id="Component.get_segment_type_distribution">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.Component.get_segment_type_distribution">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_segment_type_distribution</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">merged</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the normalized distribution of segment groups in the molecule.</span>
+
+<span class="sd">        A segment group is defined by its hydrogen bonding class (NHB, OH, OT) and its</span>
+<span class="sd">        averaged charge density.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        merged : bool, optional</span>
+<span class="sd">            Whether to merge the segment groups (NHB, OH, OT) into a single profile.</span>
+<span class="sd">            Default is False.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Normalized distribution of segment groups (sum = 1.0).</span>
+<span class="sd">            If merged=True: shape is (num_points,) - total sigma profile normalized.</span>
+<span class="sd">            If merged=False: shape is (3*num_points,) - concatenated profiles.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">profiles</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span><span class="p">[</span><span class="n">segtype</span><span class="p">]</span> <span class="k">for</span> <span class="n">segtype</span> <span class="ow">in</span> <span class="n">SEGMENT_GROUPS</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">merged</span><span class="p">:</span>
+            <span class="n">merged_profile</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">profiles</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span>
+            <span class="k">return</span> <span class="n">merged_profile</span>
+        <span class="n">concatenated_profile</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">profiles</span><span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">concatenated_profile</span></div>
+</div>
+
+</pre></div>
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../../../index.html">CosmoLayer dev</a></h1>
+
+
+
+
+
+
+
+
+
+
+
+<h3><a href="../../../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api/index.html">API Reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../references.html">Bibliography</a></li>
+</ul>
+
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024 C. Abreu.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+    </div>
+
+    
+
+    
+  </body>
+</html>

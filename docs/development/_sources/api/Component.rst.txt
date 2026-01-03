@@ -1,0 +1,14 @@
+Component
+=========
+
+.. currentmodule:: cosmolayer
+.. autoclass:: Component
+    :member-order: alphabetical
+
+    .. rubric:: Methods
+
+    .. automethod:: get_area
+    .. automethod:: get_segment_type_distribution
+    .. automethod:: get_sigma_grid
+    .. automethod:: get_sigma_profile
+    .. automethod:: get_volume
