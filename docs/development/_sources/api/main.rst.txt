@@ -5,6 +5,7 @@ Core
     :titlesonly:
 
     Component
+    CosmoSpace
     create_cosmo_sac_2002_matrix
     create_cosmo_sac_2010_matrices
 

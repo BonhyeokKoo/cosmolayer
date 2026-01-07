@@ -1,0 +1,11 @@
+CosmoSpace
+==========
+
+.. currentmodule:: cosmolayer
+.. autoclass:: CosmoSpace
+    :member-order: alphabetical
+
+    .. rubric:: Methods
+
+    .. automethod:: backward
+    .. automethod:: forward
