@@ -89,6 +89,23 @@ class Component:
         >>> _ = ax.set_ylabel("Surface area contribution (Å²)")
         >>> _ = ax.legend()
         >>> fig.tight_layout()
+
+    Plotting the segment-type probabilities:
+
+    .. plot::
+        :context: close-figs
+
+        >>> from importlib.resources import files
+        >>> from cosmolayer.sac import Component
+        >>> from matplotlib import pyplot as plt
+        >>> path = files("cosmolayer.data") / "C=C(N)O.cosmo"
+        >>> component = Component(path)
+        >>> fig, ax = plt.subplots(figsize=(8, 4))
+        >>> log_p = component.get_log_probabilities()
+        >>> _ = ax.bar(range(len(log_p)), np.exp(log_p))
+        >>> _ = ax.set_xlabel("Segment type index")
+        >>> _ = ax.set_ylabel("Probability")
+        >>> fig.tight_layout()
     """
 
     def __init__(  # noqa: PLR0913
@@ -98,7 +115,6 @@ class Component:
         min_sigma: float = -0.025,  # e/A^2
         max_sigma: float = 0.025,  # e/A^2
         num_points: int = 51,
-        hydrogen_bonding_profiles: bool = True,
         averaging_squared_radius: float = 7.25 / np.pi,  # A^2
         f_decay: float = 3.57,
         sigma_0: float = 0.007,  # e/A^2
@@ -346,32 +362,62 @@ class Component:
         )
         return total_profile
 
-    def get_segment_type_distribution(
-        self, merged: bool = False
+    def get_log_probabilities(
+        self, merge: bool = False, regularize: float = 1e-10
     ) -> NDArray[np.float64]:
-        """Get the normalized distribution of segment groups in the molecule.
+        """Get the log-probabilities of segment types in the molecule.
 
-        A segment group is defined by its hydrogen bonding class (NHB, OH, OT) and its
+        A segment type is defined by its hydrogen bonding class (NHB, OH, OT) and its
         averaged charge density.
 
         Parameters
         ----------
-        merged : bool, optional
+        merge : bool, optional
             Whether to merge the segment groups (NHB, OH, OT) into a single profile.
             Default is False.
+        regularize : float, optional
+            Minimum value for clipping probabilities before taking the logarithm
+            to avoid log(0) issues. Set to 0 to disable regularization.
+            Default is 1e-10.
 
         Returns
         -------
         np.ndarray
-            Normalized distribution of segment groups (sum = 1.0).
-            If merged=True: shape is (num_points,) - total sigma profile normalized.
-            If merged=False: shape is (3*num_points,) - concatenated profiles.
+            Log of the normalized distribution of segment groups.
+            If merge=True: shape is (num_points,) - log of total sigma
+            profile normalized.
+            If merge=False: shape is (3*num_points,) - log of concatenated
+            profiles.
+
+        Examples
+        --------
+        >>> import numpy as np
+        >>> from importlib.resources import files
+        >>> from cosmolayer.sac import Component
+        >>> path = files("cosmolayer.data") / "C=C(N)O.cosmo"
+        >>> component = Component(path)
+        >>> log_dist = component.get_log_probabilities(merge=True)
+        >>> log_dist.shape
+        (51,)
+        >>> # Verify it's log probabilities (all should be <= 0)
+        >>> bool(np.all(log_dist <= 0))
+        True
+        >>> # Verify probabilities sum to 1
+        >>> bool(np.isclose(np.exp(log_dist).sum(), 1.0))
+        True
+        >>> log_dist_full = component.get_log_probabilities(merge=False)
+        >>> log_dist_full.shape
+        (153,)
+        >>> bool(np.isclose(np.exp(log_dist_full).sum(), 1.0))
+        True
         """
+        if regularize < 0:
+            raise ValueError("Regularization value must be non-negative.")
         profiles = [self._sigma_profiles[segtype] for segtype in SEGMENT_GROUPS]
-        if merged:
-            merged_profile: NDArray[np.float64] = np.sum(profiles, axis=0) / self._area
-            return merged_profile
-        concatenated_profile: NDArray[np.float64] = (
-            np.concatenate(profiles) / self._area
+        probabilities = (
+            np.sum(profiles, axis=0) if merge else np.concatenate(profiles)
+        ) / self._area
+        log_probabilities: NDArray[np.float64] = np.log(
+            probabilities.clip(min=regularize)
         )
-        return concatenated_profile
+        return log_probabilities

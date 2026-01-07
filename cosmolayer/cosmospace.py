@@ -59,14 +59,13 @@ class CosmoSpace(torch.autograd.Function):
     ...     Component(files("cosmolayer.data") / f"{species}.cosmo")
     ...     for species in ("C=C(N)O", "NCCO")
     ... ]
-    >>> distributions = [
-    ...     component.get_segment_type_distribution(merged=True)
+    >>> log_distributions = [
+    ...     component.get_log_probabilities(merge=True)
     ...     for component in components
     ... ]
-    >>> p = torch.stack(
-    ...     [torch.tensor(p, dtype=torch.float32) for p in distributions],
-    ... )
-    >>> log_p = (p + 1e-10).log().requires_grad_(True)
+    >>> log_p = torch.stack(
+    ...     [torch.tensor(log_p, dtype=torch.float32) for log_p in log_distributions],
+    ... ).requires_grad_(True)
     >>> U_RT = torch.tensor(
     ...     create_cosmo_sac_2002_matrix(298.15),
     ...     dtype=torch.float32,
@@ -110,6 +109,26 @@ class CosmoSpace(torch.autograd.Function):
         U_RT: torch.Tensor,
         max_iter: int = 1000,
     ) -> torch.Tensor:
+        """Forward pass of the COSMOspace layer.
+
+        Solves the fixed-point equation for the activity coefficient vector γ.
+
+        Parameters
+        ----------
+        ctx : FunctionCtx
+            Context object for saving tensors needed in backward pass.
+        log_p : torch.Tensor
+            Log-probabilities of segment types. Shape: (..., n).
+        U_RT : torch.Tensor
+            Reduced interaction energy matrix. Shape: (..., n, n).
+        max_iter : int, optional
+            Maximum number of iterations for the fixed-point solver.
+
+        Returns
+        -------
+        torch.Tensor
+            Activity coefficient vector γ. Shape: (..., n).
+        """
         x = torch.softmax(log_p, dim=-1)
         B = torch.exp(-U_RT)
         gamma = CosmoSpace._fixed_point_solver(x, B, max_iter)
@@ -121,6 +140,23 @@ class CosmoSpace(torch.autograd.Function):
         ctx: NestedIOFunction,
         grad_gamma: torch.Tensor,
     ) -> tuple[torch.Tensor, torch.Tensor, None]:
+        """Backward pass of the COSMOspace layer.
+
+        Computes gradients with respect to log_p and U_RT using implicit
+        differentiation.
+
+        Parameters
+        ----------
+        ctx : NestedIOFunction
+            Context object containing saved tensors from forward pass.
+        grad_gamma : torch.Tensor
+            Gradient with respect to the output γ. Shape: (..., n).
+
+        Returns
+        -------
+        tuple[torch.Tensor, torch.Tensor, None]
+            Gradients with respect to log_p, U_RT, and max_iter (None).
+        """
         gamma, x, B = ctx.saved_tensors
         BT = B.transpose(-2, -1)
         JT = x.unsqueeze(-1) * BT * gamma.unsqueeze(-2)
