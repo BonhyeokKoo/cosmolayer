@@ -5,7 +5,10 @@ Core
     :titlesonly:
 
     Component
+    CosmoSac2002Mixture
+    CosmoSac2010Mixture
     CosmoSpace
+    Mixture
     create_cosmo_sac_2002_matrix
     create_cosmo_sac_2010_matrices
 

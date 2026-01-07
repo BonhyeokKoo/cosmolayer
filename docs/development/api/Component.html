@@ -19,7 +19,7 @@
     <script src="../_static/copybutton.js?v=ccdb6887"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="CosmoSpace" href="CosmoSpace.html" />
+    <link rel="next" title="CosmoSac2002Mixture" href="CosmoSac2002Mixture.html" />
     <link rel="prev" title="Core" href="main.html" />
    
   <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
@@ -42,30 +42,30 @@
 <h1>Component<a class="headerlink" href="#component" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="cosmolayer.Component">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cosmo_file_path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">51</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">hydrogen_bonding_profiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">averaging_squared_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.3077466748324826</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.57</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.007</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/sac/component.html#Component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.Component" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">Component</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">cosmo_file_path</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">51</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">averaging_squared_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">2.3077466748324826</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.57</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.007</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/sac/component.html#Component"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.Component" title="Link to this definition">¶</a></dt>
 <dd><p>Molecular component for the COSMO-SAC activity coefficient model.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>cosmo_file_path</strong> (<em>str</em><em> or </em><em>os.PathLike</em>) – Path to the COSMO output file from quantum mechanical calculations.</p>
+<dd class="field-odd"><p><strong>cosmo_file_path</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> or </em><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.14)"><em>os.PathLike</em></a>) – Path to the COSMO output file from quantum mechanical calculations.</p>
 </dd>
 <dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>min_sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum screening charge density in e/Å². Default is -0.025 e/Å².</p></li>
-<li><p><strong>max_sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum screening charge density in e/Å². Default is 0.025 e/Å².</p></li>
-<li><p><strong>num_points</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of discrete points in the sigma profile. Default is 51.</p></li>
-<li><p><strong>averaging_squared_radius</strong> (<em>float</em><em>, </em><em>optional</em>) – Effective squared radius for distance-weighted sigma averaging in Å².
+<li><p><strong>min_sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum screening charge density in e/Å². Default is -0.025 e/Å².</p></li>
+<li><p><strong>max_sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum screening charge density in e/Å². Default is 0.025 e/Å².</p></li>
+<li><p><strong>num_points</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of discrete points in the sigma profile. Default is 51.</p></li>
+<li><p><strong>averaging_squared_radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Effective squared radius for distance-weighted sigma averaging in Å².
 Default is (7.25 / π) Å² <span id="id1">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
-<li><p><strong>f_decay</strong> (<em>float</em><em>, </em><em>optional</em>) – Decay factor for exponential distance weighting in the sigma averaging
+<li><p><strong>f_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Decay factor for exponential distance weighting in the sigma averaging
 procedure. Default is 3.57 <span id="id2">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
-<li><p><strong>sigma_0</strong> (<em>float</em><em>, </em><em>optional</em>) – Standard deviation of the Gaussian probability of a segment to form a hydrogen
+<li><p><strong>sigma_0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Standard deviation of the Gaussian probability of a segment to form a hydrogen
 bond. Default is 0.007 e/Å² <span id="id3">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>FileNotFoundError</strong> – If the specified file does not exist.</p></li>
-<li><p><strong>ValueError</strong> – If the file contents are not in the expected format.</p></li>
-<li><p><strong>ValueError</strong> – If averaged charge densities fall outside the specified sigma range.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#FileNotFoundError" title="(in Python v3.14)"><strong>FileNotFoundError</strong></a> – If the specified file does not exist.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If the file contents are not in the expected format.</p></li>
+<li><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#ValueError" title="(in Python v3.14)"><strong>ValueError</strong></a> – If averaged charge densities fall outside the specified sigma range.</p></li>
 </ul>
 </dd>
 </dl>
@@ -111,6 +111,21 @@ bond. Default is 0.007 e/Å² <span id="id3">[<a class="reference internal" href
 </pre></div>
 </div>
 <p>(<a class="reference download internal" download="" href="../_downloads/7a92625ded18cfba7cd8081b7e56e382/Component-1.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+<p>Plotting the segment-type probabilities:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.sac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_p</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_log_probabilities</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">log_p</span><span class="p">)),</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_p</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Segment type index&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Probability&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="o">.</span><span class="n">tight_layout</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>(<a class="reference download internal" download="" href="../_downloads/8bbd205314ae734e88e3fbc8ccee1dc0/Component-2.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
 <p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.Component.get_area">
@@ -122,7 +137,7 @@ bond. Default is 0.007 e/Å² <span id="id3">[<a class="reference internal" href
 segments from the COSMO calculation.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>float</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -136,7 +151,7 @@ segments from the COSMO calculation.</p>
 <dd class="field-odd"><p>The detected file format. Either “TURBOMOLE” or “DMol-3”.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>str</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -155,25 +170,54 @@ segments from the COSMO calculation.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.Component.get_segment_type_distribution">
-<span class="sig-name descname"><span class="pre">get_segment_type_distribution</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">merged</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/sac/component.html#Component.get_segment_type_distribution"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.Component.get_segment_type_distribution" title="Link to this definition">¶</a></dt>
-<dd><p>Get the normalized distribution of segment groups in the molecule.</p>
-<p>A segment group is defined by its hydrogen bonding class (NHB, OH, OT) and its
+<dt class="sig sig-object py" id="cosmolayer.Component.get_log_probabilities">
+<span class="sig-name descname"><span class="pre">get_log_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">merge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/sac/component.html#Component.get_log_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.Component.get_log_probabilities" title="Link to this definition">¶</a></dt>
+<dd><p>Get the log-probabilities of segment types in the molecule.</p>
+<p>A segment type is defined by its hydrogen bonding class (NHB, OH, OT) and its
 averaged charge density.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>merged</strong> (<em>bool</em><em>, </em><em>optional</em>) – Whether to merge the segment groups (NHB, OH, OT) into a single profile.
-Default is False.</p>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>merge</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge the segment groups (NHB, OH, OT) into a single profile.
+Default is False.</p></li>
+<li><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities before taking the logarithm
+to avoid log(0) issues. Set to 0 to disable regularization.
+Default is 1e-10.</p></li>
+</ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Normalized distribution of segment groups (sum = 1.0).
-If merged=True: shape is (num_points,) - total sigma profile normalized.
-If merged=False: shape is (3*num_points,) - concatenated profiles.</p>
+<dd class="field-even"><p>Log of the normalized distribution of segment groups.
+If merge=True: shape is (num_points,) - log of total sigma
+profile normalized.
+If merge=False: shape is (3*num_points,) - log of concatenated
+profiles.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p>np.ndarray</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.sac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_dist</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_log_probabilities</span><span class="p">(</span><span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_dist</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(51,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Verify it&#39;s log probabilities (all should be &lt;= 0)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">log_dist</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="c1"># Verify probabilities sum to 1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_dist</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_dist_full</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_log_probabilities</span><span class="p">(</span><span class="n">merge</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_dist_full</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(153,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">log_dist_full</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -200,7 +244,7 @@ If merged=False: shape is (3*num_points,) - concatenated profiles.</p>
 - OT: Segments associated with other hydrogen-bonding groups</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>segment_class</strong> (<em>str</em><em>, </em><em>optional</em>) – Segment class. If None, returns the total sigma profile.</p>
+<dd class="field-odd"><p><strong>segment_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Segment class. If None, returns the total sigma profile.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Sigma profile for the given segment class or the overall sigma profile.
@@ -221,7 +265,7 @@ Shape: (num_points,). Units: Å².</p>
 <dd class="field-odd"><p>Cavity volume in Å³.</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>float</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -255,7 +299,10 @@ Shape: (num_points,). Units: Å².</p>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="main.html">Core</a><ul class="current">
 <li class="toctree-l3 current"><a class="current reference internal" href="#">Component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CosmoSac2002Mixture.html">CosmoSac2002Mixture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CosmoSac2010Mixture.html">CosmoSac2010Mixture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="CosmoSpace.html">CosmoSpace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Mixture.html">Mixture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="create_cosmo_sac_2002_matrix.html">create_cosmo_sac_2002_matrix</a></li>
 <li class="toctree-l3"><a class="reference internal" href="create_cosmo_sac_2010_matrices.html">create_cosmo_sac_2010_matrices</a></li>
 </ul>

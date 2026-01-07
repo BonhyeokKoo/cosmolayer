@@ -50,22 +50,22 @@ divided by the product RT, where R is the universal gas constant and T is the
 temperature at which the interaction matrix is computed.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>temperature</strong> (<em>float</em>) – The temperature in Kelvin at which the interaction matrix is computed.</p>
+<dd class="field-odd"><p><strong>temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The temperature in Kelvin at which the interaction matrix is computed.</p>
 </dd>
 <dt class="field-even">Keyword Arguments<span class="colon">:</span></dt>
 <dd class="field-even"><ul class="simple">
-<li><p><strong>min_sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – Minimum screening charge density in e/Å². Default is -0.025.</p></li>
-<li><p><strong>max_sigma</strong> (<em>float</em><em>, </em><em>optional</em>) – Maximum screening charge density in e/Å². Default is 0.025.</p></li>
-<li><p><strong>num_points</strong> (<em>int</em><em>, </em><em>optional</em>) – Number of discrete points in the sigma grid. Default is 51.</p></li>
-<li><p><strong>a_es</strong> (<em>float</em><em>, </em><em>optional</em>) – Misfit energy constant in (kcal/mol)/(e/Å²)². Controls the strength
+<li><p><strong>min_sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum screening charge density in e/Å². Default is -0.025.</p></li>
+<li><p><strong>max_sigma</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Maximum screening charge density in e/Å². Default is 0.025.</p></li>
+<li><p><strong>num_points</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Number of discrete points in the sigma grid. Default is 51.</p></li>
+<li><p><strong>a_es</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Misfit energy constant in (kcal/mol)/(e/Å²)². Controls the strength
 of electrostatic misfit interactions. Default is 6525.69 <span id="id2">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
-<li><p><strong>b_es</strong> (<em>float</em><em>, </em><em>optional</em>) – Misfit energy constant in (kcal/mol)/(e/Å²)². Controls the strength
+<li><p><strong>b_es</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Misfit energy constant in (kcal/mol)/(e/Å²)². Controls the strength
 of electrostatic misfit interactions. Default is 1.4859e8 <span id="id3">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
-<li><p><strong>c_oh_oh</strong> (<em>float</em><em>, </em><em>optional</em>) – Hydrogen bonding energy constant in (kcal/mol)/(e/Å²)². Controls the
+<li><p><strong>c_oh_oh</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Hydrogen bonding energy constant in (kcal/mol)/(e/Å²)². Controls the
 strength of hydrogen bonding interactions. Default is 4013.78 <span id="id4">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
-<li><p><strong>c_ot_ot</strong> (<em>float</em><em>, </em><em>optional</em>) – Hydrogen bonding energy constant in (kcal/mol)/(e/Å²)². Controls the
+<li><p><strong>c_ot_ot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Hydrogen bonding energy constant in (kcal/mol)/(e/Å²)². Controls the
 strength of hydrogen bonding interactions. Default is 932.31 <span id="id5">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
-<li><p><strong>c_oh_ot</strong> (<em>float</em><em>, </em><em>optional</em>) – Hydrogen bonding energy constant in (kcal/mol)/(e/Å²)². Controls the
+<li><p><strong>c_oh_ot</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Hydrogen bonding energy constant in (kcal/mol)/(e/Å²)². Controls the
 strength of hydrogen bonding interactions. Default is 3016.43 <span id="id6">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
 </ul>
 </dd>
@@ -74,7 +74,7 @@ strength of hydrogen bonding interactions. Default is 3016.43 <span id="id6">[<a
 Shape: (num_points, num_points).</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>tuple[np.ndarray, np.ndarray]</p>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[np.ndarray, np.ndarray]</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
@@ -127,7 +127,10 @@ Shape: (num_points, num_points).</p>
 <li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
 <li class="toctree-l2 current"><a class="reference internal" href="main.html">Core</a><ul class="current">
 <li class="toctree-l3"><a class="reference internal" href="Component.html">Component</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CosmoSac2002Mixture.html">CosmoSac2002Mixture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CosmoSac2010Mixture.html">CosmoSac2010Mixture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="CosmoSpace.html">CosmoSpace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Mixture.html">Mixture</a></li>
 <li class="toctree-l3"><a class="reference internal" href="create_cosmo_sac_2002_matrix.html">create_cosmo_sac_2002_matrix</a></li>
 <li class="toctree-l3 current"><a class="current reference internal" href="#">create_cosmo_sac_2010_matrices</a></li>
 </ul>

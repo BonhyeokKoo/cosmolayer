@@ -1,0 +1,7 @@
+CosmoSac2002Mixture
+===================
+
+.. currentmodule:: cosmolayer
+.. autoclass:: CosmoSac2002Mixture
+    :member-order: alphabetical
+

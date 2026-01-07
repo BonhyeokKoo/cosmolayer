@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+
+<html lang="en" data-content_root="../">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>CosmoSac2002Mixture &#8212; CosmoLayer dev  documentation</title>
+    <link rel="stylesheet" type="text/css" href="../_static/pygments.css?v=b86133f3" />
+    <link rel="stylesheet" type="text/css" href="../_static/basic.css?v=b08954a9" />
+    <link rel="stylesheet" type="text/css" href="../_static/alabaster.css?v=27fed22d" />
+    <link rel="stylesheet" type="text/css" href="../_static/copybutton.css?v=76b2166b" />
+    <link rel="stylesheet" type="text/css" href="../_static/plot_directive.css" />
+    <link rel="stylesheet" type="text/css" href="../_static/css/custom.css?v=572d9513" />
+    <script src="../_static/documentation_options.js?v=5929fcd5"></script>
+    <script src="../_static/doctools.js?v=fd6eb6e6"></script>
+    <script src="../_static/sphinx_highlight.js?v=6ffebe34"></script>
+    <script src="../_static/clipboard.min.js?v=a7894cd8"></script>
+    <script src="../_static/copybutton.js?v=ccdb6887"></script>
+    <link rel="index" title="Index" href="../genindex.html" />
+    <link rel="search" title="Search" href="../search.html" />
+    <link rel="next" title="CosmoSac2010Mixture" href="CosmoSac2010Mixture.html" />
+    <link rel="prev" title="Component" href="Component.html" />
+   
+  <link rel="stylesheet" href="../_static/custom.css" type="text/css" />
+  
+
+  
+  
+
+  </head><body>
+  
+
+    <div class="document">
+      <div class="documentwrapper">
+        <div class="bodywrapper">
+          
+
+          <div class="body" role="main">
+            
+  <section id="cosmosac2002mixture">
+<h1>CosmoSac2002Mixture<a class="headerlink" href="#cosmosac2002mixture" title="Link to this heading">¶</a></h1>
+<dl class="py class">
+<dt class="sig sig-object py" id="cosmolayer.CosmoSac2002Mixture">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">CosmoSac2002Mixture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/sac/mixture.html#CosmoSac2002Mixture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSac2002Mixture" title="Link to this definition">¶</a></dt>
+<dd><p>Mixture of molecular components for COSMO-SAC 2002 calculations.</p>
+<p>This class is pre-configured with COSMO-SAC 2002 model parameters:</p>
+<ul class="simple">
+<li><p>averaging_squared_radius = (0.81764 Å)²</p></li>
+<li><p>f_decay = 1.0</p></li>
+<li><p>merge = True (single segment type distribution)</p></li>
+<li><p>Interaction matrix from <a class="reference internal" href="create_cosmo_sac_2002_matrix.html#cosmolayer.create_cosmo_sac_2002_matrix" title="cosmolayer.create_cosmo_sac_2002_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cosmo_sac_2002_matrix()</span></code></a> with default
+parameters.</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><p><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.14)"><em>os.PathLike</em></a><em>]</em>) – Dictionary mapping component names to paths of COSMO output files.</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.sac</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosmoSac2002Mixture</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">,</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">CosmoSac2002Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">mixture</span><span class="p">)</span>
+<span class="go">2</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_probs</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_log_probabilities</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_probs</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># merge=True, so shape is (n_components, num_points)</span>
+<span class="go">(2, 51)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matrices</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_interaction_matrices</span><span class="p">(</span><span class="mf">298.15</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">matrices</span><span class="p">)</span>  <span class="c1"># COSMO-SAC 2002 returns single matrix (in tuple)</span>
+<span class="go">1</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">matrices</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(51, 51)</span>
+</pre></div>
+</div>
+</dd></dl>
+
+</section>
+
+
+          </div>
+          
+        </div>
+      </div>
+      <div class="sphinxsidebar" role="navigation" aria-label="Main">
+        <div class="sphinxsidebarwrapper">
+<h1 class="logo"><a href="../index.html">CosmoLayer dev</a></h1>
+
+
+
+
+
+
+
+
+
+
+
+<h3><a href="../index.html">Table of Contents</a></h3>
+<ul class="current">
+<li class="toctree-l1"><a class="reference internal" href="../getting_started.html">Getting Started</a></li>
+<li class="toctree-l1 current"><a class="reference internal" href="index.html">API Reference</a><ul class="current">
+<li class="toctree-l2 current"><a class="reference internal" href="main.html">Core</a><ul class="current">
+<li class="toctree-l3"><a class="reference internal" href="Component.html">Component</a></li>
+<li class="toctree-l3 current"><a class="current reference internal" href="#">CosmoSac2002Mixture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CosmoSac2010Mixture.html">CosmoSac2010Mixture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="CosmoSpace.html">CosmoSpace</a></li>
+<li class="toctree-l3"><a class="reference internal" href="Mixture.html">Mixture</a></li>
+<li class="toctree-l3"><a class="reference internal" href="create_cosmo_sac_2002_matrix.html">create_cosmo_sac_2002_matrix</a></li>
+<li class="toctree-l3"><a class="reference internal" href="create_cosmo_sac_2010_matrices.html">create_cosmo_sac_2010_matrices</a></li>
+</ul>
+</li>
+</ul>
+</li>
+<li class="toctree-l1"><a class="reference internal" href="../references.html">Bibliography</a></li>
+</ul>
+
+<search id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</search>
+<script>document.getElementById('searchbox').style.display = "block"</script>
+        </div>
+      </div>
+      <div class="clearer"></div>
+    </div>
+    <div class="footer">
+      &#169;2024 C. Abreu.
+      
+      |
+      Powered by <a href="https://www.sphinx-doc.org/">Sphinx 9.1.0</a>
+      &amp; <a href="https://alabaster.readthedocs.io">Alabaster 1.0.0</a>
+      
+      |
+      <a href="../_sources/api/CosmoSac2002Mixture.rst.txt"
+          rel="nofollow">Page source</a>
+    </div>
+
+    
+
+    
+  </body>
+</html>
