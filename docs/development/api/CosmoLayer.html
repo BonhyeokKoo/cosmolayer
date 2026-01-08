@@ -43,7 +43,7 @@
 <h1>CosmoLayer<a class="headerlink" href="#cosmolayer" title="Link to this heading">¶</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="cosmolayer.CosmoLayer">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">CosmoLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interaction_matrices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_area</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">298.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_matrices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer" title="Link to this definition">¶</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">CosmoLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interaction_matrices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_per_segment</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">298.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_matrices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer" title="Link to this definition">¶</a></dt>
 <dd><p>Differentiable COSMO-type activity coefficient layer.</p>
 <p>The temperature-dependent interaction matrix is computed as:</p>
 <div class="math notranslate nohighlight">
@@ -56,10 +56,10 @@ interaction matrix, and <span class="math notranslate nohighlight">\(\alpha_n\)<
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>interaction_matrices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a><em>, </em><em>...</em><em>]</em>) – Reduced interaction energy matrices. Must be square matrices, all with the same
+<li><p><strong>interaction_matrices</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><em>NDArray</em><em>[</em><em>np.float64</em><em>]</em><em>, </em><em>...</em><em>]</em>) – Reduced interaction energy matrices. Must be square matrices, all with the same
 shape.</p></li>
 <li><p><strong>exponents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>...</em><em>]</em>) – Temperature exponents. Must be the same length as <code class="docutils literal notranslate"><span class="pre">interaction_matrices</span></code>.</p></li>
-<li><p><strong>reference_area</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Reference area (area per segment).</p></li>
+<li><p><strong>area_per_segment</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Surface area of one segment.</p></li>
 <li><p><strong>reference_temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Reference temperature. Default is 298.15 K.</p></li>
 <li><p><strong>learn_matrices</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to learn all interaction matrices as trainable parameters.
 If True, all matrices are registered as Parameters. If False, all matrices
@@ -70,20 +70,26 @@ are registered as buffers. Default is False.</p></li>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosmoLayer</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.sac</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosmoSac2010Mixture</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.sac</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosmoSac2002Mixture</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">T_ref</span> <span class="o">=</span> <span class="mf">298.15</span>  <span class="c1"># K</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;water&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;O.cosmo&quot;</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">CosmoSac2010Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">CosmoSac2002Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">interaction_matrices</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_interaction_matrices</span><span class="p">(</span><span class="n">T_ref</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">exponents</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_temperature_exponents</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">reference_area</span> <span class="o">=</span> <span class="mf">7.25</span>  <span class="c1"># mixture.get_area_per_segment()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cosmo_layer</span> <span class="o">=</span> <span class="n">CosmoLayer</span><span class="p">(</span><span class="n">interaction_matrices</span><span class="p">,</span> <span class="n">exponents</span><span class="p">,</span> <span class="n">reference_area</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">area_per_segment</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_area_per_segment</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cosmo_layer</span> <span class="o">=</span> <span class="n">CosmoLayer</span><span class="p">(</span><span class="n">interaction_matrices</span><span class="p">,</span> <span class="n">exponents</span><span class="p">,</span> <span class="n">area_per_segment</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">cosmo_layer</span>
-<span class="go">CosmoLayer(t_ref=298.15, a_ref=7.25, exponents=[1, 3], n_types=153)</span>
+<span class="go">CosmoLayer(t_ref=298.15, aps=7.50, exponents=[1], n_types=51)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.235</span><span class="p">,</span> <span class="mf">0.765</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">mixture</span><span class="o">.</span><span class="n">get_areas</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">mixture</span><span class="o">.</span><span class="n">get_volumes</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ln_gamma_c</span> <span class="o">=</span> <span class="n">cosmo_layer</span><span class="o">.</span><span class="n">combinatorial_log_activity_coefficients</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ln_gamma_c</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[-0.27687..., -0.052266...]</span>
 </pre></div>
 </div>
 <p class="rubric">Methods</p>
@@ -91,12 +97,24 @@ are registered as buffers. Default is False.</p></li>
 <dt class="sig sig-object py" id="cosmolayer.CosmoLayer.combinatorial_log_activity_coefficients">
 <span class="sig-name descname"><span class="pre">combinatorial_log_activity_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">a</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">v</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.combinatorial_log_activity_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.combinatorial_log_activity_coefficients" title="Link to this definition">¶</a></dt>
 <dd><p>Compute the logarithms of the combinatorial activity coefficients.</p>
+<p>This method implements the Staverman-Guggenheim model:</p>
+<div class="math notranslate nohighlight">
+\[\ln {\boldsymbol \gamma}_c = {\mathbf 1}
+    - \frac{\mathbf v}{v}
+    + \ln \frac{\mathbf v}{v}
+    + \frac{Z}{2 a_0} \left[
+        a \frac{\mathbf v}{v}
+        + {\mathbf a} \odot \left(
+            \ln \frac{\mathbf a}{a} - \ln \frac{\mathbf v}{v} - {\mathbf 1}
+        \right)
+    \right]\]</div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Mole fractions of the components. Must sum to 1. Shape: (…, n).</p></li>
-<li><p><strong>a</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Surface areas of the components, all in the same units. Shape: (…, n).</p></li>
-<li><p><strong>v</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Volumes of the components, all in the same units. Shape: (…, n).</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Mole fractions of the mixture components. Must sum to 1. Shape: (…, n).</p></li>
+<li><p><strong>a</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Surface areas of the mixture components, all in the same units.
+Shape: (…, n).</p></li>
+<li><p><strong>v</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Volumes of the mixture components, all in the same units. Shape: (…, n).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
