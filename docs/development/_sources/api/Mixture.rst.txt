@@ -12,4 +12,5 @@ Mixture
     .. automethod:: get_interaction_matrices
     .. automethod:: get_log_probabilities
     .. automethod:: get_sigma_profiles
+    .. automethod:: get_temperature_exponents
     .. automethod:: get_volumes

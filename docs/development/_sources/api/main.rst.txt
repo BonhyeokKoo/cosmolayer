@@ -5,6 +5,7 @@ Core
     :titlesonly:
 
     Component
+    CosmoLayer
     CosmoSac2002Mixture
     CosmoSac2010Mixture
     CosmoSpace
