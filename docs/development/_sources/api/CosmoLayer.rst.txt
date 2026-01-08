@@ -1,0 +1,12 @@
+CosmoLayer
+==========
+
+.. currentmodule:: cosmolayer
+.. autoclass:: CosmoLayer
+    :member-order: alphabetical
+
+    .. rubric:: Methods
+
+    .. automethod:: combinatorial_log_activity_coefficients
+    .. automethod:: extra_repr
+    .. automethod:: forward
