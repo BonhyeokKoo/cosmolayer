@@ -5,15 +5,20 @@ channels:
 dependencies:
     # Base depends
   - python
+  - pip
   - numpy
   - pandas
   - periodictable
   - pyyaml
   - scipy
+  - typing-extensions
 
     # Testing
+  - matplotlib
   - pytest
+  - pytest-cov
 
-    # Linting
-  - ruff
-  - mypy
+    # Machine learning dependencies
+  - pytorch
+  - lightning
+  - opt-einsum

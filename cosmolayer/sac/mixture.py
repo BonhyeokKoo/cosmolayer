@@ -6,6 +6,10 @@ from numpy.typing import NDArray
 
 from .component import Component
 from .interaction_matrices import (
+    COSMO_SAC_2002_EXPONENTS,
+    COSMO_SAC_2002_REFERENCE_AREA,
+    COSMO_SAC_2010_EXPONENTS,
+    COSMO_SAC_2010_REFERENCE_AREA,
     create_cosmo_sac_2002_matrix,
     create_cosmo_sac_2010_matrices,
 )
@@ -31,6 +35,8 @@ class Mixture:
         Maximum screening charge density in e/Å². Default is 0.025 e/Å².
     num_points : int, optional
         Number of discrete points in the sigma profile. Default is 51.
+    area_per_segment : float, optional
+        Reference area in Å². Default is 7.25 Å².
     averaging_squared_radius : float, optional
         Effective squared radius for distance-weighted sigma averaging in Å².
         Default is (7.25 / π) Å².
@@ -49,6 +55,10 @@ class Mixture:
         Function to generate the interaction matrix for the mixture at a given
         temperature. Default is :func:`create_cosmo_sac_2010_matrices` with default
         parameters.
+    temperature_exponents : tuple[float, ...], optional
+        Temperature exponents for the interaction matrices. Must be the same length as
+        the tuple returned by ``interaction_matrix_generator``.
+        Default is (1, 3).
 
     Raises
     ------
@@ -89,7 +99,8 @@ class Mixture:
         min_sigma: float = -0.025,  # e/A^2
         max_sigma: float = 0.025,  # e/A^2
         num_points: int = 51,
-        averaging_squared_radius: float = 7.25 / np.pi,  # A^2
+        area_per_segment: float = COSMO_SAC_2010_REFERENCE_AREA,  # Å²
+        averaging_squared_radius: float = COSMO_SAC_2010_REFERENCE_AREA / np.pi,  # A^2
         f_decay: float = 3.57,
         sigma_0: float = 0.007,  # e/A^2
         merge: bool = False,
@@ -97,6 +108,7 @@ class Mixture:
         interaction_matrix_generator: Callable[
             [float], tuple[NDArray[np.float64], ...]
         ] = lambda temperature: create_cosmo_sac_2010_matrices(temperature),
+        temperature_exponents: tuple[float, ...] = COSMO_SAC_2010_EXPONENTS,
     ) -> None:
         if not components:
             raise ValueError("At least one component must be provided.")
@@ -114,9 +126,11 @@ class Mixture:
             )
             for name, path in components.items()
         }
+        self._area_per_segment = area_per_segment
         self._merge = merge
         self._regularize = regularize
         self._interaction_matrix_generator = interaction_matrix_generator
+        self._temperature_exponents = temperature_exponents
 
     def __len__(self) -> int:
         """Return the number of components in the mixture."""
@@ -145,6 +159,16 @@ class Mixture:
         if isinstance(key, str):
             return self._components_dict[key]
         return self._components_dict[self._names[key]]
+
+    def get_area_per_segment(self) -> float:
+        """Get the area per segment for the mixture.
+
+        Returns
+        -------
+        float
+            Area per segment in Å².
+        """
+        return self._area_per_segment
 
     def get_component_names(self) -> tuple[str, ...]:
         """Get the names of all components in the mixture.
@@ -316,6 +340,16 @@ class Mixture:
         """
         return self._interaction_matrix_generator(temperature)
 
+    def get_temperature_exponents(self) -> tuple[float, ...]:
+        """Get the temperature exponents for the interaction matrices.
+
+        Returns
+        -------
+        tuple[float, ...]
+            Tuple of temperature exponents.
+        """
+        return self._temperature_exponents
+
 
 class CosmoSac2002Mixture(Mixture):
     """Mixture of molecular components for COSMO-SAC 2002 calculations.
@@ -327,6 +361,7 @@ class CosmoSac2002Mixture(Mixture):
     - merge = True (single segment type distribution)
     - Interaction matrix from :func:`create_cosmo_sac_2002_matrix` with default
       parameters.
+    - temperature_exponents = (1,)
 
     Parameters
     ----------
@@ -357,12 +392,14 @@ class CosmoSac2002Mixture(Mixture):
     def __init__(self, components: dict[str, str | os.PathLike[str]]) -> None:
         super().__init__(
             components,
+            area_per_segment=COSMO_SAC_2002_REFERENCE_AREA,
             averaging_squared_radius=0.81764**2,  # ≈ 0.6685 Å²
             f_decay=1.0,
             merge=True,
             interaction_matrix_generator=lambda temperature: (
                 create_cosmo_sac_2002_matrix(temperature),
             ),
+            temperature_exponents=COSMO_SAC_2002_EXPONENTS,
         )
 
 
