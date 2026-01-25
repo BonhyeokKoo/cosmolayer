@@ -48,10 +48,10 @@
 the (unnormalized, log-scale) segment-type distribution vector log(p) and the
 reduced interaction energy matrix U/RT:</p>
 <blockquote>
-<div><p>γ ⊙ (B (x ⊙ γ)) = 𝟙ₙ,</p>
+<div><p>γ ⊙ (B (x ⊙ γ)) = 𝟙ₘ,</p>
 </div></blockquote>
-<p>where x = softmax(log(p)) is the normalized segment-type distribution vector and
-B = exp(-U/RT) is the Boltzmann-factor matrix.</p>
+<p>where m is the number of segment types, x = softmax(log(p)) is the normalized
+segment-type distribution vector, and B = exp(-U/RT) is the Boltzmann-factor matrix.</p>
 <p>The solution satisfies min(γ) &gt; 0 and aᵀBa = 1, where a = x ⊙ γ is the activity
 vector.</p>
 <p>Even though U/RT is usually symmetric, it is not assumed to be so.</p>
@@ -63,17 +63,17 @@ dimensions, and all computations are vectorized along these dimensions.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>log_p</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Segment-type distribution vector in log-scale. Shape: (…, n).</p></li>
-<li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix U/RT. Shape: (…, n, n).</p></li>
+<li><p><strong>log_p</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Segment-type distribution vector in log-scale. Shape: (…, m).</p></li>
+<li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix U/RT. Shape: (…, m, m).</p></li>
 <li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum number of iterations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p><strong>gamma</strong> – The segment activity coefficient vector. Satisfies min(γ) &gt; 0 and aᵀBa = 1,
-where a = x ⊙ γ, with x = softmax(log(p)). Shape: (…, n).</p>
+where a = x ⊙ γ, with x = softmax(log(p)). Shape: (…, m).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)">torch.Tensor</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
 <dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/exceptions.html#RuntimeError" title="(in Python v3.14)"><strong>RuntimeError</strong></a> – If the fixed-point solver does not converge within <code class="docutils literal notranslate"><span class="pre">max_iter</span></code> iterations.</p>
@@ -120,14 +120,14 @@ differentiation.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> (<em>NestedIOFunction</em>) – Context object containing saved tensors from forward pass.</p></li>
-<li><p><strong>grad_gamma</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Gradient with respect to the output γ. Shape: (…, n).</p></li>
+<li><p><strong>grad_gamma</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Gradient with respect to the output γ. Shape: (…, m).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Gradients with respect to log_p, U_RT, and max_iter (None).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)">torch.Tensor</a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)">torch.Tensor</a>, None]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a>, None]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -141,16 +141,16 @@ differentiation.</p>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>ctx</strong> (<em>FunctionCtx</em>) – Context object for saving tensors needed in backward pass.</p></li>
-<li><p><strong>log_p</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types. Shape: (…, n).</p></li>
-<li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix. Shape: (…, n, n).</p></li>
+<li><p><strong>log_p</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types. Shape: (…, m).</p></li>
+<li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix. Shape: (…, m, m).</p></li>
 <li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum number of iterations for the fixed-point solver.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Activity coefficient vector γ. Shape: (…, n).</p>
+<dd class="field-even"><p>Activity coefficient vector γ. Shape: (…, m).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.9)">torch.Tensor</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
 </dd>
 </dl>
 </dd></dl>
