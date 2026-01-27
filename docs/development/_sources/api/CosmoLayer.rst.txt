@@ -7,9 +7,12 @@ CosmoLayer
 
     .. rubric:: Methods
 
-    .. automethod:: combinatorial_log_activity_coefficients
     .. automethod:: extra_repr
     .. automethod:: forward
-    .. automethod:: log_segment_activity_coefficients
+    .. automethod:: log_activity_coefficients
+    .. automethod:: log_combinatorial_activity_coefficients
+    .. automethod:: log_mixture_segment_activity_coefficients
+    .. automethod:: log_pure_segment_activity_coefficients
+    .. automethod:: log_residual_activity_coefficients
     .. automethod:: mixture_log_probabilities
-    .. automethod:: scaled_interaction_energy_matrix
+    .. automethod:: scaled_interactions

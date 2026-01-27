@@ -89,7 +89,7 @@ parameters. Default is False.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">([</span><span class="mf">0.235</span><span class="p">,</span> <span class="mf">0.765</span><span class="p">],</span> <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">a</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">mixture</span><span class="o">.</span><span class="n">get_areas</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">mixture</span><span class="o">.</span><span class="n">get_volumes</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">ln_gamma_c</span> <span class="o">=</span> <span class="n">cosmo_layer</span><span class="o">.</span><span class="n">combinatorial_log_activity_coefficients</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">ln_gamma_c</span> <span class="o">=</span> <span class="n">cosmo_layer</span><span class="o">.</span><span class="n">log_combinatorial_activity_coefficients</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">ln_gamma_c</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
 <span class="go">[-0.27687..., -0.052266...]</span>
 </pre></div>
@@ -110,50 +110,6 @@ RT \ln {\boldsymbol \gamma} = \nabla_{\mathbf x}G^E + \left(
 </pre></div>
 </div>
 <p class="rubric">Methods</p>
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.combinatorial_log_activity_coefficients">
-<span class="sig-name descname"><span class="pre">combinatorial_log_activity_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molfracs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volumes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.combinatorial_log_activity_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.combinatorial_log_activity_coefficients" title="Link to this definition">¶</a></dt>
-<dd><p>Compute the logarithms of the combinatorial activity coefficients.</p>
-<p>This method evaluates the Staverman-Guggenheim model from the mole fractions
-<span class="math notranslate nohighlight">\(\mathbf{x}\)</span>, component volumes <span class="math notranslate nohighlight">\(\mathbf{v}\)</span>, and surface areas
-<span class="math notranslate nohighlight">\(\mathbf{a}\)</span>:</p>
-<div class="math notranslate nohighlight">
-\[\ln {\boldsymbol \gamma}_c =
-{\mathbf 1} - \hat{\mathbf v} + \ln \hat{\mathbf v}
-- \frac{Z}{2 a_0} {\mathbf a} \odot \left(
-    {\mathbf 1} - \hat{\mathbf w} + \ln \hat{\mathbf w}
-\right),\]</div>
-<p>where:</p>
-<ul class="simple">
-<li><p><span class="math notranslate nohighlight">\(\hat{\mathbf v} = \mathbf v / (\mathbf x \cdot \mathbf v)\)</span> is the
-scaled volume vector</p></li>
-<li><p><span class="math notranslate nohighlight">\(\hat{\mathbf a} = \mathbf a / (\mathbf x \cdot \mathbf a)\)</span> is the
-scaled area vector</p></li>
-<li><p><span class="math notranslate nohighlight">\(\hat{\mathbf w} = \hat{\mathbf v} \oslash \hat{\mathbf a}\)</span> is the
-scaled volume-to-area ratio vector</p></li>
-<li><p><span class="math notranslate nohighlight">\(Z = 10\)</span> is the coordination number</p></li>
-<li><p><span class="math notranslate nohighlight">\(a_0 = 79.53\)</span> Å² is the reference area per segment</p></li>
-<li><p><span class="math notranslate nohighlight">\(\odot\)</span>, <span class="math notranslate nohighlight">\(\oslash\)</span> denote element-wise operations</p></li>
-<li><p><span class="math notranslate nohighlight">\(\mathbf 1\)</span> is the vector of ones</p></li>
-</ul>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>molfracs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Mole fractions of the mixture components. Must sum to 1. Shape: (…, n).</p></li>
-<li><p><strong>areas</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Surface areas of the mixture components, all in the same units.
-Shape: (…, n).</p></li>
-<li><p><strong>volumes</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Volumes of the mixture components, all in the same units. Shape: (…, n).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Logarithms of the combinatorial activity coefficients. Shape: (…, n).</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
-</dd>
-</dl>
-</dd></dl>
-
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.CosmoLayer.extra_repr">
 <span class="sig-name descname"><span class="pre">extra_repr</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.extra_repr"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.extra_repr" title="Link to this definition">¶</a></dt>
@@ -192,29 +148,154 @@ strings are acceptable.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.log_segment_activity_coefficients">
-<span class="sig-name descname"><span class="pre">log_segment_activity_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molfracs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logprobs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.log_segment_activity_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.log_segment_activity_coefficients" title="Link to this definition">¶</a></dt>
-<dd><p>Compute the logarithms of the activity coefficients of segment types.</p>
+<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.log_activity_coefficients">
+<span class="sig-name descname"><span class="pre">log_activity_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molfracs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volumes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logprobs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.log_activity_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.log_activity_coefficients" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the logarithms of the activity coefficients.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>temp</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Temperature in the same units as the reference temperature. Shape: (…,).</p></li>
-<li><p><strong>molfracs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Mole fractions of the components. Must sum to 1. Shape: (…, n).</p></li>
-<li><p><strong>areas</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Surface areas of the components. Shape: (…, n).</p></li>
-<li><p><strong>logprobs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types per component. Shape: (…, n, m).</p></li>
+<li><p><strong>temperature</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Temperature in the same units as the reference temperature.
+Shape: (…,).</p></li>
+<li><p><strong>molfracs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Mole fractions of the components. Must sum to 1.
+Shape: (…, num_components).</p></li>
+<li><p><strong>areas</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Surface areas of the components.
+Shape: (…, num_components).</p></li>
+<li><p><strong>volumes</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Volumes of the components.
+Shape: (…, num_components).</p></li>
+<li><p><strong>logprobs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types per component.
+Shape: (…, num_components, num_segment_types).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><em>torch.Tensor</em> – Logarithms of the activity coefficients of segment types in the mixture.
-Shape: (…, m).</p></li>
-<li><p><em>torch.Tensor</em> – Logarithms of the activity coefficients of segment types in pure compounds.
-Shape: (…, n, m).</p></li>
-</ul>
-</p>
+<dd class="field-even"><p>Logarithms of the activity coefficients.
+Shape: (…, num_components).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>Tensor</em></a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>Tensor</em></a>]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.log_combinatorial_activity_coefficients">
+<span class="sig-name descname"><span class="pre">log_combinatorial_activity_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">molfracs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volumes</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.log_combinatorial_activity_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.log_combinatorial_activity_coefficients" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the logarithms of the combinatorial activity coefficients.</p>
+<p>This method evaluates the Staverman-Guggenheim model from the mole fractions
+<span class="math notranslate nohighlight">\(\mathbf{x}\)</span>, component volumes <span class="math notranslate nohighlight">\(\mathbf{v}\)</span>, and surface areas
+<span class="math notranslate nohighlight">\(\mathbf{a}\)</span>:</p>
+<div class="math notranslate nohighlight">
+\[\ln {\boldsymbol \gamma}_c =
+{\mathbf 1} - \hat{\mathbf v} + \ln \hat{\mathbf v}
+- \frac{Z}{2 a_0} {\mathbf a} \odot \left(
+    {\mathbf 1} - \hat{\mathbf w} + \ln \hat{\mathbf w}
+\right),\]</div>
+<p>where:</p>
+<ul class="simple">
+<li><p><span class="math notranslate nohighlight">\(\hat{\mathbf v} = \mathbf v / (\mathbf x \cdot \mathbf v)\)</span> is the
+scaled volume vector</p></li>
+<li><p><span class="math notranslate nohighlight">\(\hat{\mathbf a} = \mathbf a / (\mathbf x \cdot \mathbf a)\)</span> is the
+scaled area vector</p></li>
+<li><p><span class="math notranslate nohighlight">\(\hat{\mathbf w} = \hat{\mathbf v} \oslash \hat{\mathbf a}\)</span> is the
+scaled volume-to-area ratio vector</p></li>
+<li><p><span class="math notranslate nohighlight">\(Z = 10\)</span> is the coordination number</p></li>
+<li><p><span class="math notranslate nohighlight">\(a_0 = 79.53\)</span> Å² is the reference area per segment</p></li>
+<li><p><span class="math notranslate nohighlight">\(\odot\)</span>, <span class="math notranslate nohighlight">\(\oslash\)</span> denote element-wise operations</p></li>
+<li><p><span class="math notranslate nohighlight">\(\mathbf 1\)</span> is the vector of ones</p></li>
+</ul>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>molfracs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Mole fractions of the mixture components.
+Must sum to 1. Shape: (…, num_components).</p></li>
+<li><p><strong>areas</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Surface areas of the mixture components, all in the same units.
+Shape: (…, num_components).</p></li>
+<li><p><strong>volumes</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Volumes of the mixture components, all in the same units.
+Shape: (…, num_components).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Logarithms of the combinatorial activity coefficients.
+Shape: (…, num_components).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.log_mixture_segment_activity_coefficients">
+<span class="sig-name descname"><span class="pre">log_mixture_segment_activity_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled_interactions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molfracs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logprobs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.log_mixture_segment_activity_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.log_mixture_segment_activity_coefficients" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the log-activity coefficients of segment types in the mixture.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scaled_interactions</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Scaled interaction energy matrix.
+Shape: (…, num_segment_types, num_segment_types).</p></li>
+<li><p><strong>molfracs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Mole fractions of the components. Must sum to 1.
+Shape: (…, num_components).</p></li>
+<li><p><strong>areas</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Surface areas of the components.
+Shape: (…, num_components).</p></li>
+<li><p><strong>logprobs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types per component.
+Shape: (…, num_components, num_segment_types).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-activity coefficients of segment types in the mixture.
+Shape: (…, num_segment_types).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.log_pure_segment_activity_coefficients">
+<span class="sig-name descname"><span class="pre">log_pure_segment_activity_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">scaled_interactions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logprobs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.log_pure_segment_activity_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.log_pure_segment_activity_coefficients" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the log-activity coefficients of segment types in pure compounds.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>scaled_interactions</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Scaled interaction energy matrix.
+Shape: (…, num_segment_types, num_segment_types).</p></li>
+<li><p><strong>logprobs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types per component.
+Shape: (…, num_components, num_segment_types).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Log-activity coefficients of segment types in pure compounds.
+Shape: (…, num_components, num_segment_types).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.log_residual_activity_coefficients">
+<span class="sig-name descname"><span class="pre">log_residual_activity_coefficients</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">molfracs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">logprobs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.log_residual_activity_coefficients"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.log_residual_activity_coefficients" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the logarithms of the residual activity coefficients.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>temperature</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Temperature in the same units as the reference temperature.
+Shape: (…,).</p></li>
+<li><p><strong>molfracs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Mole fractions of the components. Must sum to 1.
+Shape: (…, num_components).</p></li>
+<li><p><strong>areas</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Surface areas of the components.
+Shape: (…, num_components).</p></li>
+<li><p><strong>logprobs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types per component.
+Shape: (…, num_components, num_segment_types).</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Logarithms of the residual activity coefficients.
+Shape: (…, num_components).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
 </dd>
 </dl>
 </dd></dl>
@@ -226,13 +307,17 @@ Shape: (…, n, m).</p></li>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>molfracs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Mole fractions of the components. Must sum to 1. Shape: (…, n).</p></li>
-<li><p><strong>areas</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Surface areas of the components. Shape: (…, n).</p></li>
-<li><p><strong>logprobs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types per component. Shape: (…, n, m).</p></li>
+<li><p><strong>molfracs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Mole fractions of the components. Must sum to 1.
+Shape: (…, num_components).</p></li>
+<li><p><strong>areas</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Surface areas of the components.
+Shape: (…, num_components).</p></li>
+<li><p><strong>logprobs</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types per component.
+Shape: (…, num_components, num_segment_types).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Log-probabilities of segment types in the mixture. Shape: (…, m).</p>
+<dd class="field-even"><p>Log-probabilities of segment types in the mixture.
+Shape: (…, num_segment_types).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
@@ -241,16 +326,17 @@ Shape: (…, n, m).</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.scaled_interaction_energy_matrix">
-<span class="sig-name descname"><span class="pre">scaled_interaction_energy_matrix</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.scaled_interaction_energy_matrix"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.scaled_interaction_energy_matrix" title="Link to this definition">¶</a></dt>
-<dd><p>Compute the scaled interaction energy matrix at a given temperature.</p>
+<dt class="sig sig-object py" id="cosmolayer.CosmoLayer.scaled_interactions">
+<span class="sig-name descname"><span class="pre">scaled_interactions</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.scaled_interactions"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.scaled_interactions" title="Link to this definition">¶</a></dt>
+<dd><p>Compute the scaled interactions at a given temperature.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>temp</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Temperature in the same units as the reference temperature. Shape: (…,).</p>
+<dd class="field-odd"><p><strong>temp</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Temperature in the same units as the reference temperature.
+Shape: (…,).</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>The scaled interaction energy matrix at the given temperature.
-Shape: (…, m, m).</p>
+<dd class="field-even"><p>The scaled interactions at the given temperature.
+Shape: (…, num_segment_types, num_segment_types).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>

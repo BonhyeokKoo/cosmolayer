@@ -110,7 +110,7 @@
 <span class="sd">    &gt;&gt;&gt; x = torch.tensor([0.235, 0.765], requires_grad=True)</span>
 <span class="sd">    &gt;&gt;&gt; a = torch.tensor(mixture.get_areas())</span>
 <span class="sd">    &gt;&gt;&gt; v = torch.tensor(mixture.get_volumes())</span>
-<span class="sd">    &gt;&gt;&gt; ln_gamma_c = cosmo_layer.combinatorial_log_activity_coefficients(x, a, v)</span>
+<span class="sd">    &gt;&gt;&gt; ln_gamma_c = cosmo_layer.log_combinatorial_activity_coefficients(x, a, v)</span>
 <span class="sd">    &gt;&gt;&gt; ln_gamma_c.tolist()</span>
 <span class="sd">    [-0.27687..., -0.052266...]</span>
 
@@ -188,9 +188,9 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CosmoLayer.combinatorial_log_activity_coefficients">
-<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.combinatorial_log_activity_coefficients">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">combinatorial_log_activity_coefficients</span><span class="p">(</span>
+<div class="viewcode-block" id="CosmoLayer.log_combinatorial_activity_coefficients">
+<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.log_combinatorial_activity_coefficients">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_combinatorial_activity_coefficients</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">molfracs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">areas</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
@@ -226,17 +226,20 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        molfracs : torch.Tensor</span>
-<span class="sd">            Mole fractions of the mixture components. Must sum to 1. Shape: (..., n).</span>
+<span class="sd">            Mole fractions of the mixture components.</span>
+<span class="sd">            Must sum to 1. Shape: (..., num_components).</span>
 <span class="sd">        areas : torch.Tensor</span>
 <span class="sd">            Surface areas of the mixture components, all in the same units.</span>
-<span class="sd">            Shape: (..., n).</span>
+<span class="sd">            Shape: (..., num_components).</span>
 <span class="sd">        volumes : torch.Tensor</span>
-<span class="sd">            Volumes of the mixture components, all in the same units. Shape: (..., n).</span>
+<span class="sd">            Volumes of the mixture components, all in the same units.</span>
+<span class="sd">            Shape: (..., num_components).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        torch.Tensor</span>
-<span class="sd">            Logarithms of the combinatorial activity coefficients. Shape: (..., n).</span>
+<span class="sd">            Logarithms of the combinatorial activity coefficients.</span>
+<span class="sd">            Shape: (..., num_components).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">v_hat</span> <span class="o">=</span> <span class="n">volumes</span> <span class="o">/</span> <span class="p">(</span><span class="n">molfracs</span> <span class="o">*</span> <span class="n">volumes</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">a_hat</span> <span class="o">=</span> <span class="n">areas</span> <span class="o">/</span> <span class="p">(</span><span class="n">molfracs</span> <span class="o">*</span> <span class="n">areas</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -260,37 +263,42 @@
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        molfracs : torch.Tensor</span>
-<span class="sd">            Mole fractions of the components. Must sum to 1. Shape: (..., n).</span>
+<span class="sd">            Mole fractions of the components. Must sum to 1.</span>
+<span class="sd">            Shape: (..., num_components).</span>
 <span class="sd">        areas : torch.Tensor</span>
-<span class="sd">            Surface areas of the components. Shape: (..., n).</span>
+<span class="sd">            Surface areas of the components.</span>
+<span class="sd">            Shape: (..., num_components).</span>
 <span class="sd">        logprobs : torch.Tensor</span>
-<span class="sd">            Log-probabilities of segment types per component. Shape: (..., n, m).</span>
+<span class="sd">            Log-probabilities of segment types per component.</span>
+<span class="sd">            Shape: (..., num_components, num_segment_types).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        torch.Tensor</span>
-<span class="sd">            Log-probabilities of segment types in the mixture. Shape: (..., m).</span>
+<span class="sd">            Log-probabilities of segment types in the mixture.</span>
+<span class="sd">            Shape: (..., num_segment_types).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">xa</span> <span class="o">=</span> <span class="n">molfracs</span> <span class="o">*</span> <span class="n">areas</span>
         <span class="n">log_theta</span> <span class="o">=</span> <span class="n">xa</span><span class="o">.</span><span class="n">log</span><span class="p">()</span> <span class="o">-</span> <span class="n">xa</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">logsumexp</span><span class="p">(</span><span class="n">log_theta</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">logprobs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">2</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CosmoLayer.scaled_interaction_energy_matrix">
-<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.scaled_interaction_energy_matrix">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">scaled_interaction_energy_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the scaled interaction energy matrix at a given temperature.</span>
+<div class="viewcode-block" id="CosmoLayer.scaled_interactions">
+<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.scaled_interactions">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">scaled_interactions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">temp</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the scaled interactions at a given temperature.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        temp : torch.Tensor</span>
-<span class="sd">            Temperature in the same units as the reference temperature. Shape: (...,).</span>
+<span class="sd">            Temperature in the same units as the reference temperature.</span>
+<span class="sd">            Shape: (...,).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        torch.Tensor</span>
-<span class="sd">            The scaled interaction energy matrix at the given temperature.</span>
-<span class="sd">            Shape: (..., m, m).</span>
+<span class="sd">            The scaled interactions at the given temperature.</span>
+<span class="sd">            Shape: (..., num_segment_types, num_segment_types).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">beta</span> <span class="o">=</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ref_temp</span> <span class="o">/</span> <span class="n">temp</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
         <span class="n">matrices</span> <span class="o">=</span> <span class="p">[</span>
@@ -299,45 +307,165 @@
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span><span class="n">matrices</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CosmoLayer.log_segment_activity_coefficients">
-<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.log_segment_activity_coefficients">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">log_segment_activity_coefficients</span><span class="p">(</span>
+<div class="viewcode-block" id="CosmoLayer.log_pure_segment_activity_coefficients">
+<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.log_pure_segment_activity_coefficients">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_pure_segment_activity_coefficients</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">temp</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-        <span class="n">molfracs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-        <span class="n">areas</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">scaled_interactions</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">logprobs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the logarithms of the activity coefficients of segment types.</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the log-activity coefficients of segment types in pure compounds.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        temp : torch.Tensor</span>
-<span class="sd">            Temperature in the same units as the reference temperature. Shape: (...,).</span>
-<span class="sd">        molfracs : torch.Tensor</span>
-<span class="sd">            Mole fractions of the components. Must sum to 1. Shape: (..., n).</span>
-<span class="sd">        areas : torch.Tensor</span>
-<span class="sd">            Surface areas of the components. Shape: (..., n).</span>
+<span class="sd">        scaled_interactions : torch.Tensor</span>
+<span class="sd">            Scaled interaction energy matrix.</span>
+<span class="sd">            Shape: (..., num_segment_types, num_segment_types).</span>
 <span class="sd">        logprobs : torch.Tensor</span>
-<span class="sd">            Log-probabilities of segment types per component. Shape: (..., n, m).</span>
+<span class="sd">            Log-probabilities of segment types per component.</span>
+<span class="sd">            Shape: (..., num_components, num_segment_types).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        torch.Tensor</span>
-<span class="sd">            Logarithms of the activity coefficients of segment types in the mixture.</span>
-<span class="sd">            Shape: (..., m).</span>
-<span class="sd">        torch.Tensor</span>
-<span class="sd">            Logarithms of the activity coefficients of segment types in pure compounds.</span>
-<span class="sd">            Shape: (..., n, m).</span>
+<span class="sd">            Log-activity coefficients of segment types in pure compounds.</span>
+<span class="sd">            Shape: (..., num_components, num_segment_types).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">log_p_mix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mixture_log_probabilities</span><span class="p">(</span><span class="n">molfracs</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">logprobs</span><span class="p">)</span>
-        <span class="n">U_RT</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled_interaction_energy_matrix</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
-        <span class="n">gamma_mix</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">log_p_mix</span><span class="p">,</span> <span class="n">U_RT</span><span class="p">)</span>
+        <span class="n">log_gamma_pure</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="n">logprobs</span><span class="p">,</span> <span class="n">scaled_interactions</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">log_gamma_pure</span></div>
 
-        <span class="n">U_RT_broadcast</span> <span class="o">=</span> <span class="n">U_RT</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
-        <span class="n">gamma_pure</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">U_RT_broadcast</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="n">gamma_mix</span><span class="o">.</span><span class="n">log</span><span class="p">(),</span> <span class="n">gamma_pure</span><span class="o">.</span><span class="n">log</span><span class="p">()</span></div>
+<div class="viewcode-block" id="CosmoLayer.log_mixture_segment_activity_coefficients">
+<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.log_mixture_segment_activity_coefficients">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_mixture_segment_activity_coefficients</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">scaled_interactions</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">molfracs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">areas</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">logprobs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the log-activity coefficients of segment types in the mixture.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        scaled_interactions : torch.Tensor</span>
+<span class="sd">            Scaled interaction energy matrix.</span>
+<span class="sd">            Shape: (..., num_segment_types, num_segment_types).</span>
+<span class="sd">        molfracs : torch.Tensor</span>
+<span class="sd">            Mole fractions of the components. Must sum to 1.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        areas : torch.Tensor</span>
+<span class="sd">            Surface areas of the components.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        logprobs : torch.Tensor</span>
+<span class="sd">            Log-probabilities of segment types per component.</span>
+<span class="sd">            Shape: (..., num_components, num_segment_types).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        torch.Tensor</span>
+<span class="sd">            Log-activity coefficients of segment types in the mixture.</span>
+<span class="sd">            Shape: (..., num_segment_types).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log_gamma_mix</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">mixture_log_probabilities</span><span class="p">(</span><span class="n">molfracs</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">logprobs</span><span class="p">),</span>
+            <span class="n">scaled_interactions</span><span class="p">,</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">log_gamma_mix</span></div>
+
+
+<div class="viewcode-block" id="CosmoLayer.log_residual_activity_coefficients">
+<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.log_residual_activity_coefficients">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_residual_activity_coefficients</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">molfracs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">areas</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">logprobs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the logarithms of the residual activity coefficients.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        temperature : torch.Tensor</span>
+<span class="sd">            Temperature in the same units as the reference temperature.</span>
+<span class="sd">            Shape: (...,).</span>
+<span class="sd">        molfracs : torch.Tensor</span>
+<span class="sd">            Mole fractions of the components. Must sum to 1.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        areas : torch.Tensor</span>
+<span class="sd">            Surface areas of the components.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        logprobs : torch.Tensor</span>
+<span class="sd">            Log-probabilities of segment types per component.</span>
+<span class="sd">            Shape: (..., num_components, num_segment_types).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        torch.Tensor</span>
+<span class="sd">            Logarithms of the residual activity coefficients.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">scaled_interactions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">scaled_interactions</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span>
+        <span class="n">log_gamma_pure</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_pure_segment_activity_coefficients</span><span class="p">(</span>
+            <span class="n">scaled_interactions</span><span class="p">,</span> <span class="n">logprobs</span>
+        <span class="p">)</span>
+        <span class="n">log_gamma_mix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_mixture_segment_activity_coefficients</span><span class="p">(</span>
+            <span class="n">scaled_interactions</span><span class="p">,</span> <span class="n">molfracs</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">logprobs</span>
+        <span class="p">)</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">logprobs</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">num_segments</span> <span class="o">=</span> <span class="n">areas</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area_per_segment</span>
+        <span class="n">log_gamma_res</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">num_segments</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">probs</span> <span class="o">*</span> <span class="p">(</span><span class="n">log_gamma_mix</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span> <span class="o">-</span> <span class="n">log_gamma_pure</span><span class="p">)</span>
+        <span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">log_gamma_res</span></div>
+
+
+<div class="viewcode-block" id="CosmoLayer.log_activity_coefficients">
+<a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.log_activity_coefficients">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">log_activity_coefficients</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">temperature</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">molfracs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">areas</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">volumes</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">logprobs</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute the logarithms of the activity coefficients.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        temperature : torch.Tensor</span>
+<span class="sd">            Temperature in the same units as the reference temperature.</span>
+<span class="sd">            Shape: (...,).</span>
+<span class="sd">        molfracs : torch.Tensor</span>
+<span class="sd">            Mole fractions of the components. Must sum to 1.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        areas : torch.Tensor</span>
+<span class="sd">            Surface areas of the components.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        volumes : torch.Tensor</span>
+<span class="sd">            Volumes of the components.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        logprobs : torch.Tensor</span>
+<span class="sd">            Log-probabilities of segment types per component.</span>
+<span class="sd">            Shape: (..., num_components, num_segment_types).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        torch.Tensor</span>
+<span class="sd">            Logarithms of the activity coefficients.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">log_gamma_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_combinatorial_activity_coefficients</span><span class="p">(</span>
+            <span class="n">molfracs</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">volumes</span>
+        <span class="p">)</span>
+        <span class="n">log_gamma_r</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_residual_activity_coefficients</span><span class="p">(</span>
+            <span class="n">temperature</span><span class="p">,</span> <span class="n">molfracs</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">logprobs</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">log_gamma_c</span> <span class="o">+</span> <span class="n">log_gamma_r</span></div>
 
 
 <div class="viewcode-block" id="CosmoLayer.forward">
@@ -370,7 +498,7 @@
 <span class="sd">        torch.Tensor</span>
 <span class="sd">            Logarithms of the activity coefficients. Shape: (..., n).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">log_gamma_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">combinatorial_log_activity_coefficients</span><span class="p">(</span>
+        <span class="n">log_gamma_c</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">log_combinatorial_activity_coefficients</span><span class="p">(</span>
             <span class="n">molfracs</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">volumes</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">log_gamma_c</span></div>
