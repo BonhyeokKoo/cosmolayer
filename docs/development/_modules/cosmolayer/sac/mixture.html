@@ -87,10 +87,9 @@
 <span class="sd">        a hydrogen bond. Default is 0.007 e/Å².</span>
 <span class="sd">    merge : bool, optional</span>
 <span class="sd">        Whether to merge segment groups (NHB, OH, OT) into a single profile</span>
-<span class="sd">        when calling get_log_probabilities(). Default is False.</span>
+<span class="sd">        when calling get_probabilities(). Default is False.</span>
 <span class="sd">    regularize : float, optional</span>
-<span class="sd">        Minimum value for clipping probabilities before taking logarithm</span>
-<span class="sd">        in get_log_probabilities(). Default is 1e-10.</span>
+<span class="sd">        Minimum value for clipping probabilities. Default is 1e-10.</span>
 <span class="sd">    interaction_matrix_generator : Callable, optional</span>
 <span class="sd">        Function to generate the interaction matrix for the mixture at a given</span>
 <span class="sd">        temperature. Default is :func:`create_cosmo_sac_2010_matrices` with default</span>
@@ -284,15 +283,15 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Mixture.get_log_probabilities">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.Mixture.get_log_probabilities">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_log_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get log-probabilities of segment types for all components.</span>
+<div class="viewcode-block" id="Mixture.get_probabilities">
+<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.Mixture.get_probabilities">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get probabilities of segment types for all components.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        NDArray[np.float64]</span>
-<span class="sd">            Array of log-probabilities for each component.</span>
+<span class="sd">            Array of probabilities for each component.</span>
 <span class="sd">            If merge=True: shape is (n_components, num_points).</span>
 <span class="sd">            If merge=False: shape is (n_components, 3*num_points).</span>
 
@@ -306,15 +305,15 @@
 <span class="sd">        ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
 <span class="sd">        ... }</span>
 <span class="sd">        &gt;&gt;&gt; mixture = Mixture(components, merge=True)</span>
-<span class="sd">        &gt;&gt;&gt; log_probs = mixture.get_log_probabilities()</span>
-<span class="sd">        &gt;&gt;&gt; log_probs.shape</span>
+<span class="sd">        &gt;&gt;&gt; probabilities = mixture.get_probabilities()</span>
+<span class="sd">        &gt;&gt;&gt; probabilities.shape</span>
 <span class="sd">        (2, 51)</span>
-<span class="sd">        &gt;&gt;&gt; bool(np.all(log_probs &lt;= 0))</span>
+<span class="sd">        &gt;&gt;&gt; bool(np.all(probabilities &lt;= 1))</span>
 <span class="sd">        True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
             <span class="p">[</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_components_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get_log_probabilities</span><span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_components_dict</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">(</span>
                     <span class="bp">self</span><span class="o">.</span><span class="n">_merge</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_regularize</span>
                 <span class="p">)</span>
                 <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_names</span>
@@ -446,8 +445,8 @@
 <span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2002Mixture(components)</span>
 <span class="sd">    &gt;&gt;&gt; len(mixture)</span>
 <span class="sd">    2</span>
-<span class="sd">    &gt;&gt;&gt; log_probs = mixture.get_log_probabilities()</span>
-<span class="sd">    &gt;&gt;&gt; log_probs.shape  # merge=True, so shape is (n_components, num_points)</span>
+<span class="sd">    &gt;&gt;&gt; probabilities = mixture.get_probabilities()</span>
+<span class="sd">    &gt;&gt;&gt; probabilities.shape  # merge=True, so shape is (n_components, num_points)</span>
 <span class="sd">    (2, 51)</span>
 <span class="sd">    &gt;&gt;&gt; matrices = mixture.get_interaction_matrices(298.15)</span>
 <span class="sd">    &gt;&gt;&gt; len(matrices)  # COSMO-SAC 2002 returns single matrix (in tuple)</span>
@@ -500,8 +499,8 @@
 <span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2010Mixture(components)</span>
 <span class="sd">    &gt;&gt;&gt; len(mixture)</span>
 <span class="sd">    2</span>
-<span class="sd">    &gt;&gt;&gt; log_probs = mixture.get_log_probabilities()</span>
-<span class="sd">    &gt;&gt;&gt; log_probs.shape  # merge=False, so shape is (n_components, 3*num_points)</span>
+<span class="sd">    &gt;&gt;&gt; probabilities = mixture.get_probabilities()</span>
+<span class="sd">    &gt;&gt;&gt; probabilities.shape  # merge=False, so shape is (n_components, 3*num_points)</span>
 <span class="sd">    (2, 153)</span>
 <span class="sd">    &gt;&gt;&gt; matrices = mixture.get_interaction_matrices(298.15)</span>
 <span class="sd">    &gt;&gt;&gt; len(matrices)  # COSMO-SAC 2010 returns two matrices</span>

@@ -43,6 +43,10 @@
 <span class="sd">.. functionauthor:: Charlles Abreu &lt;craabreu@gmail.com&gt;</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span>
+
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.autograd.function</span><span class="w"> </span><span class="kn">import</span> <span class="n">FunctionCtx</span><span class="p">,</span> <span class="n">NestedIOFunction</span>
 
@@ -50,31 +54,33 @@
 <div class="viewcode-block" id="CosmoSpace">
 <a class="viewcode-back" href="../../api/CosmoSpace.html#cosmolayer.CosmoSpace">[docs]</a>
 <span class="k">class</span><span class="w"> </span><span class="nc">CosmoSpace</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Implicit COSMOspace layer.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Implicit COSMOspace layer.</span>
 
 <span class="sd">    Solves the following implicit equation for the activity coefficient vector γ, given</span>
-<span class="sd">    the (unnormalized, log-scale) segment-type distribution vector log(p) and the</span>
+<span class="sd">    the segment-type weight vector x (nonnegative, not necessarily normalized) and the</span>
 <span class="sd">    reduced interaction energy matrix U/RT:</span>
 
-<span class="sd">        γ ⊙ (B (x ⊙ γ)) = 𝟙ₘ,</span>
+<span class="sd">        γ ⊙ (B (x ⊙ γ)) = 𝟙ₘ sum(x),</span>
 
-<span class="sd">    where m is the number of segment types, x = softmax(log(p)) is the normalized</span>
-<span class="sd">    segment-type distribution vector, and B = exp(-U/RT) is the Boltzmann-factor matrix.</span>
+<span class="sd">    where m is the number of segment types and B = exp(-U/RT) is the matrix of Boltzmann</span>
+<span class="sd">    factors. For a physically meaningful solution, sum(x) must be equal to 1.</span>
 
-<span class="sd">    The solution satisfies min(γ) &gt; 0 and aᵀBa = 1, where a = x ⊙ γ is the activity</span>
-<span class="sd">    vector.</span>
+<span class="sd">    Domain constraint:</span>
+<span class="sd">    - x &gt;= 0 elementwise, with at least one strictly positive component</span>
+
+<span class="sd">    With sum(x)=1, the solution satisfies min(γ) &gt; 0 and aᵀBa = 1, where a = x ⊙ γ</span>
+<span class="sd">    is the activity vector.</span>
 
 <span class="sd">    Even though U/RT is usually symmetric, it is not assumed to be so.</span>
 
 <span class="sd">    .. note::</span>
-<span class="sd">        Supports batching, meaning that log(p) and U/RT can have broadcastable leading</span>
+<span class="sd">        Supports batching, meaning that x and U/RT can have broadcastable leading</span>
 <span class="sd">        dimensions, and all computations are vectorized along these dimensions.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    log_p : torch.Tensor</span>
-<span class="sd">        Segment-type distribution vector in log-scale. Shape: (..., m).</span>
+<span class="sd">    x : torch.Tensor</span>
+<span class="sd">        Segment-type distribution vector. Shape: (..., m).</span>
 <span class="sd">    U_RT : torch.Tensor</span>
 <span class="sd">        Reduced interaction energy matrix U/RT. Shape: (..., m, m).</span>
 <span class="sd">    max_iter : int</span>
@@ -83,8 +89,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    gamma : torch.Tensor</span>
-<span class="sd">        The segment activity coefficient vector. Satisfies min(γ) &gt; 0 and aᵀBa = 1,</span>
-<span class="sd">        where a = x ⊙ γ, with x = softmax(log(p)). Shape: (..., m).</span>
+<span class="sd">        The segment activity coefficient vector.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -93,33 +98,34 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">    &gt;&gt;&gt; from cosmolayer import Component, create_cosmo_sac_2002_matrix</span>
 <span class="sd">    &gt;&gt;&gt; from importlib.resources import files</span>
 <span class="sd">    &gt;&gt;&gt; components = [</span>
 <span class="sd">    ...     Component(files(&quot;cosmolayer.data&quot;) / f&quot;{species}.cosmo&quot;)</span>
 <span class="sd">    ...     for species in (&quot;C=C(N)O&quot;, &quot;NCCO&quot;)</span>
 <span class="sd">    ... ]</span>
-<span class="sd">    &gt;&gt;&gt; log_distributions = [</span>
-<span class="sd">    ...     component.get_log_probabilities(merge=True)</span>
+<span class="sd">    &gt;&gt;&gt; probabilities = [</span>
+<span class="sd">    ...     component.get_probabilities(merge=True)</span>
 <span class="sd">    ...     for component in components</span>
 <span class="sd">    ... ]</span>
-<span class="sd">    &gt;&gt;&gt; log_p = torch.stack(</span>
-<span class="sd">    ...     [torch.tensor(log_p, dtype=torch.float32) for log_p in log_distributions],</span>
+<span class="sd">    &gt;&gt;&gt; x = torch.stack(</span>
+<span class="sd">    ...     [torch.tensor(p, dtype=torch.float32) for p in probabilities],</span>
 <span class="sd">    ... ).requires_grad_(True)</span>
 <span class="sd">    &gt;&gt;&gt; U_RT = torch.tensor(</span>
 <span class="sd">    ...     create_cosmo_sac_2002_matrix(298.15),</span>
 <span class="sd">    ...     dtype=torch.float32,</span>
 <span class="sd">    ...     requires_grad=True,</span>
 <span class="sd">    ... )</span>
-<span class="sd">    &gt;&gt;&gt; gamma = CosmoSpace.apply(log_p, U_RT)</span>
+<span class="sd">    &gt;&gt;&gt; gamma = CosmoSpace.apply(x, U_RT)</span>
 <span class="sd">    &gt;&gt;&gt; gamma.log()</span>
 <span class="sd">    tensor([[ -5.2...,  -4.6...,  ... -13.3..., -14.5...],</span>
 <span class="sd">            [-22.4..., -20.7...,  ... -4.8...,  -5.5...]], grad_fn=&lt;LogBackward0&gt;)</span>
 <span class="sd">    &gt;&gt;&gt; loss = (gamma ** 2).sum()</span>
 <span class="sd">    &gt;&gt;&gt; loss.backward()</span>
-<span class="sd">    &gt;&gt;&gt; log_p.grad</span>
-<span class="sd">    tensor([[ 2.7...e-07,  6.0...e-08,  ... -4.8...e-06],</span>
-<span class="sd">            [-5.1...e-08, -5.0...e-08,  ...  6.3...e-08]])</span>
+<span class="sd">    &gt;&gt;&gt; x.grad</span>
+<span class="sd">    tensor([[ 2.7...e+03,  6.0...e+02,  ... -4.8...e+04],</span>
+<span class="sd">            [-5.1...e+02, -5.0...e+02,  ...  6.3...e+02]])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@staticmethod</span>
@@ -135,7 +141,7 @@
                 <span class="n">a</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">gamma</span>
                 <span class="n">Ba</span> <span class="o">=</span> <span class="n">B</span> <span class="o">@</span> <span class="n">a</span>
                 <span class="n">s</span> <span class="o">=</span> <span class="p">(</span><span class="n">a</span> <span class="o">*</span> <span class="n">Ba</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">()</span>
-                <span class="n">gamma</span> <span class="o">=</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Ba</span>  <span class="c1"># Enforces aᵀBa = 1 at each iteration</span>
+                <span class="n">gamma</span> <span class="o">=</span> <span class="n">s</span> <span class="o">/</span> <span class="n">Ba</span>
                 <span class="k">if</span> <span class="p">((</span><span class="n">gamma</span> <span class="o">-</span> <span class="n">gamma_prev</span><span class="p">)</span> <span class="o">/</span> <span class="n">gamma</span><span class="p">)</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">max</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">&lt;</span> <span class="n">tol</span><span class="p">:</span>
                     <span class="k">return</span> <span class="n">gamma</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
             <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
@@ -147,33 +153,35 @@
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span>
         <span class="n">ctx</span><span class="p">:</span> <span class="n">FunctionCtx</span><span class="p">,</span>
-        <span class="n">log_p</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">U_RT</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
         <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1000</span><span class="p">,</span>
+        <span class="n">validate_x</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Forward pass of the COSMOspace layer.</span>
-
-<span class="sd">        Solves the fixed-point equation for the activity coefficient vector γ.</span>
-
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        ctx : FunctionCtx</span>
-<span class="sd">            Context object for saving tensors needed in backward pass.</span>
-<span class="sd">        log_p : torch.Tensor</span>
-<span class="sd">            Log-probabilities of segment types. Shape: (..., m).</span>
+<span class="sd">        x : torch.Tensor</span>
+<span class="sd">            Segment-type weights (not necessarily normalized). Shape: (..., m).</span>
 <span class="sd">        U_RT : torch.Tensor</span>
 <span class="sd">            Reduced interaction energy matrix. Shape: (..., m, m).</span>
-<span class="sd">        max_iter : int, optional</span>
-<span class="sd">            Maximum number of iterations for the fixed-point solver.</span>
+<span class="sd">        max_iter : int</span>
+<span class="sd">            Maximum iterations for fixed-point solver.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        torch.Tensor</span>
-<span class="sd">            Activity coefficient vector γ. Shape: (..., m).</span>
+<span class="sd">        gamma : torch.Tensor</span>
+<span class="sd">            Segment activity coefficient vector. Shape: broadcast(x, U_RT)[..., m]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">softmax</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="c1"># Save shapes for correct gradient reductions when broadcasting happened</span>
+        <span class="n">ctx_any</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">ctx</span>
+        <span class="n">ctx_any</span><span class="o">.</span><span class="n">x_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+        <span class="n">ctx_any</span><span class="o">.</span><span class="n">u_shape</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">U_RT</span><span class="o">.</span><span class="n">shape</span><span class="p">)</span>
+
         <span class="n">B</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">U_RT</span><span class="p">)</span>
         <span class="n">gamma</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">_fixed_point_solver</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">B</span><span class="p">,</span> <span class="n">max_iter</span><span class="p">)</span>
+
+        <span class="c1"># Save tensors needed in backward</span>
         <span class="n">ctx</span><span class="o">.</span><span class="n">save_for_backward</span><span class="p">(</span><span class="n">gamma</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">B</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">gamma</span></div>
 
@@ -181,38 +189,56 @@
 <div class="viewcode-block" id="CosmoSpace.backward">
 <a class="viewcode-back" href="../../api/CosmoSpace.html#cosmolayer.CosmoSpace.backward">[docs]</a>
     <span class="nd">@staticmethod</span>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">once_differentiable</span>  <span class="c1"># type: ignore[untyped-decorator]</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span>
         <span class="n">ctx</span><span class="p">:</span> <span class="n">NestedIOFunction</span><span class="p">,</span>
-        <span class="n">grad_gamma</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Backward pass of the COSMOspace layer.</span>
+        <span class="n">grad_gamma</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Backward via implicit differentiation of:</span>
 
-<span class="sd">        Computes gradients with respect to log_p and U_RT using implicit</span>
-<span class="sd">        differentiation.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        ctx : NestedIOFunction</span>
-<span class="sd">            Context object containing saved tensors from forward pass.</span>
-<span class="sd">        grad_gamma : torch.Tensor</span>
-<span class="sd">            Gradient with respect to the output γ. Shape: (..., m).</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        tuple[torch.Tensor, torch.Tensor, None]</span>
-<span class="sd">            Gradients with respect to log_p, U_RT, and max_iter (None).</span>
+<span class="sd">            F(γ; x, B) = γ ⊙ (B (x ⊙ γ)) - (sum(x))·1 = 0.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">gamma</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>
+        <span class="k">if</span> <span class="n">grad_gamma</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span>
+
+        <span class="n">gamma</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">B</span> <span class="o">=</span> <span class="n">ctx</span><span class="o">.</span><span class="n">saved_tensors</span>  <span class="c1"># (..., m), (..., m), (..., m, m)</span>
+
+        <span class="c1"># t = sum(x) (shape (..., 1))</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
         <span class="n">BT</span> <span class="o">=</span> <span class="n">B</span><span class="o">.</span><span class="n">transpose</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">JT</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">BT</span> <span class="o">*</span> <span class="n">gamma</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>
-        <span class="n">JT</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">gamma</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">())</span>
-        <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">JT</span><span class="p">,</span> <span class="n">grad_gamma</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">gv</span> <span class="o">=</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">grad_x</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">gamma</span> <span class="o">*</span> <span class="p">(</span><span class="n">BT</span> <span class="o">@</span> <span class="n">gv</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span>
-        <span class="n">grad_B</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">gv</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+
+        <span class="c1"># JT = (∂F/∂gamma)^T evaluated at solution:</span>
+        <span class="c1"># JT = diag(t/gamma) + diag(x) B^T diag(gamma)</span>
+        <span class="n">JT</span> <span class="o">=</span> <span class="n">x</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span> <span class="o">*</span> <span class="n">BT</span> <span class="o">*</span> <span class="n">gamma</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">)</span>  <span class="c1"># (..., m, m)</span>
+        <span class="n">JT</span><span class="o">.</span><span class="n">diagonal</span><span class="p">(</span><span class="n">dim1</span><span class="o">=-</span><span class="mi">2</span><span class="p">,</span> <span class="n">dim2</span><span class="o">=-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">add_</span><span class="p">(</span><span class="n">t</span> <span class="o">*</span> <span class="n">gamma</span><span class="o">.</span><span class="n">reciprocal</span><span class="p">())</span>  <span class="c1"># (..., m)</span>
+
+        <span class="c1"># Solve JT v = dL/dgamma</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">JT</span><span class="p">,</span> <span class="n">grad_gamma</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (..., m)</span>
+
+        <span class="n">gv</span> <span class="o">=</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">*</span> <span class="n">v</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (..., m, 1)</span>
+
+        <span class="c1"># grad_x:</span>
+        <span class="c1"># dF/dx has two parts:</span>
+        <span class="c1"># 1) from Ba term:   gamma_i * B_{i j} * gamma_j  -&gt;  -gamma ⊙ (B^T (gamma ⊙ v))</span>
+        <span class="c1"># 2) from -sum(x):   -1 for each component -&gt; +sum(v) broadcast</span>
+        <span class="n">term1</span> <span class="o">=</span> <span class="n">gamma</span> <span class="o">*</span> <span class="p">(</span><span class="n">BT</span> <span class="o">@</span> <span class="n">gv</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">(</span><span class="o">-</span><span class="mi">1</span><span class="p">)</span>  <span class="c1"># (..., m)</span>
+        <span class="n">v_sum</span> <span class="o">=</span> <span class="n">v</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>  <span class="c1"># (..., 1)</span>
+        <span class="n">grad_x</span> <span class="o">=</span> <span class="o">-</span><span class="n">term1</span> <span class="o">+</span> <span class="n">v_sum</span>  <span class="c1"># (..., m)</span>
+
+        <span class="c1"># grad_B:  - (gamma ⊙ v) ⊗ (x ⊙ gamma)</span>
+        <span class="n">grad_B</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">gv</span> <span class="o">*</span> <span class="p">(</span><span class="n">x</span> <span class="o">*</span> <span class="n">gamma</span><span class="p">)</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span>  <span class="c1"># (..., m, m)</span>
+
+        <span class="c1"># B = exp(-U_RT) =&gt; dB/dU_RT = -B</span>
         <span class="n">grad_U_RT</span> <span class="o">=</span> <span class="o">-</span><span class="p">(</span><span class="n">B</span> <span class="o">*</span> <span class="n">grad_B</span><span class="p">)</span>
-        <span class="n">grad_log_p</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="p">(</span><span class="n">grad_x</span> <span class="o">-</span> <span class="p">(</span><span class="n">grad_x</span> <span class="o">*</span> <span class="n">x</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">keepdim</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-        <span class="k">return</span> <span class="n">grad_log_p</span><span class="p">,</span> <span class="n">grad_U_RT</span><span class="p">,</span> <span class="kc">None</span></div>
+
+        <span class="c1"># Reduce gradients back to original (possibly broadcasted) input shapes</span>
+        <span class="n">ctx_any</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="n">ctx</span>
+        <span class="n">grad_x</span> <span class="o">=</span> <span class="n">grad_x</span><span class="o">.</span><span class="n">sum_to_size</span><span class="p">(</span><span class="n">ctx_any</span><span class="o">.</span><span class="n">x_shape</span><span class="p">)</span>
+        <span class="n">grad_U_RT</span> <span class="o">=</span> <span class="n">grad_U_RT</span><span class="o">.</span><span class="n">sum_to_size</span><span class="p">(</span><span class="n">ctx_any</span><span class="o">.</span><span class="n">u_shape</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">grad_x</span><span class="p">,</span> <span class="n">grad_U_RT</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span></div>
 </div>
 
 </pre></div>

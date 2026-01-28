@@ -65,9 +65,8 @@ Default is (7.25 / π) Å².</p></li>
 <li><p><strong>sigma_0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Standard deviation of the Gaussian probability of a segment to form
 a hydrogen bond. Default is 0.007 e/Å².</p></li>
 <li><p><strong>merge</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge segment groups (NHB, OH, OT) into a single profile
-when calling get_log_probabilities(). Default is False.</p></li>
-<li><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities before taking logarithm
-in get_log_probabilities(). Default is 1e-10.</p></li>
+when calling get_probabilities(). Default is False.</p></li>
+<li><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities. Default is 1e-10.</p></li>
 <li><p><strong>interaction_matrix_generator</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Function to generate the interaction matrix for the mixture at a given
 temperature. Default is <a class="reference internal" href="create_cosmo_sac_2010_matrices.html#cosmolayer.create_cosmo_sac_2010_matrices" title="cosmolayer.create_cosmo_sac_2010_matrices"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cosmo_sac_2010_matrices()</span></code></a> with default
 parameters.</p></li>
@@ -203,12 +202,12 @@ Each matrix has shape (n_segment_types, n_segment_types).</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.Mixture.get_log_probabilities">
-<span class="sig-name descname"><span class="pre">get_log_probabilities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/sac/mixture.html#Mixture.get_log_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.Mixture.get_log_probabilities" title="Link to this definition">¶</a></dt>
-<dd><p>Get log-probabilities of segment types for all components.</p>
+<dt class="sig sig-object py" id="cosmolayer.Mixture.get_probabilities">
+<span class="sig-name descname"><span class="pre">get_probabilities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/sac/mixture.html#Mixture.get_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.Mixture.get_probabilities" title="Link to this definition">¶</a></dt>
+<dd><p>Get probabilities of segment types for all components.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Array of log-probabilities for each component.
+<dd class="field-odd"><p>Array of probabilities for each component.
 If merge=True: shape is (n_components, num_points).
 If merge=False: shape is (n_components, 3*num_points).</p>
 </dd>
@@ -225,10 +224,10 @@ If merge=False: shape is (n_components, 3*num_points).</p>
 <span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">}</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">,</span> <span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">log_probs</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_log_probabilities</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">log_probs</span><span class="o">.</span><span class="n">shape</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(2, 51)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">log_probs</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">))</span>
 <span class="go">True</span>
 </pre></div>
 </div>

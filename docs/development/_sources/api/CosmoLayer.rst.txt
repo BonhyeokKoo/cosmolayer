@@ -14,5 +14,5 @@ CosmoLayer
     .. automethod:: log_mixture_segment_activity_coefficients
     .. automethod:: log_pure_segment_activity_coefficients
     .. automethod:: log_residual_activity_coefficients
-    .. automethod:: mixture_log_probabilities
+    .. automethod:: mixture_probabilities
     .. automethod:: scaled_interactions

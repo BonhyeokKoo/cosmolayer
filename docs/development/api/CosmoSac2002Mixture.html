@@ -68,8 +68,8 @@ parameters.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">CosmoSac2002Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">mixture</span><span class="p">)</span>
 <span class="go">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">log_probs</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_log_probabilities</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">log_probs</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># merge=True, so shape is (n_components, num_points)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span>  <span class="c1"># merge=True, so shape is (n_components, num_points)</span>
 <span class="go">(2, 51)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">matrices</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_interaction_matrices</span><span class="p">(</span><span class="mf">298.15</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">matrices</span><span class="p">)</span>  <span class="c1"># COSMO-SAC 2002 returns single matrix (in tuple)</span>

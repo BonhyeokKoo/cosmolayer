@@ -45,32 +45,33 @@
 <span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">CosmoSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmospace.html#CosmoSpace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSpace" title="Link to this definition">¶</a></dt>
 <dd><p>Implicit COSMOspace layer.</p>
 <p>Solves the following implicit equation for the activity coefficient vector γ, given
-the (unnormalized, log-scale) segment-type distribution vector log(p) and the
+the segment-type weight vector x (nonnegative, not necessarily normalized) and the
 reduced interaction energy matrix U/RT:</p>
 <blockquote>
-<div><p>γ ⊙ (B (x ⊙ γ)) = 𝟙ₘ,</p>
+<div><p>γ ⊙ (B (x ⊙ γ)) = 𝟙ₘ sum(x),</p>
 </div></blockquote>
-<p>where m is the number of segment types, x = softmax(log(p)) is the normalized
-segment-type distribution vector, and B = exp(-U/RT) is the Boltzmann-factor matrix.</p>
-<p>The solution satisfies min(γ) &gt; 0 and aᵀBa = 1, where a = x ⊙ γ is the activity
-vector.</p>
+<p>where m is the number of segment types and B = exp(-U/RT) is the matrix of Boltzmann
+factors. For a physically meaningful solution, sum(x) must be equal to 1.</p>
+<p>Domain constraint:
+- x &gt;= 0 elementwise, with at least one strictly positive component</p>
+<p>With sum(x)=1, the solution satisfies min(γ) &gt; 0 and aᵀBa = 1, where a = x ⊙ γ
+is the activity vector.</p>
 <p>Even though U/RT is usually symmetric, it is not assumed to be so.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Supports batching, meaning that log(p) and U/RT can have broadcastable leading
+<p>Supports batching, meaning that x and U/RT can have broadcastable leading
 dimensions, and all computations are vectorized along these dimensions.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>log_p</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Segment-type distribution vector in log-scale. Shape: (…, m).</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Segment-type distribution vector. Shape: (…, m).</p></li>
 <li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix U/RT. Shape: (…, m, m).</p></li>
 <li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum number of iterations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>gamma</strong> – The segment activity coefficient vector. Satisfies min(γ) &gt; 0 and aᵀBa = 1,
-where a = x ⊙ γ, with x = softmax(log(p)). Shape: (…, m).</p>
+<dd class="field-even"><p><strong>gamma</strong> – The segment activity coefficient vector.</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
@@ -80,74 +81,64 @@ where a = x ⊙ γ, with x = softmax(log(p)). Shape: (…, m).</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span><span class="p">,</span> <span class="n">create_cosmo_sac_2002_matrix</span>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span><span class="p">,</span> <span class="n">create_cosmo_sac_2002_matrix</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">[</span>
 <span class="gp">... </span>    <span class="n">Component</span><span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">.cosmo&quot;</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;C=C(N)O&quot;</span><span class="p">,</span> <span class="s2">&quot;NCCO&quot;</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">log_distributions</span> <span class="o">=</span> <span class="p">[</span>
-<span class="gp">... </span>    <span class="n">component</span><span class="o">.</span><span class="n">get_log_probabilities</span><span class="p">(</span><span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="n">component</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">(</span><span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">components</span>
 <span class="gp">... </span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">log_p</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="k">for</span> <span class="n">log_p</span> <span class="ow">in</span> <span class="n">log_distributions</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probabilities</span><span class="p">],</span>
 <span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">U_RT</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">create_cosmo_sac_2002_matrix</span><span class="p">(</span><span class="mf">298.15</span><span class="p">),</span>
 <span class="gp">... </span>    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">gamma</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">log_p</span><span class="p">,</span> <span class="n">U_RT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">gamma</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">U_RT</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">gamma</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
 <span class="go">tensor([[ -5.2...,  -4.6...,  ... -13.3..., -14.5...],</span>
 <span class="go">        [-22.4..., -20.7...,  ... -4.8...,  -5.5...]], grad_fn=&lt;LogBackward0&gt;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">log_p</span><span class="o">.</span><span class="n">grad</span>
-<span class="go">tensor([[ 2.7...e-07,  6.0...e-08,  ... -4.8...e-06],</span>
-<span class="go">        [-5.1...e-08, -5.0...e-08,  ...  6.3...e-08]])</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="go">tensor([[ 2.7...e+03,  6.0...e+02,  ... -4.8...e+04],</span>
+<span class="go">        [-5.1...e+02, -5.0...e+02,  ...  6.3...e+02]])</span>
 </pre></div>
 </div>
 <p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.CosmoSpace.backward">
 <span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmospace.html#CosmoSpace.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSpace.backward" title="Link to this definition">¶</a></dt>
-<dd><p>Backward pass of the COSMOspace layer.</p>
-<p>Computes gradients with respect to log_p and U_RT using implicit
-differentiation.</p>
+<dd><p>Backward via implicit differentiation of:</p>
+<blockquote>
+<div><p>F(γ; x, B) = γ ⊙ (B (x ⊙ γ)) - (sum(x))·1 = 0.</p>
+</div></blockquote>
 <dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> (<em>NestedIOFunction</em>) – Context object containing saved tensors from forward pass.</p></li>
-<li><p><strong>grad_gamma</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Gradient with respect to the output γ. Shape: (…, m).</p></li>
-</ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Gradients with respect to log_p, U_RT, and max_iter (None).</p>
-</dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a>, None]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>Tensor</em></a> | None, <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>Tensor</em></a> | None, None, None]</p>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.CosmoSpace.forward">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">log_p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U_RT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmospace.html#CosmoSpace.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSpace.forward" title="Link to this definition">¶</a></dt>
-<dd><p>Forward pass of the COSMOspace layer.</p>
-<p>Solves the fixed-point equation for the activity coefficient vector γ.</p>
-<dl class="field-list simple">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U_RT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">validate_x</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmospace.html#CosmoSpace.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSpace.forward" title="Link to this definition">¶</a></dt>
+<dd><dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>ctx</strong> (<em>FunctionCtx</em>) – Context object for saving tensors needed in backward pass.</p></li>
-<li><p><strong>log_p</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Log-probabilities of segment types. Shape: (…, m).</p></li>
+<li><p><strong>x</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Segment-type weights (not necessarily normalized). Shape: (…, m).</p></li>
 <li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix. Shape: (…, m, m).</p></li>
-<li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>, </em><em>optional</em>) – Maximum number of iterations for the fixed-point solver.</p></li>
+<li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum iterations for fixed-point solver.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Activity coefficient vector γ. Shape: (…, m).</p>
+<dd class="field-even"><p><strong>gamma</strong> – Segment activity coefficient vector. Shape: broadcast(x, U_RT)[…, m]</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
