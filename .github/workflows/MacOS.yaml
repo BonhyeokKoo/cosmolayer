@@ -49,6 +49,16 @@ jobs:
           python -m pip install . --no-deps
           micromamba list
 
+      - name: Install COSMOSAC reference package
+        shell: bash -l {0}
+        run: |
+          devtools/scripts/install_cosmosac.sh
+
+      - name: Verify COSMOSAC installation
+        shell: bash -l {0}
+        run: |
+          python -c "import cCOSMO; print('cCOSMO package imported successfully')"
+
       - name: Run tests
         # conda setup requires this special shell
         shell: bash -l {0}
