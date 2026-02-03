@@ -1,15 +1,21 @@
 Component
 =========
 
-.. currentmodule:: cosmolayer
+.. currentmodule:: cosmolayer.cosmosac
 .. autoclass:: Component
     :member-order: alphabetical
 
     .. rubric:: Methods
 
     .. automethod:: get_area
+        :no-index-entry:
     .. automethod:: get_format
+        :no-index-entry:
     .. automethod:: get_probabilities
+        :no-index-entry:
     .. automethod:: get_sigma_grid
+        :no-index-entry:
     .. automethod:: get_sigma_profile
+        :no-index-entry:
     .. automethod:: get_volume
+        :no-index-entry:

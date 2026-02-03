@@ -1,5 +1,5 @@
 from importlib.resources import files
-from cosmolayer.sac import Component
+from cosmolayer.cosmosac import Component
 from matplotlib import pyplot as plt
 path = files("cosmolayer.data") / "C=C(N)O.cosmo"
 component = Component(path)

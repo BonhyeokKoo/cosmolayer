@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for cosmolayer/sac/interaction_matrices.py: 100%</title>
+    <title>Coverage for cosmolayer/cosmosac/interaction_matrices.py: 100%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_9ff733b0.css" type="text/css">
     <script src="coverage_html_cb_dd2e7eb5.js" defer></script>
@@ -11,7 +11,7 @@
 <header>
     <div class="content">
         <h1>
-            <span class="text">Coverage for </span><b>cosmolayer&#8201;/&#8201;sac&#8201;/&#8201;interaction_matrices.py</b>:
+            <span class="text">Coverage for </span><b>cosmolayer&#8201;/&#8201;cosmosac&#8201;/&#8201;interaction_matrices.py</b>:
             <span class="pc_cov">100%</span>
         </h1>
         <aside id="help_panel_wrapper">
@@ -60,12 +60,12 @@
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
-            <a id="prevFileLink" class="nav" href="z_262791d3b3c6ea39_component_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="prevFileLink" class="nav" href="z_a97ec370a3cb32de_component_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
-            <a id="nextFileLink" class="nav" href="z_262791d3b3c6ea39_mixture_py.html">&#xbb; next</a>
+            <a id="nextFileLink" class="nav" href="z_a97ec370a3cb32de_mixture_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.2">coverage.py v7.13.2</a>,
-            created at 2026-02-03 04:14 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.3">coverage.py v7.13.3</a>,
+            created at 2026-02-03 20:50 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -81,7 +81,7 @@
 </header>
 <main id="source">
     <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="str">"""</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="str">.. module:: cosmolayer.sac.interaction_matrices</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t"><span class="str">.. module:: cosmolayer.cosmosac.interaction_matrices</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="str">   :synopsis: Create interaction matrices for COSMO-SAC calculations.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="str">.. functionauthor:: Charlles Abreu &lt;craabreu@gmail.com></span>&nbsp;</span><span class="r"></span></p>
@@ -94,10 +94,10 @@
     <p class="pln"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t"><span class="key">from</span> <span class="op">.</span><span class="nam">segment_groups</span> <span class="key">import</span> <span class="nam">OH</span><span class="op">,</span> <span class="nam">OT</span><span class="op">,</span> <span class="nam">SEGMENT_GROUPS</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="nam">COSMO_SAC_2002_EXPONENTS</span> <span class="op">=</span> <span class="op">(</span><span class="num">1</span><span class="op">,</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="nam">COSMO_SAC_2010_EXPONENTS</span> <span class="op">=</span> <span class="op">(</span><span class="num">1</span><span class="op">,</span> <span class="num">3</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t"><span class="nam">COSMO_SAC_2002_REFERENCE_AREA</span> <span class="op">=</span> <span class="num">7.5</span>  <span class="com"># &#197;&#178;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="nam">COSMO_SAC_2010_REFERENCE_AREA</span> <span class="op">=</span> <span class="num">7.25</span>  <span class="com"># &#197;&#178;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t"><span class="nam">COSMO_SAC_2002_EXPONENTS</span><span class="op">:</span> <span class="nam">tuple</span><span class="op">[</span><span class="nam">int</span><span class="op">,</span> <span class="op">...</span><span class="op">]</span> <span class="op">=</span> <span class="op">(</span><span class="num">1</span><span class="op">,</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t"><span class="nam">COSMO_SAC_2010_EXPONENTS</span><span class="op">:</span> <span class="nam">tuple</span><span class="op">[</span><span class="nam">int</span><span class="op">,</span> <span class="op">...</span><span class="op">]</span> <span class="op">=</span> <span class="op">(</span><span class="num">1</span><span class="op">,</span> <span class="num">3</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t"><span class="nam">COSMO_SAC_2002_AREA_PER_SEGMENT</span><span class="op">:</span> <span class="nam">float</span> <span class="op">=</span> <span class="num">7.5</span>  <span class="com"># &#197;&#178;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t"><span class="nam">COSMO_SAC_2010_AREA_PER_SEGMENT</span><span class="op">:</span> <span class="nam">float</span> <span class="op">=</span> <span class="num">7.25</span>  <span class="com"># &#197;&#178;</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t"><span class="key">def</span> <span class="nam">create_cosmo_sac_2002_matrix</span><span class="op">(</span>  <span class="com"># noqa: PLR0913</span>&nbsp;</span><span class="r"></span></p>
@@ -169,7 +169,7 @@
     <p class="pln"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t"><span class="str">    .. plot::</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t"><span class="str">        :context: close-figs</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t"><span class="str">        >>> from cosmolayer.sac import create_cosmo_sac_2002_matrix</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t"><span class="str">        >>> from cosmolayer.cosmosac import create_cosmo_sac_2002_matrix</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t"><span class="str">        >>> from matplotlib import pyplot as plt</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t"><span class="str">        >>> matrix = create_cosmo_sac_2002_matrix(298.15)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t"><span class="str">        >>> fig, ax = plt.subplots(figsize=(8, 6))</span>&nbsp;</span><span class="r"></span></p>
@@ -257,7 +257,7 @@
     <p class="pln"><span class="n"><a id="t175" href="#t175">175</a></span><span class="t"><span class="str">    .. plot::</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t176" href="#t176">176</a></span><span class="t"><span class="str">        :context: close-figs</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t177" href="#t177">177</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t178" href="#t178">178</a></span><span class="t"><span class="str">        >>> from cosmolayer.sac import create_cosmo_sac_2010_matrices</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t178" href="#t178">178</a></span><span class="t"><span class="str">        >>> from cosmolayer.cosmosac import create_cosmo_sac_2010_matrices</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t179" href="#t179">179</a></span><span class="t"><span class="str">        >>> from matplotlib import pyplot as plt</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t180" href="#t180">180</a></span><span class="t"><span class="str">        >>> delta_w_a, delta_w_b = create_cosmo_sac_2010_matrices(298.15)</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t181" href="#t181">181</a></span><span class="t"><span class="str">        >>> fig, ax = plt.subplots(figsize=(8, 6))</span>&nbsp;</span><span class="r"></span></p>
@@ -289,12 +289,12 @@
 <footer>
     <div class="content">
         <p>
-            <a class="nav" href="z_262791d3b3c6ea39_component_py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="z_a97ec370a3cb32de_component_py.html">&#xab; prev</a> &nbsp; &nbsp;
             <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
-            <a class="nav" href="z_262791d3b3c6ea39_mixture_py.html">&#xbb; next</a>
+            <a class="nav" href="z_a97ec370a3cb32de_mixture_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
-            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.2">coverage.py v7.13.2</a>,
-            created at 2026-02-03 04:14 +0000
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.13.3">coverage.py v7.13.3</a>,
+            created at 2026-02-03 20:50 +0000
         </p>
     </div>
 </footer>

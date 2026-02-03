@@ -1,0 +1,15 @@
+Core API
+========
+
+Classes
+-------
+
+.. toctree::
+    :titlesonly:
+
+    CosmoLayer
+    CosmoSpace
+
+.. testsetup::
+
+    from cosmolayer import *

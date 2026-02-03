@@ -1,17 +1,25 @@
 Mixture
 =======
 
-.. currentmodule:: cosmolayer
+.. currentmodule:: cosmolayer.cosmosac
 .. autoclass:: Mixture
     :member-order: alphabetical
 
     .. rubric:: Methods
 
     .. automethod:: get_area_per_segment
+        :no-index-entry:
     .. automethod:: get_areas
+        :no-index-entry:
     .. automethod:: get_component_names
+        :no-index-entry:
     .. automethod:: get_interaction_matrices
+        :no-index-entry:
     .. automethod:: get_probabilities
+        :no-index-entry:
     .. automethod:: get_sigma_profiles
+        :no-index-entry:
     .. automethod:: get_temperature_exponents
+        :no-index-entry:
     .. automethod:: get_volumes
+        :no-index-entry:

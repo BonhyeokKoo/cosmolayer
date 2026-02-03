@@ -8,11 +8,20 @@ CosmoLayer
     .. rubric:: Methods
 
     .. automethod:: extra_repr
+        :no-index-entry:
     .. automethod:: forward
+        :no-index-entry:
     .. automethod:: log_activity_coefficients
+        :no-index-entry:
     .. automethod:: log_combinatorial_activity_coefficients
+        :no-index-entry:
     .. automethod:: log_mixture_segment_activity_coefficients
+        :no-index-entry:
     .. automethod:: log_pure_segment_activity_coefficients
+        :no-index-entry:
     .. automethod:: log_residual_activity_coefficients
+        :no-index-entry:
     .. automethod:: mixture_probabilities
+        :no-index-entry:
     .. automethod:: scaled_interactions
+        :no-index-entry:
