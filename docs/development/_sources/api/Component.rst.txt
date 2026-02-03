@@ -9,7 +9,6 @@ Component
 
     .. automethod:: get_area
     .. automethod:: get_format
-    .. automethod:: get_log_probabilities
     .. automethod:: get_probabilities
     .. automethod:: get_sigma_grid
     .. automethod:: get_sigma_profile
