@@ -170,10 +170,7 @@ def reference_results(
     """
     results: _ReferenceResultsType = {}
     for n, mixtures_n in mixtures.items():
-        results[n] = ReferenceData(
-            ln_gamma_c={},
-            ln_gamma_r={},
-        )
+        results[n] = ReferenceData(ln_gamma_c={}, ln_gamma_r={})
         for mix, (smiles, _, _, _) in enumerate(mixtures_n):
             cosmo = get_cosmo_model(smiles)
             cosmo.get_mutable_COSMO_constants().fast_Gamma = True
@@ -249,7 +246,7 @@ def test_multiple_mixtures_multiple_compositions(
         for composition in compositions[n]
         for temperature in temperatures
     ]
-    a, v, p, T, x = map(torch.as_tensor, zip(*data, strict=True))
+    a, v, p, T, x = (torch.as_tensor(np.array(x)) for x in zip(*data, strict=True))
 
     triples = list(
         itertools.product(

@@ -232,11 +232,7 @@ def reference_results(
     """
     results: _ReferenceResultsType = {}
     for n, mixtures_n in mixtures.items():
-        results[n] = ReferenceData(
-            psigma={},
-            ln_gamma_mix={},
-            ln_gamma_pure={},
-        )
+        results[n] = ReferenceData(psigma={}, ln_gamma_mix={}, ln_gamma_pure={})
         for mix, (areas, probs) in enumerate(mixtures_n):
             results[n]["psigma"][mix] = {}
             results[n]["ln_gamma_mix"][mix] = {}
@@ -322,7 +318,7 @@ def test_multiple_mixtures_multiple_compositions(
         for composition in compositions[n]
         for temperature in temperatures
     ]
-    a, p, T, x = map(torch.as_tensor, zip(*data, strict=True))
+    a, p, T, x = (torch.as_tensor(np.array(x)) for x in zip(*data, strict=True))
 
     scaled_interactions = cosmo_layer.scaled_interactions(T)
 
@@ -582,7 +578,8 @@ def test_reduced_energy_matrix(
         T = torch.as_tensor(temperature)
         U_RT = cosmo_layer.scaled_interactions(T)
         assert U_RT.shape == (51, 51)
-        assert_close(U_RT, interaction_matrix / (_GAS_CONSTANT * T))
+        ref = interaction_matrix / (_GAS_CONSTANT * temperature)
+        assert_close(U_RT, ref)
 
 
 def test_reduced_energy_matrix_broadcasting(
@@ -590,7 +587,8 @@ def test_reduced_energy_matrix_broadcasting(
     temperatures: list[float],
     cosmo_layer: CosmoLayer,
 ) -> None:
-    T = torch.as_tensor(temperatures)
-    U_RT = cosmo_layer.scaled_interactions(T)
+    T_tensor = torch.as_tensor(temperatures)
+    U_RT = cosmo_layer.scaled_interactions(T_tensor)
     assert U_RT.shape == (len(temperatures), 51, 51)
-    assert_close(U_RT, interaction_matrix / (_GAS_CONSTANT * T[:, None, None]))
+    T_array = np.asarray(temperatures)[:, None, None]
+    assert_close(U_RT, interaction_matrix / (_GAS_CONSTANT * T_array))

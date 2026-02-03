@@ -224,8 +224,10 @@ class Component:
             Sigma profile histogram. Shape: (num_points,).
         """
         profile = np.zeros_like(self._grid)
+        max_index = len(self._grid) - 2  # index + 1 must be valid
         for sigma, area in zip(averaged_sigmas, areas, strict=True):
             index = int((sigma - self._min_sigma) / self._bin_width)
+            index = min(max(0, index), max_index)
             weight = (self._grid[index + 1] - sigma) / self._bin_width
             profile[index] += area * weight
             profile[index + 1] += area * (1.0 - weight)
