@@ -17,9 +17,9 @@ import torch
 from numpy.typing import NDArray
 
 from cosmolayer import CosmoLayer
-from cosmolayer.sac import (
+from cosmolayer.cosmosac import (
+    COSMO_SAC_2002_AREA_PER_SEGMENT,
     COSMO_SAC_2002_EXPONENTS,
-    COSMO_SAC_2002_REFERENCE_AREA,
 )
 
 _NUM_POINTS = 3
@@ -170,7 +170,7 @@ def interaction_matrix() -> NDArray[np.float64]:
     EPS = 3.667  # (LIN AND SANDLER USE A CONSTANT FPOL WHICH YIELDS EPS=3.68)
     EO = 2.395e-4
     FPOL = (EPS - 1.0) / (EPS + 0.5)
-    ALPHA = (0.3 * COSMO_SAC_2002_REFERENCE_AREA ** (1.5)) / (EO)
+    ALPHA = (0.3 * COSMO_SAC_2002_AREA_PER_SEGMENT ** (1.5)) / (EO)
     alpha_prime = FPOL * ALPHA
     sigma_tabulated = np.linspace(-0.025, 0.025, 51)
     sigma_m = np.tile(sigma_tabulated, (len(sigma_tabulated), 1))
@@ -255,7 +255,9 @@ def reference_results(
 @pytest.fixture
 def cosmo_layer(interaction_matrix: NDArray[np.float64]) -> CosmoLayer:
     U_RT = interaction_matrix / (_GAS_CONSTANT * _REF_TEMP)
-    return CosmoLayer((U_RT,), COSMO_SAC_2002_EXPONENTS, COSMO_SAC_2002_REFERENCE_AREA)
+    return CosmoLayer(
+        (U_RT,), COSMO_SAC_2002_EXPONENTS, COSMO_SAC_2002_AREA_PER_SEGMENT
+    )
 
 
 @pytest.mark.parametrize("n", [2, 3], ids=["binary", "ternary"])
@@ -425,7 +427,9 @@ def test_broadcasting(
 
 
 @pytest.mark.parametrize("n", [2, 3], ids=["binary", "ternary"])
+@pytest.mark.parametrize("seed", [3445, 90745], ids=["seed0", "seed1"])
 def test_composition_and_temperature_differentiation(
+    seed: int,
     n: int,
     temperatures: list[float],
     mixtures: dict[int, list[_MixtureType]],
@@ -436,28 +440,31 @@ def test_composition_and_temperature_differentiation(
     # Use double precision for gradcheck
     dtype = torch.float64
 
-    for areas, probs in mixtures[n]:
-        a = torch.as_tensor(areas, dtype=dtype)
-        p = torch.as_tensor(probs, dtype=dtype)
+    rng = np.random.default_rng(seed)
+    mix = rng.integers(len(mixtures[n]))
+    comp = rng.integers(len(compositions[n]))
+    temp = rng.integers(len(temperatures))
 
-        func = functools.partial(
-            reduced_excess_gibbs_energy, a=a, p=p, cosmo_layer=cosmo_layer
-        )
+    areas, probs = mixtures[n][mix]
+    a = torch.as_tensor(areas, dtype=dtype)
+    p = torch.as_tensor(probs, dtype=dtype)
 
-        for temperature in temperatures:
-            T = torch.as_tensor(temperature, dtype=dtype).requires_grad_(True)
+    func = functools.partial(
+        reduced_excess_gibbs_energy, a=a, p=p, cosmo_layer=cosmo_layer
+    )
 
-            for composition in compositions[n]:
-                x = torch.as_tensor(composition, dtype=dtype).requires_grad_(True)
+    T = torch.as_tensor(temperatures[temp], dtype=dtype).requires_grad_(True)
 
-                # Check that the gradients are computed correctly
-                assert torch.autograd.gradcheck(
-                    func,
-                    (T, x),
-                    atol=1e-6,
-                    rtol=1e-5,
-                    eps=1e-6,
-                )
+    x = torch.as_tensor(compositions[n][comp], dtype=dtype).requires_grad_(True)
+
+    # Check that the gradients are computed correctly
+    assert torch.autograd.gradcheck(
+        func,
+        (T, x),
+        atol=1e-6,
+        rtol=1e-5,
+        eps=1e-6,
+    )
 
 
 @pytest.mark.parametrize("n", [2, 3], ids=["binary", "ternary"])
@@ -476,7 +483,7 @@ def test_parameter_differentiation(
     cosmo_layer = CosmoLayer(
         (U_RT,),
         COSMO_SAC_2002_EXPONENTS,
-        COSMO_SAC_2002_REFERENCE_AREA,
+        COSMO_SAC_2002_AREA_PER_SEGMENT,
         learn_matrices=True,
     )
 

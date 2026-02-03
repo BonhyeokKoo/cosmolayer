@@ -6,10 +6,10 @@ from numpy.typing import NDArray
 
 from .component import Component
 from .interaction_matrices import (
+    COSMO_SAC_2002_AREA_PER_SEGMENT,
     COSMO_SAC_2002_EXPONENTS,
-    COSMO_SAC_2002_REFERENCE_AREA,
+    COSMO_SAC_2010_AREA_PER_SEGMENT,
     COSMO_SAC_2010_EXPONENTS,
-    COSMO_SAC_2010_REFERENCE_AREA,
     create_cosmo_sac_2002_matrix,
     create_cosmo_sac_2010_matrices,
 )
@@ -69,7 +69,7 @@ class Mixture:
     Examples
     --------
     >>> from importlib.resources import files
-    >>> from cosmolayer.sac import Mixture
+    >>> from cosmolayer.cosmosac import Mixture
     >>> components = {
     ...     "1-aminoethenol": files("cosmolayer.data") / "C=C(N)O.cosmo",
     ...     "2-aminoethanol": files("cosmolayer.data") / "NCCO.cosmo",
@@ -98,8 +98,9 @@ class Mixture:
         min_sigma: float = -0.025,  # e/A^2
         max_sigma: float = 0.025,  # e/A^2
         num_points: int = 51,
-        area_per_segment: float = COSMO_SAC_2010_REFERENCE_AREA,  # Å²
-        averaging_squared_radius: float = COSMO_SAC_2010_REFERENCE_AREA / np.pi,  # A^2
+        area_per_segment: float = COSMO_SAC_2010_AREA_PER_SEGMENT,  # Å²
+        averaging_squared_radius: float = COSMO_SAC_2010_AREA_PER_SEGMENT
+        / np.pi,  # A^2
         f_decay: float = 3.57,
         sigma_0: float = 0.007,  # e/A^2
         merge: bool = False,
@@ -191,7 +192,7 @@ class Mixture:
         Examples
         --------
         >>> from importlib.resources import files
-        >>> from cosmolayer.sac import Mixture
+        >>> from cosmolayer.cosmosac import Mixture
         >>> components = {
         ...     "1-aminoethenol": files("cosmolayer.data") / "C=C(N)O.cosmo",
         ...     "2-aminoethanol": files("cosmolayer.data") / "NCCO.cosmo",
@@ -217,7 +218,7 @@ class Mixture:
         Examples
         --------
         >>> from importlib.resources import files
-        >>> from cosmolayer.sac import Mixture
+        >>> from cosmolayer.cosmosac import Mixture
         >>> components = {
         ...     "1-aminoethenol": files("cosmolayer.data") / "C=C(N)O.cosmo",
         ...     "2-aminoethanol": files("cosmolayer.data") / "NCCO.cosmo",
@@ -244,7 +245,7 @@ class Mixture:
         Examples
         --------
         >>> from importlib.resources import files
-        >>> from cosmolayer.sac import Mixture
+        >>> from cosmolayer.cosmosac import Mixture
         >>> import numpy as np
         >>> components = {
         ...     "1-aminoethenol": files("cosmolayer.data") / "C=C(N)O.cosmo",
@@ -285,7 +286,7 @@ class Mixture:
         Examples
         --------
         >>> from importlib.resources import files
-        >>> from cosmolayer.sac import Mixture
+        >>> from cosmolayer.cosmosac import Mixture
         >>> components = {
         ...     "1-aminoethenol": files("cosmolayer.data") / "C=C(N)O.cosmo",
         ...     "2-aminoethanol": files("cosmolayer.data") / "NCCO.cosmo",
@@ -321,7 +322,7 @@ class Mixture:
         Examples
         --------
         >>> from importlib.resources import files
-        >>> from cosmolayer.sac import Mixture
+        >>> from cosmolayer.cosmosac import Mixture
         >>> components = {
         ...     "1-aminoethenol": files("cosmolayer.data") / "C=C(N)O.cosmo",
         ...     "2-aminoethanol": files("cosmolayer.data") / "NCCO.cosmo",
@@ -370,7 +371,7 @@ class CosmoSac2002Mixture(Mixture):
     Examples
     --------
     >>> from importlib.resources import files
-    >>> from cosmolayer.sac import CosmoSac2002Mixture
+    >>> from cosmolayer.cosmosac import CosmoSac2002Mixture
     >>> components = {
     ...     "1-aminoethenol": files("cosmolayer.data") / "C=C(N)O.cosmo",
     ...     "2-aminoethanol": files("cosmolayer.data") / "NCCO.cosmo",
@@ -391,7 +392,7 @@ class CosmoSac2002Mixture(Mixture):
     def __init__(self, components: dict[str, str | os.PathLike[str]]) -> None:
         super().__init__(
             components,
-            area_per_segment=COSMO_SAC_2002_REFERENCE_AREA,
+            area_per_segment=COSMO_SAC_2002_AREA_PER_SEGMENT,
             averaging_squared_radius=0.81764**2,  # ≈ 0.6685 Å²
             f_decay=1.0,
             merge=True,
@@ -421,7 +422,7 @@ class CosmoSac2010Mixture(Mixture):
     Examples
     --------
     >>> from importlib.resources import files
-    >>> from cosmolayer.sac import CosmoSac2010Mixture
+    >>> from cosmolayer.cosmosac import CosmoSac2010Mixture
     >>> components = {
     ...     "1-aminoethenol": files("cosmolayer.data") / "C=C(N)O.cosmo",
     ...     "2-aminoethanol": files("cosmolayer.data") / "NCCO.cosmo",
