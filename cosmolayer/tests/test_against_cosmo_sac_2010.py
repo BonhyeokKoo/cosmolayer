@@ -1,5 +1,5 @@
 """
-Test CosmoLayer against a reference implementation of the COSMO-SAC 2002 model.
+Test CosmoLayer against a reference implementation of the COSMO-SAC 2010 model.
 
 Reference implementation:
     https://github.com/usnistgov/COSMOSAC
@@ -20,9 +20,9 @@ from numpy.typing import NDArray
 
 from cosmolayer import CosmoLayer
 from cosmolayer.sac import (
-    COSMO_SAC_2002_EXPONENTS,
-    COSMO_SAC_2002_REFERENCE_AREA,
-    create_cosmo_sac_2002_matrix,
+    COSMO_SAC_2010_EXPONENTS,
+    COSMO_SAC_2010_REFERENCE_AREA,
+    create_cosmo_sac_2010_matrices,
 )
 
 _NUM_POINTS = 3
@@ -81,7 +81,7 @@ def reduced_excess_gibbs_energy(
 
 
 def get_compound_data(smiles: str) -> tuple[pd.DataFrame, float, float]:
-    sigma_file = files("cosmolayer.data") / f"{smiles}.sigma"
+    sigma_file = files("cosmolayer.data") / f"{smiles}.sigma3"
     with open(str(sigma_file)) as f:
         metadata = f.readline()
         volume_match = re.search(r'"volume \[A\^3\]": ([\d.]+)', metadata)
@@ -116,14 +116,12 @@ def get_mixture_data(smiles: list[str]) -> _MixtureType:
     )
 
 
-def get_cosmo_model(compounds: list[str]) -> cCOSMO.COSMO1:
-    path = files("cosmolayer") / "data" / "cosmo-sac-2002"
-    db = cCOSMO.VirginiaTechProfileDatabase(
-        str(path / "Sigma_Profile_Database_Index_v2.txt"), str(path)
-    )
+def get_cosmo_model(compounds: list[str]) -> cCOSMO.COSMO3:
+    path = files("cosmolayer") / "data" / "cosmo-sac-2010"
+    db = cCOSMO.DirectImport()
     for compound in compounds:
-        db.add_profile(db.normalize_identifier(compound))
-    return cCOSMO.COSMO1(compounds, db)
+        db.add_profile(compound, str(path))
+    return cCOSMO.COSMO3(compounds, db)
 
 
 @pytest.fixture
@@ -196,9 +194,9 @@ def reference_results(
 @pytest.fixture
 def cosmo_layer() -> CosmoLayer:
     return CosmoLayer(
-        [create_cosmo_sac_2002_matrix(_REF_TEMP)],
-        COSMO_SAC_2002_EXPONENTS,
-        COSMO_SAC_2002_REFERENCE_AREA,
+        create_cosmo_sac_2010_matrices(_REF_TEMP),
+        COSMO_SAC_2010_EXPONENTS,
+        COSMO_SAC_2010_REFERENCE_AREA,
     )
 
 
@@ -301,7 +299,7 @@ def test_broadcasting(
     assert v.shape == (num_mixtures, n)
 
     p = torch.as_tensor(np.stack(probs_list))
-    assert p.shape == (num_mixtures, n, 51)
+    assert p.shape == (num_mixtures, n, 153)
 
     T = torch.as_tensor(np.array(temperatures, dtype=np.float64))
     assert T.shape == (num_temperatures,)
@@ -441,9 +439,9 @@ def test_parameter_differentiation(
     dtype = torch.float64
 
     cosmo_layer = CosmoLayer(
-        [create_cosmo_sac_2002_matrix(_REF_TEMP)],
-        COSMO_SAC_2002_EXPONENTS,
-        COSMO_SAC_2002_REFERENCE_AREA,
+        create_cosmo_sac_2010_matrices(_REF_TEMP),
+        COSMO_SAC_2010_EXPONENTS,
+        COSMO_SAC_2010_REFERENCE_AREA,
         learn_matrices=True,
     )
 
