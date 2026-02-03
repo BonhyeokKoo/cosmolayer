@@ -114,13 +114,13 @@
 <span class="sd">    &gt;&gt;&gt; P = torch.tensor(mixture.get_probabilities())</span>
 <span class="sd">    &gt;&gt;&gt; ln_gamma = cosmo_layer(T, x, a, v, P)</span>
 <span class="sd">    &gt;&gt;&gt; ln_gamma.tolist()</span>
-<span class="sd">    [0.805765..., 0.648046...]</span>
+<span class="sd">    [0.805800..., 0.648065...]</span>
 <span class="sd">    &gt;&gt;&gt; gE_RT = (x * ln_gamma).sum()</span>
 <span class="sd">    &gt;&gt;&gt; gE_RT.item()</span>
-<span class="sd">    0.726905...</span>
+<span class="sd">    0.726932...</span>
 <span class="sd">    &gt;&gt;&gt; gE_RT.backward()</span>
 <span class="sd">    &gt;&gt;&gt; x.grad.tolist()</span>
-<span class="sd">    [0.805765..., 0.648046...]</span>
+<span class="sd">    [0.805800..., 0.648065...]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>

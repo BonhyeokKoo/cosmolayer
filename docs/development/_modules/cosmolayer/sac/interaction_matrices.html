@@ -47,11 +47,9 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">scipy</span><span class="w"> </span><span class="kn">import</span> <span class="n">constants</span> <span class="k">as</span> <span class="n">spc</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.segment_groups</span><span class="w"> </span><span class="kn">import</span> <span class="n">OH</span><span class="p">,</span> <span class="n">OT</span><span class="p">,</span> <span class="n">SEGMENT_GROUPS</span>
 
-<span class="n">GAS_CONSTANT</span> <span class="o">=</span> <span class="n">spc</span><span class="o">.</span><span class="n">gas_constant</span> <span class="o">/</span> <span class="p">(</span><span class="n">spc</span><span class="o">.</span><span class="n">kilo</span> <span class="o">*</span> <span class="n">spc</span><span class="o">.</span><span class="n">calorie</span><span class="p">)</span>  <span class="c1"># kcal/(mol·K)</span>
 <span class="n">COSMO_SAC_2002_EXPONENTS</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,)</span>
 <span class="n">COSMO_SAC_2010_EXPONENTS</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">COSMO_SAC_2002_REFERENCE_AREA</span> <span class="o">=</span> <span class="mf">7.5</span>  <span class="c1"># Å²</span>
@@ -69,6 +67,7 @@
     <span class="n">sigma_hb</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0084</span><span class="p">,</span>  <span class="c1"># e/Å²</span>
     <span class="n">alpha_prime</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">16466.72</span><span class="p">,</span>  <span class="c1"># (kcal/mol)/(e/Å²)²</span>
     <span class="n">c_hb</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">85580.0</span><span class="p">,</span>  <span class="c1"># (kcal/mol)/(e/Å²)²</span>
+    <span class="n">gas_constant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.001987</span><span class="p">,</span>  <span class="c1"># kcal/(mol·K)</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create an interaction matrix for the COSMO-SAC 2002 model :cite:`Bell2020`.</span>
 
@@ -99,6 +98,8 @@
 <span class="sd">    c_hb : float, optional</span>
 <span class="sd">        Hydrogen bonding energy constant in (kcal/mol)/(e/Å²)². Controls the</span>
 <span class="sd">        strength of hydrogen bonding interactions. Default is 85580.0 :cite:`Bell2020`.</span>
+<span class="sd">    gas_constant : float, optional</span>
+<span class="sd">        Universal gas constant in kcal/(mol·K). Default is 0.001987 :cite:`Bell2020`.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -140,7 +141,7 @@
     <span class="n">delta</span> <span class="o">=</span> <span class="p">(</span><span class="n">grid</span> <span class="o">-</span> <span class="n">sigma_hb</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="n">grid</span> <span class="o">+</span> <span class="n">sigma_hb</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">hb_block</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">outer</span><span class="p">(</span><span class="n">delta</span><span class="p">,</span> <span class="n">delta</span><span class="p">)</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">max</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">energy_matrix</span> <span class="o">=</span> <span class="p">(</span><span class="n">alpha_prime</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">squared_sum_block</span> <span class="o">+</span> <span class="n">c_hb</span> <span class="o">*</span> <span class="n">hb_block</span>
-    <span class="n">result</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_matrix</span> <span class="o">/</span> <span class="p">(</span><span class="n">GAS_CONSTANT</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)</span>
+    <span class="n">result</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">energy_matrix</span> <span class="o">/</span> <span class="p">(</span><span class="n">gas_constant</span> <span class="o">*</span> <span class="n">temperature</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">result</span></div>
 
 
@@ -158,6 +159,7 @@
     <span class="n">c_oh_oh</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">4013.78</span><span class="p">,</span>  <span class="c1"># kcal·Å^4·mol⁻¹·e⁻²</span>
     <span class="n">c_ot_ot</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">932.31</span><span class="p">,</span>  <span class="c1"># kcal·Å^4·mol⁻¹·e⁻²</span>
     <span class="n">c_oh_ot</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3016.43</span><span class="p">,</span>  <span class="c1"># kcal·Å^4·mol⁻¹·e⁻²</span>
+    <span class="n">gas_constant</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0019872043011606513</span><span class="p">,</span>  <span class="c1"># kcal/(mol·K)</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
 <span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create interaction matrices for the COSMO-SAC 2010 model :cite:`Bell2020`.</span>
 
@@ -194,6 +196,9 @@
 <span class="sd">    c_oh_ot : float, optional</span>
 <span class="sd">        Hydrogen bonding energy constant in (kcal/mol)/(e/Å²)². Controls the</span>
 <span class="sd">        strength of hydrogen bonding interactions. Default is 3016.43 :cite:`Bell2020`.</span>
+<span class="sd">    gas_constant : float, optional</span>
+<span class="sd">        Universal gas constant in kcal/(mol·K). Default is 0.0019872043011606513</span>
+<span class="sd">        :cite:`Bell2020`</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -221,7 +226,7 @@
 <span class="sd">        &gt;&gt;&gt; _ = fig.colorbar(im, ax=ax, label=&quot;ΔW/(RT)&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; fig.tight_layout()</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">RT</span> <span class="o">=</span> <span class="n">GAS_CONSTANT</span> <span class="o">*</span> <span class="n">temperature</span>
+    <span class="n">RT</span> <span class="o">=</span> <span class="n">gas_constant</span> <span class="o">*</span> <span class="n">temperature</span>
     <span class="n">c_hb</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">defaultdict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">float</span><span class="p">]]</span> <span class="o">=</span> <span class="n">defaultdict</span><span class="p">(</span>
         <span class="k">lambda</span><span class="p">:</span> <span class="n">defaultdict</span><span class="p">(</span><span class="nb">float</span><span class="p">)</span>
     <span class="p">)</span>
