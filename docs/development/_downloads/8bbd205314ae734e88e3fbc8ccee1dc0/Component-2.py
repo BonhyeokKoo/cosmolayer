@@ -2,7 +2,7 @@ from importlib.resources import files
 from cosmolayer.cosmosac import Component
 from matplotlib import pyplot as plt
 path = files("cosmolayer.data") / "C=C(N)O.cosmo"
-component = Component(path)
+component = Component(path.read_text())
 fig, ax = plt.subplots(figsize=(8, 4))
 p = component.get_probabilities()
 _ = ax.bar(range(len(p)), p)

@@ -385,6 +385,7 @@
   <h1>Source code for cosmolayer.cosmosac.mixture</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span><span class="w"> </span><span class="nn">os</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">TextIO</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
@@ -414,8 +415,9 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    components : dict[str, str | os.PathLike]</span>
-<span class="sd">        Dictionary mapping component names to paths of COSMO output files.</span>
+<span class="sd">    components : dict[str, str]</span>
+<span class="sd">        Dictionary mapping component names to COSMO strings (i.e., contents of COSMO</span>
+<span class="sd">        output files from quantum mechanical calculations).</span>
 <span class="sd">    min_sigma : float, optional</span>
 <span class="sd">        Minimum screening charge density in e/Å². Default is -0.025 e/Å².</span>
 <span class="sd">    max_sigma : float, optional</span>
@@ -461,7 +463,7 @@
 <span class="sd">    ...     &quot;1-aminoethenol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;,</span>
 <span class="sd">    ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
 <span class="sd">    ... }</span>
-<span class="sd">    &gt;&gt;&gt; mixture = Mixture(components)</span>
+<span class="sd">    &gt;&gt;&gt; mixture = Mixture.from_files(components)</span>
 <span class="sd">    &gt;&gt;&gt; len(mixture)</span>
 <span class="sd">    2</span>
 <span class="sd">    &gt;&gt;&gt; mixture[&quot;1-aminoethenol&quot;].get_area()</span>
@@ -494,16 +496,23 @@
         <span class="n">regularize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">,</span>
         <span class="n">interaction_matrix_generator</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
             <span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">temperature</span><span class="p">:</span> <span class="n">create_cosmo_sac_2010_matrices</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span>
+        <span class="p">]</span> <span class="o">=</span> <span class="n">create_cosmo_sac_2010_matrices</span><span class="p">,</span>
         <span class="n">temperature_exponents</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_EXPONENTS</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">components</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;At least one component must be provided.&quot;</span><span class="p">)</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">components</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+        <span class="k">def</span><span class="w"> </span><span class="nf">_read_content</span><span class="p">(</span><span class="n">val</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">):</span>
+                <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">val</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+            <span class="k">return</span> <span class="n">val</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">_components_dict</span> <span class="o">=</span> <span class="p">{</span>
             <span class="n">name</span><span class="p">:</span> <span class="n">Component</span><span class="p">(</span>
-                <span class="n">path</span><span class="p">,</span>
+                <span class="n">_read_content</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">),</span>
                 <span class="n">min_sigma</span><span class="o">=</span><span class="n">min_sigma</span><span class="p">,</span>
                 <span class="n">max_sigma</span><span class="o">=</span><span class="n">max_sigma</span><span class="p">,</span>
                 <span class="n">num_points</span><span class="o">=</span><span class="n">num_points</span><span class="p">,</span>
@@ -511,7 +520,7 @@
                 <span class="n">f_decay</span><span class="o">=</span><span class="n">f_decay</span><span class="p">,</span>
                 <span class="n">sigma_0</span><span class="o">=</span><span class="n">sigma_0</span><span class="p">,</span>
             <span class="p">)</span>
-            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">path</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">cosmo_string</span> <span class="ow">in</span> <span class="n">components</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
         <span class="p">}</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_area_per_segment</span> <span class="o">=</span> <span class="n">area_per_segment</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_merge</span> <span class="o">=</span> <span class="n">merge</span>
@@ -546,6 +555,62 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components_dict</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">[</span><span class="n">key</span><span class="p">]]</span>
+
+<div class="viewcode-block" id="Mixture.from_text_readers">
+<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.from_text_readers">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_text_readers</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">text_readers</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">TextIO</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Mixture&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a mixture from a dictionary of text readers.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            This method creates a mixture with default parameters. To create a mixture</span>
+<span class="sd">            with custom parameters, use the :meth:`__init__` method instead.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        text_readers : dict[str, io.TextIO]</span>
+<span class="sd">            Dictionary mapping component names to text readers from which to read the</span>
+<span class="sd">            COSMO strings.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Mixture</span>
+<span class="sd">            Mixture object.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">name</span><span class="p">:</span> <span class="n">text_reader</span><span class="o">.</span><span class="n">read</span><span class="p">()</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">text_reader</span> <span class="ow">in</span> <span class="n">text_readers</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="Mixture.from_files">
+<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.from_files">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_files</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">files</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">os</span><span class="o">.</span><span class="n">PathLike</span><span class="p">[</span><span class="nb">str</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="s2">&quot;Mixture&quot;</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a mixture from a dictionary of file paths.</span>
+
+<span class="sd">        .. note::</span>
+<span class="sd">            This method creates a mixture with default parameters. To create a mixture</span>
+<span class="sd">            with custom parameters, use the :meth:`__init__` method instead.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        files : dict[str, os.PathLike]</span>
+<span class="sd">            Dictionary mapping component names to output files from COSMO quantum</span>
+<span class="sd">            mechanical calculations.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Mixture</span>
+<span class="sd">            Mixture object.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_text_readers</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="n">name</span><span class="p">:</span> <span class="nb">open</span><span class="p">(</span><span class="n">file_path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span>
+                <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">file_path</span> <span class="ow">in</span> <span class="n">files</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="p">}</span>
+        <span class="p">)</span></div>
+
 
 <div class="viewcode-block" id="Mixture.get_area_per_segment">
 <a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_area_per_segment">[docs]</a>
@@ -592,7 +657,7 @@
 <span class="sd">        ...     &quot;1-aminoethenol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;,</span>
 <span class="sd">        ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
 <span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
+<span class="sd">        &gt;&gt;&gt; mixture = Mixture.from_files(components)</span>
 <span class="sd">        &gt;&gt;&gt; areas = mixture.get_areas()</span>
 <span class="sd">        &gt;&gt;&gt; areas.shape</span>
 <span class="sd">        (2,)</span>
@@ -621,7 +686,7 @@
 <span class="sd">        ...     &quot;1-aminoethenol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;,</span>
 <span class="sd">        ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
 <span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
+<span class="sd">        &gt;&gt;&gt; mixture = Mixture.from_files(components)</span>
 <span class="sd">        &gt;&gt;&gt; volumes = mixture.get_volumes()</span>
 <span class="sd">        &gt;&gt;&gt; volumes.shape</span>
 <span class="sd">        (2,)</span>
@@ -648,9 +713,10 @@
 <span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Mixture</span>
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; source = files(&quot;cosmolayer.data&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; components = {</span>
-<span class="sd">        ...     &quot;1-aminoethenol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;,</span>
-<span class="sd">        ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
+<span class="sd">        ...     &quot;1-aminoethenol&quot;: (source / &quot;C=C(N)O.cosmo&quot;).read_text(),</span>
+<span class="sd">        ...     &quot;2-aminoethanol&quot;: (source / &quot;NCCO.cosmo&quot;).read_text(),</span>
 <span class="sd">        ... }</span>
 <span class="sd">        &gt;&gt;&gt; mixture = Mixture(components, merge=True)</span>
 <span class="sd">        &gt;&gt;&gt; probabilities = mixture.get_probabilities()</span>
@@ -695,7 +761,7 @@
 <span class="sd">        ...     &quot;1-aminoethenol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;,</span>
 <span class="sd">        ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
 <span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
+<span class="sd">        &gt;&gt;&gt; mixture = Mixture.from_files(components)</span>
 <span class="sd">        &gt;&gt;&gt; profiles = mixture.get_sigma_profiles()</span>
 <span class="sd">        &gt;&gt;&gt; profiles.shape</span>
 <span class="sd">        (2, 51)</span>
@@ -734,7 +800,7 @@
 <span class="sd">        ...     &quot;1-aminoethenol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;,</span>
 <span class="sd">        ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
 <span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
+<span class="sd">        &gt;&gt;&gt; mixture = Mixture.from_files(components)</span>
 <span class="sd">        &gt;&gt;&gt; matrices = mixture.get_interaction_matrices(298.15)</span>
 <span class="sd">        &gt;&gt;&gt; isinstance(matrices, tuple)</span>
 <span class="sd">        True</span>
@@ -790,7 +856,7 @@
 <span class="sd">    ...     &quot;1-aminoethenol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;,</span>
 <span class="sd">    ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
 <span class="sd">    ... }</span>
-<span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2002Mixture(components)</span>
+<span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2002Mixture.from_files(components)</span>
 <span class="sd">    &gt;&gt;&gt; len(mixture)</span>
 <span class="sd">    2</span>
 <span class="sd">    &gt;&gt;&gt; probabilities = mixture.get_probabilities()</span>
@@ -844,7 +910,7 @@
 <span class="sd">    ...     &quot;1-aminoethenol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;,</span>
 <span class="sd">    ...     &quot;2-aminoethanol&quot;: files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;,</span>
 <span class="sd">    ... }</span>
-<span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2010Mixture(components)</span>
+<span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2010Mixture.from_files(components)</span>
 <span class="sd">    &gt;&gt;&gt; len(mixture)</span>
 <span class="sd">    2</span>
 <span class="sd">    &gt;&gt;&gt; probabilities = mixture.get_probabilities()</span>

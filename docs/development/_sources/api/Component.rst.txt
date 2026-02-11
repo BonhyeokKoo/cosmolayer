@@ -7,6 +7,10 @@ Component
 
     .. rubric:: Methods
 
+    .. automethod:: from_file
+        :no-index-entry:
+    .. automethod:: from_text_reader
+        :no-index-entry:
     .. automethod:: get_area
         :no-index-entry:
     .. automethod:: get_format

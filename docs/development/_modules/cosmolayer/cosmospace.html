@@ -461,7 +461,7 @@
 <span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac import Component, create_cosmo_sac_2002_matrix</span>
 <span class="sd">    &gt;&gt;&gt; from importlib.resources import files</span>
 <span class="sd">    &gt;&gt;&gt; components = [</span>
-<span class="sd">    ...     Component(files(&quot;cosmolayer.data&quot;) / f&quot;{species}.cosmo&quot;)</span>
+<span class="sd">    ...     Component.from_file(files(&quot;cosmolayer.data&quot;) / f&quot;{species}.cosmo&quot;)</span>
 <span class="sd">    ...     for species in (&quot;C=C(N)O&quot;, &quot;NCCO&quot;)</span>
 <span class="sd">    ... ]</span>
 <span class="sd">    &gt;&gt;&gt; probabilities = [</span>
@@ -550,7 +550,7 @@
 <div class="viewcode-block" id="CosmoSpace.backward">
 <a class="viewcode-back" href="../../api/CosmoSpace.html#cosmolayer.CosmoSpace.backward">[docs]</a>
     <span class="nd">@staticmethod</span>
-    <span class="nd">@torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">once_differentiable</span>  <span class="c1"># type: ignore[untyped-decorator]</span>
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">autograd</span><span class="o">.</span><span class="n">function</span><span class="o">.</span><span class="n">once_differentiable</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">backward</span><span class="p">(</span>
         <span class="n">ctx</span><span class="p">:</span> <span class="n">NestedIOFunction</span><span class="p">,</span>
         <span class="n">grad_gamma</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span><span class="p">,</span>

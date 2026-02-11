@@ -7,6 +7,10 @@ Mixture
 
     .. rubric:: Methods
 
+    .. automethod:: from_files
+        :no-index-entry:
+    .. automethod:: from_text_readers
+        :no-index-entry:
     .. automethod:: get_area_per_segment
         :no-index-entry:
     .. automethod:: get_areas
