@@ -97,14 +97,15 @@ class Mixture:
     def __init__(  # noqa: PLR0913
         self,
         components: dict[str, str | os.PathLike[str]],
-        min_sigma: float = -0.025,  # e/A^2
-        max_sigma: float = 0.025,  # e/A^2
+        min_sigma: float = -0.025,  # e/Å²
+        max_sigma: float = 0.025,  # e/Å²
         num_points: int = 51,
         area_per_segment: float = COSMO_SAC_2010_AREA_PER_SEGMENT,  # Å²
-        averaging_squared_radius: float = COSMO_SAC_2010_AREA_PER_SEGMENT
-        / np.pi,  # A^2
+        averaging_squared_radius: float = (
+            COSMO_SAC_2010_AREA_PER_SEGMENT / np.pi
+        ),  # Å²
         f_decay: float = 3.57,
-        sigma_0: float = 0.007,  # e/A^2
+        sigma_0: float = 0.007,  # e/Å²
         merge: bool = False,
         regularize: float = 1e-10,
         interaction_matrix_generator: Callable[
@@ -453,7 +454,7 @@ class CosmoSac2002Mixture(Mixture):
         super().__init__(
             components,
             area_per_segment=COSMO_SAC_2002_AREA_PER_SEGMENT,
-            averaging_squared_radius=0.81764**2,  # ≈ 0.6685 Å²
+            averaging_squared_radius=0.8176300195**2,  # ≈ 0.6685 Å²
             f_decay=1.0,
             merge=True,
             interaction_matrix_generator=lambda temperature: (
