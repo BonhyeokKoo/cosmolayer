@@ -436,7 +436,7 @@
 <dd><p>Mixture of molecular components for COSMO-SAC 2002 calculations.</p>
 <p>This class is pre-configured with COSMO-SAC 2002 model parameters:</p>
 <ul class="simple">
-<li><p>averaging_squared_radius = (0.81764 Å)²</p></li>
+<li><p>averaging_radius = 0.8176300195 Å</p></li>
 <li><p>f_decay = 1.0</p></li>
 <li><p>merge = True (single segment type distribution)</p></li>
 <li><p>Interaction matrix from <a class="reference internal" href="create_cosmo_sac_2002_matrix.html#cosmolayer.cosmosac.create_cosmo_sac_2002_matrix" title="cosmolayer.cosmosac.create_cosmo_sac_2002_matrix"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cosmo_sac_2002_matrix</span></code></a> with default
@@ -445,17 +445,18 @@ parameters.</p></li>
 </ul>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/os.html#os.PathLike" title="(in Python v3.14)"><em>os.PathLike</em></a><em>]</em>) – Dictionary mapping component names to paths of COSMO output files.</p>
+<dd class="field-odd"><p><strong>components</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#dict" title="(in Python v3.14)"><em>dict</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>]</em>) – Dictionary mapping component names to paths of COSMO output files.</p>
 </dd>
 </dl>
 <p class="rubric">Examples</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosmoSac2002Mixture</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">,</span>
-<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
+<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
 <span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">CosmoSac2002Mixture</span><span class="o">.</span><span class="n">from_files</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">CosmoSac2002Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">mixture</span><span class="p">)</span>
 <span class="go">2</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
@@ -468,6 +469,49 @@ parameters.</p></li>
 <span class="go">(51, 51)</span>
 </pre></div>
 </div>
+<p class="rubric">Methods</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.CosmoSac2002Mixture.get_probabilities">
+<span class="sig-name descname"><span class="pre">get_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">merge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#CosmoSac2002Mixture.get_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.CosmoSac2002Mixture.get_probabilities" title="Link to this definition">#</a></dt>
+<dd><p>Get probabilities of segment types for all components.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>merge</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge the segment groups (NHB, OH, OT) into a single profile.
+Default is False.</p></li>
+<li><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities. Set to 0 to disable
+regularization. Default is 1e-10. If clipping occurs, the returned
+distribution is renormalized to sum to 1.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>Array of probabilities for each component.
+If merge=True: shape is (n_components, num_points).
+If merge=False: shape is (n_components, 3*num_points).</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>NDArray[np.float64]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mixture</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
+<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
+<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
+<span class="gp">... </span><span class="p">}</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(2, 153)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -519,7 +563,10 @@ parameters.</p></li>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.CosmoSac2002Mixture"><code class="docutils literal notranslate"><span class="pre">CosmoSac2002Mixture</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.CosmoSac2002Mixture"><code class="docutils literal notranslate"><span class="pre">CosmoSac2002Mixture</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.CosmoSac2002Mixture.get_probabilities"><code class="docutils literal notranslate"><span class="pre">get_probabilities</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

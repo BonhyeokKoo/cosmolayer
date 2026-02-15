@@ -401,6 +401,14 @@
 <span class="n">COSMO_SAC_2010_EXPONENTS</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
 <span class="n">COSMO_SAC_2002_AREA_PER_SEGMENT</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.5</span>  <span class="c1"># Å²</span>
 <span class="n">COSMO_SAC_2010_AREA_PER_SEGMENT</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">7.25</span>  <span class="c1"># Å²</span>
+<span class="n">COSMO_SAC_2002_AVERAGING_RADIUS</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.8176300195</span>  <span class="c1"># Å</span>
+<span class="n">COSMO_SAC_2010_AVERAGING_RADIUS</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span>
+    <span class="n">COSMO_SAC_2010_AREA_PER_SEGMENT</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">pi</span>
+<span class="p">)</span>
+<span class="n">COSMO_SAC_2002_F_DECAY</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span>
+<span class="n">COSMO_SAC_2010_F_DECAY</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">3.57</span>
+<span class="n">COSMO_SAC_2002_SIGMA_0</span><span class="p">:</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="n">COSMO_SAC_2010_SIGMA_0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.007</span>  <span class="c1"># e/Å²</span>
 
 
 <div class="viewcode-block" id="create_cosmo_sac_2002_matrix">

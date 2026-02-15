@@ -449,11 +449,12 @@
 <span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac import CosmoSac2002Mixture</span>
 <span class="sd">    &gt;&gt;&gt; import torch</span>
 <span class="sd">    &gt;&gt;&gt; T_ref = 298.15  # K</span>
+<span class="sd">    &gt;&gt;&gt; source = files(&quot;cosmolayer.data&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; components = {</span>
-<span class="sd">    ...     &quot;fluoromethane&quot;: files(&quot;cosmolayer.data&quot;) / &quot;CF.cosmo&quot;,</span>
-<span class="sd">    ...     &quot;water&quot;: files(&quot;cosmolayer.data&quot;) / &quot;O.cosmo&quot;,</span>
+<span class="sd">    ...     &quot;fluoromethane&quot;: (source / &quot;CF.cosmo&quot;).read_text(),</span>
+<span class="sd">    ...     &quot;water&quot;: (source / &quot;O.cosmo&quot;).read_text(),</span>
 <span class="sd">    ... }</span>
-<span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2002Mixture.from_files(components)</span>
+<span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2002Mixture(components)</span>
 <span class="sd">    &gt;&gt;&gt; interaction_matrices = mixture.get_interaction_matrices(T_ref)</span>
 <span class="sd">    &gt;&gt;&gt; exponents = mixture.get_temperature_exponents()</span>
 <span class="sd">    &gt;&gt;&gt; area_per_segment = mixture.get_area_per_segment()</span>
@@ -472,13 +473,13 @@
 <span class="sd">    &gt;&gt;&gt; P = torch.tensor(mixture.get_probabilities())</span>
 <span class="sd">    &gt;&gt;&gt; ln_gamma = cosmo_layer(T, x, a, v, P)</span>
 <span class="sd">    &gt;&gt;&gt; ln_gamma.tolist()</span>
-<span class="sd">    [0.805800..., 0.648065...]</span>
+<span class="sd">    [0.805809..., 0.648071...]</span>
 <span class="sd">    &gt;&gt;&gt; gE_RT = (x * ln_gamma).sum()</span>
 <span class="sd">    &gt;&gt;&gt; gE_RT.item()</span>
-<span class="sd">    0.726932...</span>
+<span class="sd">    0.726940...</span>
 <span class="sd">    &gt;&gt;&gt; gE_RT.backward()</span>
 <span class="sd">    &gt;&gt;&gt; x.grad.tolist()</span>
-<span class="sd">    [0.805800..., 0.648065...]</span>
+<span class="sd">    [0.805809..., 0.648071...]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>

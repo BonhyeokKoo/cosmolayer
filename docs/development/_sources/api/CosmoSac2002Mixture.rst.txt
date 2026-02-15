@@ -5,3 +5,7 @@ CosmoSac2002Mixture
 .. autoclass:: CosmoSac2002Mixture
     :member-order: alphabetical
 
+    .. rubric:: Methods
+
+    .. automethod:: get_probabilities
+        :no-index-entry:

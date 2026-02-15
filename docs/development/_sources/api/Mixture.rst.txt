@@ -7,9 +7,7 @@ Mixture
 
     .. rubric:: Methods
 
-    .. automethod:: from_files
-        :no-index-entry:
-    .. automethod:: from_text_readers
+    .. automethod:: add_component
         :no-index-entry:
     .. automethod:: get_area_per_segment
         :no-index-entry:
@@ -26,4 +24,8 @@ Mixture
     .. automethod:: get_temperature_exponents
         :no-index-entry:
     .. automethod:: get_volumes
+        :no-index-entry:
+    .. automethod:: remove_component
+        :no-index-entry:
+    .. automethod:: replace_component
         :no-index-entry:
