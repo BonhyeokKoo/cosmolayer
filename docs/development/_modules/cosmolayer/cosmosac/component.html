@@ -534,6 +534,11 @@
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_sigma_profiles</span><span class="p">(</span><span class="n">averaged_sigmas</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="n">num_atoms</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">)</span>
+        <span class="n">num_segments</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;Component(</span><span class="si">{</span><span class="n">num_atoms</span><span class="si">}</span><span class="s2"> atoms, </span><span class="si">{</span><span class="n">num_segments</span><span class="si">}</span><span class="s2"> segments)&quot;</span>
+
     <span class="nd">@staticmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_covalent_radius</span><span class="p">(</span><span class="n">element</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get scaled covalent radius for bond detection.</span>
@@ -648,13 +653,13 @@
 <span class="sd">            Dictionary with keys &quot;NHB&quot;, &quot;OH&quot;, &quot;OT&quot; and values as sigma profile</span>
 <span class="sd">            arrays. Each profile has shape (num_points,).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">atom_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;atom&quot;</span><span class="p">]</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="n">atom_indices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;atom&quot;</span><span class="p">]</span>
         <span class="n">element</span> <span class="o">=</span> <span class="n">atom_indices</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">])</span>
         <span class="n">is_hb_candidate</span> <span class="o">=</span> <span class="p">(</span><span class="n">element</span> <span class="o">==</span> <span class="s2">&quot;H&quot;</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="n">averaged_sigmas</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">)</span>
         <span class="n">hb_class</span> <span class="o">=</span> <span class="n">atom_indices</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_hydrogen_bonding_classes</span><span class="p">())</span>
         <span class="n">mask_oh</span> <span class="o">=</span> <span class="n">is_hb_candidate</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">hb_class</span> <span class="o">==</span> <span class="n">OH</span><span class="p">)</span>
         <span class="n">mask_ot</span> <span class="o">=</span> <span class="n">is_hb_candidate</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">hb_class</span> <span class="o">==</span> <span class="n">OT</span><span class="p">)</span>
-        <span class="n">mask_nhb</span> <span class="o">=</span> <span class="o">~</span><span class="p">(</span><span class="n">mask_oh</span> <span class="o">|</span> <span class="n">mask_ot</span><span class="p">)</span>
+        <span class="n">mask_nhb</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">logical_not</span><span class="p">(</span><span class="n">mask_oh</span> <span class="o">|</span> <span class="n">mask_ot</span><span class="p">)</span>
         <span class="n">areas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
         <span class="n">profile_oh</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_sigma_profile</span><span class="p">(</span>
             <span class="n">averaged_sigmas</span><span class="p">[</span><span class="n">mask_oh</span><span class="p">],</span> <span class="n">areas</span><span class="p">[</span><span class="n">mask_oh</span><span class="p">]</span>
