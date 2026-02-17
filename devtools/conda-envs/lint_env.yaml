@@ -12,6 +12,11 @@ dependencies:
   - pyyaml
   - typing-extensions
 
+    # Linting & visualization
+  - cmap
+  - networkx
+  - open3d
+
     # Linting
   - ruff
   - mypy

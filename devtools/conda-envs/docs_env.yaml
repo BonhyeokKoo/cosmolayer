@@ -26,9 +26,13 @@ dependencies:
   - pytest
   - pytest-cov
 
-  # Docs building
+  # Docs building & visualization
+  - cmap
   - matplotlib
+  - networkx
+  - open3d
   - sphinx
+  - sphinx-argparse
   - sphinxcontrib-bibtex
   - sphinx-copybutton
   - sphinx-design

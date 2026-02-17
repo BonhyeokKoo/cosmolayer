@@ -16,8 +16,11 @@ dependencies:
   - c-compiler
   - cxx-compiler
 
-    # Testing
+    # Testing & visualization
+  - cmap
   - matplotlib
+  - networkx
+  - open3d
   - pytest
   - pytest-cov
 
