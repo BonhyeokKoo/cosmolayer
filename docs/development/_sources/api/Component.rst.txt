@@ -13,9 +13,15 @@ Component
         :no-index-entry:
     .. automethod:: get_area
         :no-index-entry:
+    .. automethod:: get_atom_data
+        :no-index-entry:
+    .. automethod:: get_bonds
+        :no-index-entry:
     .. automethod:: get_format
         :no-index-entry:
     .. automethod:: get_probabilities
+        :no-index-entry:
+    .. automethod:: get_segment_data
         :no-index-entry:
     .. automethod:: get_sigma_grid
         :no-index-entry:

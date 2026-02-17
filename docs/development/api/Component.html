@@ -155,6 +155,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../visualization.html">
+    Visualization
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../references.html">
     Bibliography
   </a>
@@ -276,6 +283,13 @@
 <li class="nav-item current active">
   <a class="nav-link nav-internal" href="index.html">
     API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../visualization.html">
+    Visualization
   </a>
 </li>
 
@@ -593,6 +607,62 @@ segments from the COSMO calculation.</p>
 </dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_atom_data">
+<span class="sig-name descname"><span class="pre">get_atom_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_atom_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_atom_data" title="Link to this definition">#</a></dt>
+<dd><p>Get the atom data.</p>
+<p>Get a pandas DataFrame containing the following columns:
+- id: atom identifier (str)
+- x, y, z: Cartesian coordinates in Å (float)
+- element: chemical element symbol (str)</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Atom data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_atom_data</span><span class="p">()</span>
+<span class="go">   id       x       y       z element</span>
+<span class="go">0  C1 -1.4... -0.2...  0.0...       C</span>
+<span class="go">1  C2 -0.0...  0.0...  0.0...       C</span>
+<span class="go">2  N1  0.9... -0.9... -0.0...       N</span>
+<span class="go">...</span>
+<span class="go">8  H5  1.1...  1.3... -0.4...       H</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_bonds">
+<span class="sig-name descname"><span class="pre">get_bonds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_bonds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_bonds" title="Link to this definition">#</a></dt>
+<dd><p>Get the bonds between atoms.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>List of bonds between atoms. Each bond is represented as a tuple of two
+integers, the indices of the atoms in the bond.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>]]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_bonds</span><span class="p">()</span>
+<span class="go">[(0, 1), (0, 4), (0, 5), ... (2, 7), (3, 8)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_format">
 <span class="sig-name descname"><span class="pre">get_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_format" title="Link to this definition">#</a></dt>
 <dd><p>Get the COSMO file format that was parsed.</p>
@@ -668,17 +738,62 @@ normalized.</p>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_sigma_grid">
-<span class="sig-name descname"><span class="pre">get_sigma_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_sigma_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_sigma_grid" title="Link to this definition">#</a></dt>
-<dd><p>Get the charge density grid in e/Å².</p>
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_segment_data">
+<span class="sig-name descname"><span class="pre">get_segment_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_segment_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_segment_data" title="Link to this definition">#</a></dt>
+<dd><p>Get the segment data.</p>
+<p>Get a pandas DataFrame containing the following columns:
+- atom: index of the atom associated with the segment (int)
+- x, y, z: segment coordinates in Å² (float)
+- charge: segment charge in e (float)
+- area: segment surface area in Å² (float)
+- sigma: screening charge density in e/Å² (float)
+- sigma_avg: smoothed charge density in e/Å² (float)</p>
 <dl class="field-list simple">
 <dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Charge density grid in e/Å².</p>
+<dd class="field-odd"><p>Segment data.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_segment_data</span><span class="p">()</span>
+<span class="go">     atom         x         y  ...      area     sigma  sigma_avg</span>
+<span class="go">0       0 -0.867... -1.196...  ...  0.206...  0.010...   0.007...</span>
+<span class="go">1       0 -1.504... -1.502...  ...  0.218...  0.007...   0.005...</span>
+<span class="go">...</span>
+<span class="go">470     8  2.133...  1.152...  ...  0.145... -0.012...  -0.009...</span>
+
+<span class="go">[471 rows x 8 columns]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_sigma_grid">
+<span class="sig-name descname"><span class="pre">get_sigma_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_sigma_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_sigma_grid" title="Link to this definition">#</a></dt>
+<dd><p>Get the screening charge density grid in e/Å².</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Charge density vector in e/Å².</p>
 </dd>
 <dt class="field-even">Return type<span class="colon">:</span></dt>
 <dd class="field-even"><p>np.ndarray</p>
 </dd>
 </dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_sigma_grid</span><span class="p">()</span>
+<span class="go">array([-0.025, -0.024, -0.023, ... 0.023,  0.024,  0.025])</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -772,8 +887,11 @@ Shape: (num_points,). Units: Å².</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.from_file"><code class="docutils literal notranslate"><span class="pre">from_file</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.from_text_reader"><code class="docutils literal notranslate"><span class="pre">from_text_reader</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_area"><code class="docutils literal notranslate"><span class="pre">get_area</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_atom_data"><code class="docutils literal notranslate"><span class="pre">get_atom_data</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_bonds"><code class="docutils literal notranslate"><span class="pre">get_bonds</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_format"><code class="docutils literal notranslate"><span class="pre">get_format</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_probabilities"><code class="docutils literal notranslate"><span class="pre">get_probabilities</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_segment_data"><code class="docutils literal notranslate"><span class="pre">get_segment_data</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_sigma_grid"><code class="docutils literal notranslate"><span class="pre">get_sigma_grid</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_sigma_profile"><code class="docutils literal notranslate"><span class="pre">get_sigma_profile</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_volume"><code class="docutils literal notranslate"><span class="pre">get_volume</span></code></a></li>

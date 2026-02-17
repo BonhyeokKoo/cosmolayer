@@ -143,6 +143,13 @@
 
 
 <li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../visualization.html">
+    Visualization
+  </a>
+</li>
+
+
+<li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../references.html">
     Bibliography
   </a>
@@ -262,6 +269,13 @@
 <li class="nav-item ">
   <a class="nav-link nav-internal" href="../../../api/index.html">
     API Reference
+  </a>
+</li>
+
+
+<li class="nav-item ">
+  <a class="nav-link nav-internal" href="../../../visualization.html">
+    Visualization
   </a>
 </li>
 
@@ -526,12 +540,15 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">parse_cosmo_file</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">averaged_sigmas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_average_sigmas</span><span class="p">()</span>
+
+        <span class="n">sigmas</span><span class="p">,</span> <span class="n">averaged_sigmas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_average_sigmas</span><span class="p">()</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">averaged_sigmas</span> <span class="o">&lt;</span> <span class="n">min_sigma</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span> <span class="ow">or</span> <span class="p">(</span><span class="n">averaged_sigmas</span> <span class="o">&gt;</span> <span class="n">max_sigma</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Averaged charge densities out of range.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;sigma&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">sigmas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;sigma_avg&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">averaged_sigmas</span>
 
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bonds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_detect_bonds</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_area</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">[</span><span class="s2">&quot;area&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
-
         <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compute_sigma_profiles</span><span class="p">(</span><span class="n">averaged_sigmas</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -556,34 +573,38 @@
         <span class="n">radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">pt</span><span class="o">.</span><span class="n">elements</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">element</span><span class="p">)</span><span class="o">.</span><span class="n">covalent_radius</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">COVALENT_FACTOR</span> <span class="o">*</span> <span class="n">radius</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_detect_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Determines bonds from interatomic distances.&quot;&quot;&quot;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span>
+        <span class="n">coords</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">radii</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_covalent_radius</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">adjacency_matrix</span> <span class="o">=</span> <span class="n">distances</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">radii</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">radii</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:])</span>
+        <span class="n">bond_indices</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">adjacency_matrix</span><span class="p">,</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[(</span><span class="nb">int</span><span class="p">(</span><span class="n">i</span><span class="p">),</span> <span class="nb">int</span><span class="p">(</span><span class="n">j</span><span class="p">))</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bond_indices</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">)]</span>
+
     <span class="k">def</span><span class="w"> </span><span class="nf">_get_hydrogen_bonding_classes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Classify atoms into hydrogen bonding types (OH, OT, NHB).</span>
 
-<span class="sd">        Determines bonds from interatomic distances and assigns hydrogen bonding</span>
-<span class="sd">        classes: OH (O-H bonds), OT (N-H, F-H bonds or isolated N/F/O), and</span>
-<span class="sd">        NHB (all other atoms).</span>
+<span class="sd">        Assigns hydrogen bonding classes: OH (O-H bonds), OT (N-H, F-H bonds or</span>
+<span class="sd">        isolated N/F/O), and NHB (all other atoms).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        pd.Series</span>
 <span class="sd">            Hydrogen bonding class label for each atom.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="n">coords</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="s2">&quot;x&quot;</span><span class="p">,</span> <span class="s2">&quot;y&quot;</span><span class="p">,</span> <span class="s2">&quot;z&quot;</span><span class="p">]]</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">distances</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">square</span><span class="p">(</span><span class="n">coords</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">,</span> <span class="p">:]</span> <span class="o">-</span> <span class="n">coords</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">axis</span><span class="o">=-</span><span class="mi">1</span><span class="p">))</span>
-        <span class="n">elements</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">]</span>
-        <span class="n">radii</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_get_covalent_radius</span><span class="p">)</span><span class="o">.</span><span class="n">values</span>
-        <span class="n">bonds</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nonzero</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">distances</span> <span class="o">&lt;</span> <span class="p">(</span><span class="n">radii</span><span class="p">[:,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">+</span> <span class="n">radii</span><span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="p">:]),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">))</span>
-        <span class="n">hb_class</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="n">elements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">[</span><span class="s2">&quot;element&quot;</span><span class="p">]</span>
+        <span class="n">hb_class</span> <span class="o">=</span> <span class="n">elements</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">element</span><span class="p">:</span> <span class="n">OT</span> <span class="k">if</span> <span class="n">element</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;O&quot;</span><span class="p">]</span> <span class="k">else</span> <span class="n">NHB</span>
         <span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="o">*</span><span class="n">bonds</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bonds</span><span class="p">:</span>
             <span class="n">elements_ij</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">elements</span><span class="o">.</span><span class="n">iloc</span><span class="p">[[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]])</span>
             <span class="k">if</span> <span class="n">elements_ij</span> <span class="ow">in</span> <span class="p">[{</span><span class="s2">&quot;O&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;N&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">},</span> <span class="p">{</span><span class="s2">&quot;F&quot;</span><span class="p">,</span> <span class="s2">&quot;H&quot;</span><span class="p">}]:</span>
                 <span class="n">hb_class</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">hb_class</span><span class="o">.</span><span class="n">at</span><span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">OH</span> <span class="k">if</span> <span class="s2">&quot;O&quot;</span> <span class="ow">in</span> <span class="n">elements_ij</span> <span class="k">else</span> <span class="n">OT</span>
         <span class="k">return</span> <span class="n">hb_class</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="nf">_average_sigmas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_average_sigmas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Apply distance-weighted averaging to segment charge densities.</span>
 
 <span class="sd">        Smooths raw screening charge densities (σ = q/A) using exponentially</span>
@@ -602,10 +623,11 @@
         <span class="n">sums</span> <span class="o">=</span> <span class="n">squared_radii</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_radius</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">prods</span> <span class="o">=</span> <span class="n">squared_radii</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_radius</span><span class="o">**</span><span class="mi">2</span>
         <span class="n">weights</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="bp">self</span><span class="o">.</span><span class="n">_f_decay</span> <span class="o">*</span> <span class="n">squared_distances</span> <span class="o">/</span> <span class="n">sums</span><span class="p">)</span> <span class="o">*</span> <span class="n">prods</span> <span class="o">/</span> <span class="n">sums</span>
-        <span class="n">result</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-            <span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">result</span>
+        <span class="n">averaged_sigmas</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+            <span class="n">weights</span> <span class="o">*</span> <span class="n">sigmas</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span>
+        <span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">weights</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">sigmas</span><span class="p">,</span> <span class="n">averaged_sigmas</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">_compute_sigma_profile</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">averaged_sigmas</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="n">areas</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span>
@@ -799,15 +821,117 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span></div>
 
 
+<div class="viewcode-block" id="Component.get_atom_data">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_atom_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_atom_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the atom data.</span>
+
+<span class="sd">        Get a pandas DataFrame containing the following columns:</span>
+<span class="sd">        - id: atom identifier (str)</span>
+<span class="sd">        - x, y, z: Cartesian coordinates in Å (float)</span>
+<span class="sd">        - element: chemical element symbol (str)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            Atom data.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
+<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
+<span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
+<span class="sd">        &gt;&gt;&gt; component.get_atom_data()</span>
+<span class="sd">           id       x       y       z element</span>
+<span class="sd">        0  C1 -1.4... -0.2...  0.0...       C</span>
+<span class="sd">        1  C2 -0.0...  0.0...  0.0...       C</span>
+<span class="sd">        2  N1  0.9... -0.9... -0.0...       N</span>
+<span class="sd">        ...</span>
+<span class="sd">        8  H5  1.1...  1.3... -0.4...       H</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span></div>
+
+
+<div class="viewcode-block" id="Component.get_segment_data">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_segment_data">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_segment_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the segment data.</span>
+
+<span class="sd">        Get a pandas DataFrame containing the following columns:</span>
+<span class="sd">        - atom: index of the atom associated with the segment (int)</span>
+<span class="sd">        - x, y, z: segment coordinates in Å² (float)</span>
+<span class="sd">        - charge: segment charge in e (float)</span>
+<span class="sd">        - area: segment surface area in Å² (float)</span>
+<span class="sd">        - sigma: screening charge density in e/Å² (float)</span>
+<span class="sd">        - sigma_avg: smoothed charge density in e/Å² (float)</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        pd.DataFrame</span>
+<span class="sd">            Segment data.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
+<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
+<span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
+<span class="sd">        &gt;&gt;&gt; component.get_segment_data()</span>
+<span class="sd">             atom         x         y  ...      area     sigma  sigma_avg</span>
+<span class="sd">        0       0 -0.867... -1.196...  ...  0.206...  0.010...   0.007...</span>
+<span class="sd">        1       0 -1.504... -1.502...  ...  0.218...  0.007...   0.005...</span>
+<span class="sd">        ...</span>
+<span class="sd">        470     8  2.133...  1.152...  ...  0.145... -0.012...  -0.009...</span>
+<span class="sd">        &lt;BLANKLINE&gt;</span>
+<span class="sd">        [471 rows x 8 columns]</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span></div>
+
+
+<div class="viewcode-block" id="Component.get_bonds">
+<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_bonds">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the bonds between atoms.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        list[tuple[int, int]]</span>
+<span class="sd">            List of bonds between atoms. Each bond is represented as a tuple of two</span>
+<span class="sd">            integers, the indices of the atoms in the bond.</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
+<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
+<span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
+<span class="sd">        &gt;&gt;&gt; component.get_bonds()</span>
+<span class="sd">        [(0, 1), (0, 4), (0, 5), ... (2, 7), (3, 8)]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bonds</span></div>
+
+
 <div class="viewcode-block" id="Component.get_sigma_grid">
 <a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_sigma_grid">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_sigma_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the charge density grid in e/Å².</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the screening charge density grid in e/Å².</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        np.ndarray</span>
-<span class="sd">            Charge density grid in e/Å².</span>
+<span class="sd">            Charge density vector in e/Å².</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
+<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
+<span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
+<span class="sd">        &gt;&gt;&gt; component.get_sigma_grid()</span>
+<span class="sd">        array([-0.025, -0.024, -0.023, ... 0.023,  0.024,  0.025])</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span></div>
 
