@@ -1,0 +1,15 @@
+CosmoSacModel
+=============
+
+.. currentmodule:: cosmolayer.cosmosac
+.. autoclass:: CosmoSacModel
+    :member-order: alphabetical
+
+    .. rubric:: Methods
+
+    .. automethod:: create_component
+        :no-index-entry:
+    .. automethod:: create_interaction_matrices
+        :no-index-entry:
+    .. automethod:: create_mixture
+        :no-index-entry:

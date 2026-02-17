@@ -10,6 +10,7 @@ Classes
     Component
     CosmoSac2002Mixture
     CosmoSac2010Mixture
+    CosmoSacModel
     Mixture
 
 Functions
@@ -27,10 +28,8 @@ Constants
 .. toctree::
     :titlesonly:
 
-    COSMO_SAC_2002_AREA_PER_SEGMENT
-    COSMO_SAC_2002_EXPONENTS
-    COSMO_SAC_2010_AREA_PER_SEGMENT
-    COSMO_SAC_2010_EXPONENTS
+    CosmoSac2002Model
+    CosmoSac2010Model
 
 .. testsetup::
 

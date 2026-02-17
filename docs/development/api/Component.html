@@ -370,13 +370,12 @@
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Component</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSac2002Mixture.html">CosmoSac2002Mixture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSac2010Mixture.html">CosmoSac2010Mixture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoSacModel.html">CosmoSacModel</a></li>
 <li class="toctree-l2"><a class="reference internal" href="Mixture.html">Mixture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="create_cosmo_sac_2002_matrix.html">create_cosmo_sac_2002_matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="create_cosmo_sac_2010_matrices.html">create_cosmo_sac_2010_matrices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="COSMO_SAC_2002_AREA_PER_SEGMENT.html">COSMO_SAC_2002_AREA_PER_SEGMENT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="COSMO_SAC_2002_EXPONENTS.html">COSMO_SAC_2002_EXPONENTS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="COSMO_SAC_2010_AREA_PER_SEGMENT.html">COSMO_SAC_2010_AREA_PER_SEGMENT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="COSMO_SAC_2010_EXPONENTS.html">COSMO_SAC_2010_EXPONENTS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoSac2002Model.html">CosmoSac2002Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoSac2010Model.html">CosmoSac2010Model</a></li>
 </ul>
 </details></li>
 </ul>
@@ -461,8 +460,10 @@
 Default is √(7.25 / π) Å <span id="id1">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
 <li><p><strong>f_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Decay factor for exponential distance weighting in the sigma averaging
 procedure. Default is 3.57 <span id="id2">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
-<li><p><strong>sigma_0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Standard deviation of the Gaussian probability of a segment to form a hydrogen
-bond. Default is 0.007 e/Å² <span id="id3">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
+<li><p><strong>sigma_0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Standard deviation of the Gaussian probability of a segment to form a hydrogen
+bond in e/Å².  Set to <code class="docutils literal notranslate"><span class="pre">None</span></code> to disable hydrogen-bond splitting (all
+surface area is assigned to the NHB class).
+Default is 0.007 e/Å² <span id="id3">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>

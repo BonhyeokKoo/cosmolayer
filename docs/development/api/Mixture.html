@@ -61,7 +61,7 @@
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="create_cosmo_sac_2002_matrix" href="create_cosmo_sac_2002_matrix.html" />
-    <link rel="prev" title="CosmoSac2010Mixture" href="CosmoSac2010Mixture.html" />
+    <link rel="prev" title="CosmoSacModel" href="CosmoSacModel.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -370,13 +370,12 @@
 <li class="toctree-l2"><a class="reference internal" href="Component.html">Component</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSac2002Mixture.html">CosmoSac2002Mixture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSac2010Mixture.html">CosmoSac2010Mixture</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoSacModel.html">CosmoSacModel</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Mixture</a></li>
 <li class="toctree-l2"><a class="reference internal" href="create_cosmo_sac_2002_matrix.html">create_cosmo_sac_2002_matrix</a></li>
 <li class="toctree-l2"><a class="reference internal" href="create_cosmo_sac_2010_matrices.html">create_cosmo_sac_2010_matrices</a></li>
-<li class="toctree-l2"><a class="reference internal" href="COSMO_SAC_2002_AREA_PER_SEGMENT.html">COSMO_SAC_2002_AREA_PER_SEGMENT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="COSMO_SAC_2002_EXPONENTS.html">COSMO_SAC_2002_EXPONENTS</a></li>
-<li class="toctree-l2"><a class="reference internal" href="COSMO_SAC_2010_AREA_PER_SEGMENT.html">COSMO_SAC_2010_AREA_PER_SEGMENT</a></li>
-<li class="toctree-l2"><a class="reference internal" href="COSMO_SAC_2010_EXPONENTS.html">COSMO_SAC_2010_EXPONENTS</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoSac2002Model.html">CosmoSac2002Model</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoSac2010Model.html">CosmoSac2010Model</a></li>
 </ul>
 </details></li>
 </ul>
@@ -467,8 +466,10 @@ output files from quantum mechanical calculations).</p></li>
 <li><p><strong>averaging_radius</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Effective radius for distance-weighted sigma averaging in Å.
 Default is √(7.25 / π) Å.</p></li>
 <li><p><strong>f_decay</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Decay factor for exponential distance weighting. Default is 3.57.</p></li>
-<li><p><strong>sigma_0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Standard deviation of the Gaussian probability of a segment to form
-a hydrogen bond. Default is 0.007 e/Å².</p></li>
+<li><p><strong>sigma_0</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em> or </em><em>None</em><em>, </em><em>optional</em>) – Standard deviation of the Gaussian probability of a segment to form
+a hydrogen bond in e/Å².  Set to <code class="docutils literal notranslate"><span class="pre">None</span></code> to disable hydrogen-bond
+splitting (all surface area is assigned to the NHB class).
+Default is 0.007 e/Å².</p></li>
 <li><p><strong>merge</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge segment groups (NHB, OH, OT) into a single profile
 when calling get_probabilities(). Default is False.</p></li>
 <li><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities. Default is 1e-10.</p></li>
@@ -779,12 +780,12 @@ Shape: (n_components,).</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="CosmoSac2010Mixture.html"
+       href="CosmoSacModel.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">CosmoSac2010Mixture</p>
+        <p class="prev-next-title">CosmoSacModel</p>
       </div>
     </a>
     <a class="right-next"

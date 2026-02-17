@@ -1,9 +1,0 @@
-COSMO_SAC_2010_EXPONENTS
-========================
-
-.. currentmodule:: cosmolayer.cosmosac
-.. py:data:: COSMO_SAC_2010_EXPONENTS
-
-**Type:** tuple
-
-**Value:** ``(1, 3)``

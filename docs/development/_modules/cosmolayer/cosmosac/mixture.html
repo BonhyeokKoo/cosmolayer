@@ -450,9 +450,11 @@
 <span class="sd">        Default is √(7.25 / π) Å.</span>
 <span class="sd">    f_decay : float, optional</span>
 <span class="sd">        Decay factor for exponential distance weighting. Default is 3.57.</span>
-<span class="sd">    sigma_0 : float, optional</span>
+<span class="sd">    sigma_0 : float or None, optional</span>
 <span class="sd">        Standard deviation of the Gaussian probability of a segment to form</span>
-<span class="sd">        a hydrogen bond. Default is 0.007 e/Å².</span>
+<span class="sd">        a hydrogen bond in e/Å².  Set to ``None`` to disable hydrogen-bond</span>
+<span class="sd">        splitting (all surface area is assigned to the NHB class).</span>
+<span class="sd">        Default is 0.007 e/Å².</span>
 <span class="sd">    merge : bool, optional</span>
 <span class="sd">        Whether to merge segment groups (NHB, OH, OT) into a single profile</span>
 <span class="sd">        when calling get_probabilities(). Default is False.</span>
@@ -508,7 +510,7 @@
         <span class="n">area_per_segment</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_AREA_PER_SEGMENT</span><span class="p">,</span>  <span class="c1"># Å²</span>
         <span class="n">averaging_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_AVERAGING_RADIUS</span><span class="p">,</span>  <span class="c1"># Å</span>
         <span class="n">f_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_F_DECAY</span><span class="p">,</span>
-        <span class="n">sigma_0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_SIGMA_0</span><span class="p">,</span>  <span class="c1"># e/Å²</span>
+        <span class="n">sigma_0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_SIGMA_0</span><span class="p">,</span>  <span class="c1"># e/Å²</span>
         <span class="n">interaction_matrix_generator</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
             <span class="p">[</span><span class="nb">float</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="o">...</span><span class="p">]</span>
         <span class="p">]</span> <span class="o">=</span> <span class="n">create_cosmo_sac_2010_matrices</span><span class="p">,</span>
@@ -896,6 +898,7 @@
             <span class="n">area_per_segment</span><span class="o">=</span><span class="n">COSMO_SAC_2002_AREA_PER_SEGMENT</span><span class="p">,</span>
             <span class="n">averaging_radius</span><span class="o">=</span><span class="n">COSMO_SAC_2002_AVERAGING_RADIUS</span><span class="p">,</span>
             <span class="n">f_decay</span><span class="o">=</span><span class="n">COSMO_SAC_2002_F_DECAY</span><span class="p">,</span>
+            <span class="n">sigma_0</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
             <span class="n">interaction_matrix_generator</span><span class="o">=</span><span class="k">lambda</span> <span class="n">temperature</span><span class="p">:</span> <span class="p">(</span>
                 <span class="n">create_cosmo_sac_2002_matrix</span><span class="p">(</span><span class="n">temperature</span><span class="p">),</span>
             <span class="p">),</span>

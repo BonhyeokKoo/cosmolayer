@@ -1,9 +1,0 @@
-COSMO_SAC_2010_AREA_PER_SEGMENT
-===============================
-
-.. currentmodule:: cosmolayer.cosmosac
-.. py:data:: COSMO_SAC_2010_AREA_PER_SEGMENT
-
-**Type:** float
-
-**Value:** ``7.25``
