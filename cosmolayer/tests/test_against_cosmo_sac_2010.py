@@ -19,10 +19,10 @@ import torch
 from numpy.typing import NDArray
 
 from cosmolayer import CosmoLayer
-from cosmolayer.cosmosac import (
+from cosmolayer.cosmosac import create_cosmo_sac_2010_matrices
+from cosmolayer.cosmosac.interaction_matrices import (
     COSMO_SAC_2010_AREA_PER_SEGMENT,
     COSMO_SAC_2010_EXPONENTS,
-    create_cosmo_sac_2010_matrices,
 )
 
 _NUM_POINTS = 3

@@ -49,9 +49,11 @@ class Mixture:
         Default is √(7.25 / π) Å.
     f_decay : float, optional
         Decay factor for exponential distance weighting. Default is 3.57.
-    sigma_0 : float, optional
+    sigma_0 : float or None, optional
         Standard deviation of the Gaussian probability of a segment to form
-        a hydrogen bond. Default is 0.007 e/Å².
+        a hydrogen bond in e/Å².  Set to ``None`` to disable hydrogen-bond
+        splitting (all surface area is assigned to the NHB class).
+        Default is 0.007 e/Å².
     merge : bool, optional
         Whether to merge segment groups (NHB, OH, OT) into a single profile
         when calling get_probabilities(). Default is False.
@@ -107,7 +109,7 @@ class Mixture:
         area_per_segment: float = COSMO_SAC_2010_AREA_PER_SEGMENT,  # Å²
         averaging_radius: float = COSMO_SAC_2010_AVERAGING_RADIUS,  # Å
         f_decay: float = COSMO_SAC_2010_F_DECAY,
-        sigma_0: float = COSMO_SAC_2010_SIGMA_0,  # e/Å²
+        sigma_0: float | None = COSMO_SAC_2010_SIGMA_0,  # e/Å²
         interaction_matrix_generator: Callable[
             [float], tuple[NDArray[np.float64], ...]
         ] = create_cosmo_sac_2010_matrices,
@@ -459,6 +461,7 @@ class CosmoSac2002Mixture(Mixture):
             area_per_segment=COSMO_SAC_2002_AREA_PER_SEGMENT,
             averaging_radius=COSMO_SAC_2002_AVERAGING_RADIUS,
             f_decay=COSMO_SAC_2002_F_DECAY,
+            sigma_0=None,
             interaction_matrix_generator=lambda temperature: (
                 create_cosmo_sac_2002_matrix(temperature),
             ),

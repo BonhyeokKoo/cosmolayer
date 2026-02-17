@@ -44,9 +44,11 @@ class Component:
     f_decay : float, optional
         Decay factor for exponential distance weighting in the sigma averaging
         procedure. Default is 3.57 :cite:`Bell2020`.
-    sigma_0 : float, optional
+    sigma_0 : float or None, optional
         Standard deviation of the Gaussian probability of a segment to form a hydrogen
-        bond. Default is 0.007 e/Å² :cite:`Bell2020`.
+        bond in e/Å².  Set to ``None`` to disable hydrogen-bond splitting (all
+        surface area is assigned to the NHB class).
+        Default is 0.007 e/Å² :cite:`Bell2020`.
 
     Raises
     ------
@@ -126,7 +128,7 @@ class Component:
         num_points: int = 51,
         averaging_radius: float = COSMO_SAC_2010_AVERAGING_RADIUS,  # Å
         f_decay: float = COSMO_SAC_2010_F_DECAY,
-        sigma_0: float = COSMO_SAC_2010_SIGMA_0,  # e/Å²
+        sigma_0: float | None = COSMO_SAC_2010_SIGMA_0,  # e/Å²
     ):
         self._min_sigma = min_sigma
         self._grid = np.linspace(min_sigma, max_sigma, num_points)
@@ -291,7 +293,10 @@ class Component:
         profile_nhb = self._compute_sigma_profile(
             averaged_sigmas[mask_nhb], areas[mask_nhb]
         )
-        hb_probability = 1.0 - np.exp(-0.5 * (self._grid / self._sigma_0) ** 2)
+        if self._sigma_0 is None:
+            hb_probability = np.zeros_like(self._grid)
+        else:
+            hb_probability = 1.0 - np.exp(-0.5 * (self._grid / self._sigma_0) ** 2)
         return {
             NHB: profile_nhb + (profile_oh + profile_ot) * (1.0 - hb_probability),
             OH: profile_oh * hb_probability,
