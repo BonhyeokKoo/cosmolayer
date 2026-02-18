@@ -474,13 +474,13 @@
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac import Component, CosmoSac2002Model</span>
 <span class="sd">    &gt;&gt;&gt; from importlib.resources import files</span>
-<span class="sd">    &gt;&gt;&gt; components = [</span>
-<span class="sd">    ...     Component.from_file(files(&quot;cosmolayer.data&quot;) / f&quot;{species}.cosmo&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; cosmo_strings = [</span>
+<span class="sd">    ...     (files(&quot;cosmolayer.data&quot;) / f&quot;{species}.cosmo&quot;).read_text()</span>
 <span class="sd">    ...     for species in (&quot;C=C(N)O&quot;, &quot;NCCO&quot;)</span>
 <span class="sd">    ... ]</span>
 <span class="sd">    &gt;&gt;&gt; probabilities = [</span>
-<span class="sd">    ...     component.get_probabilities(merge=True)</span>
-<span class="sd">    ...     for component in components</span>
+<span class="sd">    ...     CosmoSac2002Model.create_component(cosmo_string).get_probabilities()</span>
+<span class="sd">    ...     for cosmo_string in cosmo_strings</span>
 <span class="sd">    ... ]</span>
 <span class="sd">    &gt;&gt;&gt; x = torch.stack(</span>
 <span class="sd">    ...     [torch.tensor(p, dtype=torch.float32) for p in probabilities],</span>
@@ -492,13 +492,13 @@
 <span class="sd">    ... )</span>
 <span class="sd">    &gt;&gt;&gt; gamma = CosmoSpace.apply(x, U_RT)</span>
 <span class="sd">    &gt;&gt;&gt; gamma.log()</span>
-<span class="sd">    tensor([[ -5.2...,  -4.6...,  ... -13.3..., -14.5...],</span>
-<span class="sd">            [-22.4..., -20.7...,  ... -4.8...,  -5.5...]], grad_fn=&lt;LogBackward0&gt;)</span>
+<span class="sd">    tensor([[-4.7...e+00, -4.0...e+00, ... -1.4056e+01],</span>
+<span class="sd">            [-2.1...e+01, -1.9...e+01, ... -5.3149e+00]], grad_fn=&lt;LogBackward0&gt;)</span>
 <span class="sd">    &gt;&gt;&gt; loss = (gamma ** 2).sum()</span>
 <span class="sd">    &gt;&gt;&gt; loss.backward()</span>
 <span class="sd">    &gt;&gt;&gt; x.grad</span>
-<span class="sd">    tensor([[ 2.8...e+03,  6.0...e+02, ... -4.8...e+04],</span>
-<span class="sd">            [-5.1...e+02, -5.0...e+02, ...  6.3...e+02]])</span>
+<span class="sd">    tensor([[ 6.4...e+04,  1.1...e+04, ... -4.2...e+05],</span>
+<span class="sd">            [-6.6...e+02, -6.3...e+02, ...  7.4...e+02]])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="nd">@staticmethod</span>

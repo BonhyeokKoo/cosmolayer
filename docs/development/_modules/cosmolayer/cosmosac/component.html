@@ -450,6 +450,9 @@
 <span class="sd">        bond in e/Å².  Set to ``None`` to disable hydrogen-bond splitting (all</span>
 <span class="sd">        surface area is assigned to the NHB class).</span>
 <span class="sd">        Default is 0.007 e/Å² :cite:`Bell2020`.</span>
+<span class="sd">    merge_profiles : bool, optional</span>
+<span class="sd">        Whether to merge segment groups (NHB, OH, OT) into a single profile</span>
+<span class="sd">        when calling get_probabilities(). Default is False.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -530,6 +533,7 @@
         <span class="n">averaging_radius</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_AVERAGING_RADIUS</span><span class="p">,</span>  <span class="c1"># Å</span>
         <span class="n">f_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_F_DECAY</span><span class="p">,</span>
         <span class="n">sigma_0</span><span class="p">:</span> <span class="nb">float</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="n">COSMO_SAC_2010_SIGMA_0</span><span class="p">,</span>  <span class="c1"># e/Å²</span>
+        <span class="n">merge_profiles</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_min_sigma</span> <span class="o">=</span> <span class="n">min_sigma</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">linspace</span><span class="p">(</span><span class="n">min_sigma</span><span class="p">,</span> <span class="n">max_sigma</span><span class="p">,</span> <span class="n">num_points</span><span class="p">)</span>
@@ -538,6 +542,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_averaging_radius</span> <span class="o">=</span> <span class="n">averaging_radius</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_f_decay</span> <span class="o">=</span> <span class="n">f_decay</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_0</span> <span class="o">=</span> <span class="n">sigma_0</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_merge_profiles</span> <span class="o">=</span> <span class="n">merge_profiles</span>
 
         <span class="bp">self</span><span class="o">.</span><span class="n">_format</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">parse_cosmo_file</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">)</span>
@@ -980,9 +985,7 @@
 
 <div class="viewcode-block" id="Component.get_probabilities">
 <a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_probabilities">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_probabilities</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">merge</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">regularize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">regularize</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-10</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the probabilities of segment types in the molecule.</span>
 
 <span class="sd">        A segment type is defined by its hydrogen bonding class (NHB, OH, OT) and its</span>
@@ -990,9 +993,6 @@
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        merge : bool, optional</span>
-<span class="sd">            Whether to merge the segment groups (NHB, OH, OT) into a single profile.</span>
-<span class="sd">            Default is False.</span>
 <span class="sd">        regularize : float, optional</span>
 <span class="sd">            Minimum value for clipping probabilities. Set to 0 to disable</span>
 <span class="sd">            regularization. Default is 1e-10. If clipping occurs, the returned</span>
@@ -1001,26 +1001,26 @@
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        np.ndarray</span>
-<span class="sd">            Normalized distribution of segment groups.</span>
-<span class="sd">            If merge=True: shape is (num_points,) - total sigma profile normalized.</span>
-<span class="sd">            If merge=False: shape is (3*num_points,) - concatenated profiles</span>
-<span class="sd">            normalized.</span>
+<span class="sd">            Normalized probability distribution of segment groups.</span>
+<span class="sd">            Shape is (num_points,) if ``merge_profiles`` is True, otherwise</span>
+<span class="sd">            (3*num_points,).</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; import numpy as np</span>
 <span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
-<span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
-<span class="sd">        &gt;&gt;&gt; component = Component.from_file(path)</span>
-<span class="sd">        &gt;&gt;&gt; probabilities = component.get_probabilities(merge=True)</span>
+<span class="sd">        &gt;&gt;&gt; cosmo_string = (files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;).read_text()</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(cosmo_string, merge_profiles=True)</span>
+<span class="sd">        &gt;&gt;&gt; probabilities = component.get_probabilities()</span>
 <span class="sd">        &gt;&gt;&gt; probabilities.shape</span>
 <span class="sd">        (51,)</span>
 <span class="sd">        &gt;&gt;&gt; bool(np.all(probabilities &lt;= 1))</span>
 <span class="sd">        True</span>
 <span class="sd">        &gt;&gt;&gt; bool(np.isclose(probabilities.sum(), 1.0))</span>
 <span class="sd">        True</span>
-<span class="sd">        &gt;&gt;&gt; probabilities_full = component.get_probabilities(merge=False)</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(cosmo_string, merge_profiles=False)</span>
+<span class="sd">        &gt;&gt;&gt; probabilities_full = component.get_probabilities()</span>
 <span class="sd">        &gt;&gt;&gt; probabilities_full.shape</span>
 <span class="sd">        (153,)</span>
 <span class="sd">        &gt;&gt;&gt; bool(np.isclose(probabilities_full.sum(), 1.0))</span>
@@ -1030,7 +1030,9 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Regularization value must be non-negative.&quot;</span><span class="p">)</span>
         <span class="n">profiles</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span><span class="p">[</span><span class="n">segtype</span><span class="p">]</span> <span class="k">for</span> <span class="n">segtype</span> <span class="ow">in</span> <span class="n">SEGMENT_GROUPS</span><span class="p">]</span>
         <span class="n">summed</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">profiles</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">merge</span> <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">profiles</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">profiles</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_profiles</span>
+            <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">profiles</span><span class="p">)</span>
         <span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span>
         <span class="n">clipped</span> <span class="o">=</span> <span class="n">summed</span><span class="o">.</span><span class="n">clip</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="n">regularize</span><span class="p">)</span>
         <span class="n">normalized</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">clipped</span> <span class="o">/</span> <span class="n">clipped</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>

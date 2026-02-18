@@ -493,13 +493,13 @@ Shape: (…, num_segment_types).</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span><span class="p">,</span> <span class="n">CosmoSac2002Model</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">[</span>
-<span class="gp">... </span>    <span class="n">Component</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">.cosmo&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cosmo_strings</span> <span class="o">=</span> <span class="p">[</span>
+<span class="gp">... </span>    <span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">species</span><span class="si">}</span><span class="s2">.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;C=C(N)O&quot;</span><span class="p">,</span> <span class="s2">&quot;NCCO&quot;</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="p">[</span>
-<span class="gp">... </span>    <span class="n">component</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">(</span><span class="n">merge</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="n">components</span>
+<span class="gp">... </span>    <span class="n">CosmoSac2002Model</span><span class="o">.</span><span class="n">create_component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">)</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="k">for</span> <span class="n">cosmo_string</span> <span class="ow">in</span> <span class="n">cosmo_strings</span>
 <span class="gp">... </span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probabilities</span><span class="p">],</span>
@@ -511,13 +511,13 @@ Shape: (…, num_segment_types).</p>
 <span class="gp">... </span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">gamma</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">U_RT</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">gamma</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
-<span class="go">tensor([[ -5.2...,  -4.6...,  ... -13.3..., -14.5...],</span>
-<span class="go">        [-22.4..., -20.7...,  ... -4.8...,  -5.5...]], grad_fn=&lt;LogBackward0&gt;)</span>
+<span class="go">tensor([[-4.7...e+00, -4.0...e+00, ... -1.4056e+01],</span>
+<span class="go">        [-2.1...e+01, -1.9...e+01, ... -5.3149e+00]], grad_fn=&lt;LogBackward0&gt;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
-<span class="go">tensor([[ 2.8...e+03,  6.0...e+02, ... -4.8...e+04],</span>
-<span class="go">        [-5.1...e+02, -5.0...e+02, ...  6.3...e+02]])</span>
+<span class="go">tensor([[ 6.4...e+04,  1.1...e+04, ... -4.2...e+05],</span>
+<span class="go">        [-6.6...e+02, -6.3...e+02, ...  7.4...e+02]])</span>
 </pre></div>
 </div>
 <p class="rubric">Methods</p>
