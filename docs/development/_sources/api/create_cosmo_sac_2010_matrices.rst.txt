@@ -1,5 +1,0 @@
-create_cosmo_sac_2010_matrices
-==============================
-
-.. currentmodule:: cosmolayer.cosmosac
-.. autofunction:: create_cosmo_sac_2010_matrices

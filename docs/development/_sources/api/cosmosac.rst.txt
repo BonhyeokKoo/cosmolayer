@@ -8,19 +8,8 @@ Classes
     :titlesonly:
 
     Component
-    CosmoSac2002Mixture
-    CosmoSac2010Mixture
-    CosmoSacModel
     Mixture
-
-Functions
----------
-
-.. toctree::
-    :titlesonly:
-
-    create_cosmo_sac_2002_matrix
-    create_cosmo_sac_2010_matrices
+    Model
 
 Constants
 ---------

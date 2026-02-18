@@ -1,8 +1,8 @@
-CosmoSacModel
-=============
+Model
+=====
 
 .. currentmodule:: cosmolayer.cosmosac
-.. autoclass:: CosmoSacModel
+.. autoclass:: Model
     :member-order: alphabetical
 
     .. rubric:: Methods

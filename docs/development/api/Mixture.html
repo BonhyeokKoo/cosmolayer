@@ -60,8 +60,8 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/Mixture';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="create_cosmo_sac_2002_matrix" href="create_cosmo_sac_2002_matrix.html" />
-    <link rel="prev" title="CosmoSacModel" href="CosmoSacModel.html" />
+    <link rel="next" title="Model" href="Model.html" />
+    <link rel="prev" title="Component" href="Component.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   <meta name="docsearch:version" content="dev" />
@@ -368,12 +368,8 @@
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="cosmosac.html">COSMO-SAC</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="Component.html">Component</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CosmoSac2002Mixture.html">CosmoSac2002Mixture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CosmoSac2010Mixture.html">CosmoSac2010Mixture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="CosmoSacModel.html">CosmoSacModel</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">Mixture</a></li>
-<li class="toctree-l2"><a class="reference internal" href="create_cosmo_sac_2002_matrix.html">create_cosmo_sac_2002_matrix</a></li>
-<li class="toctree-l2"><a class="reference internal" href="create_cosmo_sac_2010_matrices.html">create_cosmo_sac_2010_matrices</a></li>
+<li class="toctree-l2"><a class="reference internal" href="Model.html">Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSac2002Model.html">CosmoSac2002Model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSac2010Model.html">CosmoSac2010Model</a></li>
 </ul>
@@ -445,14 +441,13 @@
 <h1>Mixture<a class="headerlink" href="#mixture" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.cosmosac.</span></span><span class="sig-name descname"><span class="pre">Mixture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">51</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_per_segment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">averaging_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.float64(1.5191269449366247)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.57</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.007</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction_matrix_generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">create_cosmo_sac_2010_matrices&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_exponents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">3)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.cosmosac.</span></span><span class="sig-name descname"><span class="pre">Mixture</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">components</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">min_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">-0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_sigma</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.025</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">num_points</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">51</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_per_segment</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">7.25</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">averaging_radius</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">np.float64(1.5191269449366247)</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">f_decay</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">3.57</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">sigma_0</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">0.007</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">merge_profiles</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">interaction_matrix_generator</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">&lt;function</span> <span class="pre">create_cosmo_sac_2010_matrices&gt;</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature_exponents</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">(1</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">3)</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture" title="Link to this definition">#</a></dt>
 <dd><p>Mixture of molecular components for COSMO-SAC calculations.</p>
 <p>This class manages a collection of molecular components, each defined by
 a COSMO output file from quantum mechanical calculations.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>With all default parameters, this class is equivalent to
-<a class="reference internal" href="CosmoSac2010Mixture.html#cosmolayer.cosmosac.CosmoSac2010Mixture" title="cosmolayer.cosmosac.CosmoSac2010Mixture"><code class="xref py py-class docutils literal notranslate"><span class="pre">CosmoSac2010Mixture</span></code></a>.</p>
+<p>The default parameters correspond to the COSMO-SAC 2010 model <span id="id1">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -470,11 +465,11 @@ Default is √(7.25 / π) Å.</p></li>
 a hydrogen bond in e/Å².  Set to <code class="docutils literal notranslate"><span class="pre">None</span></code> to disable hydrogen-bond
 splitting (all surface area is assigned to the NHB class).
 Default is 0.007 e/Å².</p></li>
-<li><p><strong>merge</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge segment groups (NHB, OH, OT) into a single profile
+<li><p><strong>merge_profiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge segment groups (NHB, OH, OT) into a single profile
 when calling get_probabilities(). Default is False.</p></li>
 <li><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities. Default is 1e-10.</p></li>
 <li><p><strong>interaction_matrix_generator</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Function to generate the interaction matrix for the mixture at a given
-temperature. Default is <a class="reference internal" href="create_cosmo_sac_2010_matrices.html#cosmolayer.cosmosac.create_cosmo_sac_2010_matrices" title="cosmolayer.cosmosac.create_cosmo_sac_2010_matrices"><code class="xref py py-func docutils literal notranslate"><span class="pre">create_cosmo_sac_2010_matrices</span></code></a> with default
+temperature. Default is <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cosmo_sac_2010_matrices</span></code> with default
 parameters.</p></li>
 <li><p><strong>temperature_exponents</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)"><em>tuple</em></a><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>...</em><em>]</em><em>, </em><em>optional</em>) – Temperature exponents for the interaction matrices. Must be the same length as
 the tuple returned by <code class="docutils literal notranslate"><span class="pre">interaction_matrix_generator</span></code>.
@@ -624,17 +619,13 @@ Each matrix has shape (n_segment_types, n_segment_types).</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_probabilities">
-<span class="sig-name descname"><span class="pre">get_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">merge</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">regularize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_probabilities" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_probabilities</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">regularize</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1e-10</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_probabilities" title="Link to this definition">#</a></dt>
 <dd><p>Get probabilities of segment types for all components.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>merge</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge the segment groups (NHB, OH, OT) into a single profile.
-Default is False.</p></li>
-<li><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities. Set to 0 to disable
+<dd class="field-odd"><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities. Set to 0 to disable
 regularization. Default is 1e-10. If clipping occurs, the returned
-distribution is renormalized to sum to 1.</p></li>
-</ul>
+distribution is renormalized to sum to 1.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Array of probabilities for each component.
@@ -780,20 +771,20 @@ Shape: (n_components,).</p>
                   
 <div class="prev-next-area">
     <a class="left-prev"
-       href="CosmoSacModel.html"
+       href="Component.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">CosmoSacModel</p>
+        <p class="prev-next-title">Component</p>
       </div>
     </a>
     <a class="right-next"
-       href="create_cosmo_sac_2002_matrix.html"
+       href="Model.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">create_cosmo_sac_2002_matrix</p>
+        <p class="prev-next-title">Model</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

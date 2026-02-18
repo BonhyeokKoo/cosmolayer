@@ -472,7 +472,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac import Component, create_cosmo_sac_2002_matrix</span>
+<span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac import Component, CosmoSac2002Model</span>
 <span class="sd">    &gt;&gt;&gt; from importlib.resources import files</span>
 <span class="sd">    &gt;&gt;&gt; components = [</span>
 <span class="sd">    ...     Component.from_file(files(&quot;cosmolayer.data&quot;) / f&quot;{species}.cosmo&quot;)</span>
@@ -486,7 +486,7 @@
 <span class="sd">    ...     [torch.tensor(p, dtype=torch.float32) for p in probabilities],</span>
 <span class="sd">    ... ).requires_grad_(True)</span>
 <span class="sd">    &gt;&gt;&gt; U_RT = torch.tensor(</span>
-<span class="sd">    ...     create_cosmo_sac_2002_matrix(298.15),</span>
+<span class="sd">    ...     CosmoSac2002Model.create_interaction_matrices(298.15)[0],</span>
 <span class="sd">    ...     dtype=torch.float32,</span>
 <span class="sd">    ...     requires_grad=True,</span>
 <span class="sd">    ... )</span>

@@ -4,6 +4,6 @@ CosmoSac2002Model
 .. currentmodule:: cosmolayer.cosmosac
 .. py:data:: CosmoSac2002Model
 
-**Type:** CosmoSacModel
+**Type:** Model
 
-**Value:** ``CosmoSacModel(area_per_segment=7.5, averaging_radius=0.8176300195, f_decay=1.0, sigma_0=None, merge_profiles=True, temperature_exponents=(1,))``
+**Value:** ``Model(area_per_segment=7.5, averaging_radius=0.8176300195, f_decay=1.0, sigma_0=None, merge_profiles=True, temperature_exponents=(1,))``

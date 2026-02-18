@@ -460,7 +460,7 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from importlib.resources import files</span>
 <span class="sd">    &gt;&gt;&gt; from cosmolayer import CosmoLayer</span>
-<span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac import CosmoSac2002Mixture</span>
+<span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac import CosmoSac2002Model</span>
 <span class="sd">    &gt;&gt;&gt; import torch</span>
 <span class="sd">    &gt;&gt;&gt; T_ref = 298.15  # K</span>
 <span class="sd">    &gt;&gt;&gt; source = files(&quot;cosmolayer.data&quot;)</span>
@@ -468,7 +468,7 @@
 <span class="sd">    ...     &quot;fluoromethane&quot;: (source / &quot;CF.cosmo&quot;).read_text(),</span>
 <span class="sd">    ...     &quot;water&quot;: (source / &quot;O.cosmo&quot;).read_text(),</span>
 <span class="sd">    ... }</span>
-<span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2002Mixture(components)</span>
+<span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2002Model.create_mixture(components)</span>
 <span class="sd">    &gt;&gt;&gt; interaction_matrices = mixture.get_interaction_matrices(T_ref)</span>
 <span class="sd">    &gt;&gt;&gt; exponents = mixture.get_temperature_exponents()</span>
 <span class="sd">    &gt;&gt;&gt; area_per_segment = mixture.get_area_per_segment()</span>
