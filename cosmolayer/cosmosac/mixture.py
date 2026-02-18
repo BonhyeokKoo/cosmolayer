@@ -170,6 +170,7 @@ class Mixture:
             averaging_radius=self._averaging_radius,
             f_decay=self._f_decay,
             sigma_0=self._sigma_0,
+            merge_profiles=self._merge_profiles,
         )
 
     def remove_component(self, name: str) -> None:
@@ -314,9 +315,7 @@ class Mixture:
         """
         return np.stack(
             [
-                component.get_probabilities(
-                    merge=self._merge_profiles, regularize=regularize
-                )
+                component.get_probabilities(regularize=regularize)
                 for component in self._components.values()
             ],
             axis=0,

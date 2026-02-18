@@ -73,13 +73,13 @@ class CosmoSpace(torch.autograd.Function):
     >>> import numpy as np
     >>> from cosmolayer.cosmosac import Component, CosmoSac2002Model
     >>> from importlib.resources import files
-    >>> components = [
-    ...     Component.from_file(files("cosmolayer.data") / f"{species}.cosmo")
+    >>> cosmo_strings = [
+    ...     (files("cosmolayer.data") / f"{species}.cosmo").read_text()
     ...     for species in ("C=C(N)O", "NCCO")
     ... ]
     >>> probabilities = [
-    ...     component.get_probabilities(merge=True)
-    ...     for component in components
+    ...     CosmoSac2002Model.create_component(cosmo_string).get_probabilities()
+    ...     for cosmo_string in cosmo_strings
     ... ]
     >>> x = torch.stack(
     ...     [torch.tensor(p, dtype=torch.float32) for p in probabilities],
@@ -91,13 +91,13 @@ class CosmoSpace(torch.autograd.Function):
     ... )
     >>> gamma = CosmoSpace.apply(x, U_RT)
     >>> gamma.log()
-    tensor([[ -5.2...,  -4.6...,  ... -13.3..., -14.5...],
-            [-22.4..., -20.7...,  ... -4.8...,  -5.5...]], grad_fn=<LogBackward0>)
+    tensor([[-4.7...e+00, -4.0...e+00, ... -1.4056e+01],
+            [-2.1...e+01, -1.9...e+01, ... -5.3149e+00]], grad_fn=<LogBackward0>)
     >>> loss = (gamma ** 2).sum()
     >>> loss.backward()
     >>> x.grad
-    tensor([[ 2.8...e+03,  6.0...e+02, ... -4.8...e+04],
-            [-5.1...e+02, -5.0...e+02, ...  6.3...e+02]])
+    tensor([[ 6.4...e+04,  1.1...e+04, ... -4.2...e+05],
+            [-6.6...e+02, -6.3...e+02, ...  7.4...e+02]])
     """
 
     @staticmethod

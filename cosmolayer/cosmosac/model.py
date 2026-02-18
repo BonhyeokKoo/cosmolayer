@@ -210,6 +210,7 @@ class Model:
             averaging_radius=self.averaging_radius,
             f_decay=self.f_decay,
             sigma_0=self.sigma_0,
+            merge_profiles=self.merge_profiles,
         )
 
     def create_mixture(

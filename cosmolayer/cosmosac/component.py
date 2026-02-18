@@ -49,6 +49,9 @@ class Component:
         bond in e/Å².  Set to ``None`` to disable hydrogen-bond splitting (all
         surface area is assigned to the NHB class).
         Default is 0.007 e/Å² :cite:`Bell2020`.
+    merge_profiles : bool, optional
+        Whether to merge segment groups (NHB, OH, OT) into a single profile
+        when calling get_probabilities(). Default is False.
 
     Raises
     ------
@@ -129,6 +132,7 @@ class Component:
         averaging_radius: float = COSMO_SAC_2010_AVERAGING_RADIUS,  # Å
         f_decay: float = COSMO_SAC_2010_F_DECAY,
         sigma_0: float | None = COSMO_SAC_2010_SIGMA_0,  # e/Å²
+        merge_profiles: bool = False,
     ):
         self._min_sigma = min_sigma
         self._grid = np.linspace(min_sigma, max_sigma, num_points)
@@ -137,6 +141,7 @@ class Component:
         self._averaging_radius = averaging_radius
         self._f_decay = f_decay
         self._sigma_0 = sigma_0
+        self._merge_profiles = merge_profiles
 
         self._format, self._atom_data, self._segment_data, self._volume = (
             parse_cosmo_file(cosmo_string)
@@ -547,9 +552,7 @@ class Component:
         )
         return total_profile
 
-    def get_probabilities(
-        self, merge: bool = False, regularize: float = 1e-10
-    ) -> NDArray[np.float64]:
+    def get_probabilities(self, regularize: float = 1e-10) -> NDArray[np.float64]:
         """Get the probabilities of segment types in the molecule.
 
         A segment type is defined by its hydrogen bonding class (NHB, OH, OT) and its
@@ -557,9 +560,6 @@ class Component:
 
         Parameters
         ----------
-        merge : bool, optional
-            Whether to merge the segment groups (NHB, OH, OT) into a single profile.
-            Default is False.
         regularize : float, optional
             Minimum value for clipping probabilities. Set to 0 to disable
             regularization. Default is 1e-10. If clipping occurs, the returned
@@ -568,26 +568,26 @@ class Component:
         Returns
         -------
         np.ndarray
-            Normalized distribution of segment groups.
-            If merge=True: shape is (num_points,) - total sigma profile normalized.
-            If merge=False: shape is (3*num_points,) - concatenated profiles
-            normalized.
+            Normalized probability distribution of segment groups.
+            Shape is (num_points,) if ``merge_profiles`` is True, otherwise
+            (3*num_points,).
 
         Examples
         --------
         >>> import numpy as np
         >>> from importlib.resources import files
         >>> from cosmolayer.cosmosac import Component
-        >>> path = files("cosmolayer.data") / "C=C(N)O.cosmo"
-        >>> component = Component.from_file(path)
-        >>> probabilities = component.get_probabilities(merge=True)
+        >>> cosmo_string = (files("cosmolayer.data") / "C=C(N)O.cosmo").read_text()
+        >>> component = Component(cosmo_string, merge_profiles=True)
+        >>> probabilities = component.get_probabilities()
         >>> probabilities.shape
         (51,)
         >>> bool(np.all(probabilities <= 1))
         True
         >>> bool(np.isclose(probabilities.sum(), 1.0))
         True
-        >>> probabilities_full = component.get_probabilities(merge=False)
+        >>> component = Component(cosmo_string, merge_profiles=False)
+        >>> probabilities_full = component.get_probabilities()
         >>> probabilities_full.shape
         (153,)
         >>> bool(np.isclose(probabilities_full.sum(), 1.0))
@@ -597,7 +597,9 @@ class Component:
             raise ValueError("Regularization value must be non-negative.")
         profiles = [self._sigma_profiles[segtype] for segtype in SEGMENT_GROUPS]
         summed = (
-            np.sum(profiles, axis=0) if merge else np.concatenate(profiles)
+            np.sum(profiles, axis=0)
+            if self._merge_profiles
+            else np.concatenate(profiles)
         ) / self._area
         clipped = summed.clip(min=regularize)
         normalized: NDArray[np.float64] = clipped / clipped.sum()
