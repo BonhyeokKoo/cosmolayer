@@ -299,6 +299,78 @@ def surface_tessellation(
     return mesh
 
 
+def generate_geometries(
+    component: Component,
+    original_charge_densities: bool = False,
+    use_continuous_colors: bool = False,
+    colormap: str = "jet",
+    segment_edge_color: str | None = None,
+) -> tuple[o3d.geometry.Geometry3D, ...]:
+    """Build Open3D geometries for visualizing a component's COSMO surface.
+
+    Returns a tuple of Open3D geometries:
+
+    (1) a tessellated surface mesh colored by screening charge density;
+    (2) optionally, segment-boundary loop line sets when ``segment_edge_color`` is set;
+    (3) atom spheres; and
+    (4) bond sticks.
+
+    Parameters
+    ----------
+    component : Component
+        The molecular component whose COSMO surface is to be visualized.
+    original_charge_densities : bool, optional
+        If ``True``, color the surface using the original (unsmoothed) segment
+        charge densities instead of the distance-weighted averages. Default is
+        ``False``.
+    use_continuous_colors : bool, optional
+        If ``True``, use interpolated colors across the surface; otherwise,
+        segments are uniformly colored. Default is ``False``.
+    colormap : str, optional
+        Name of the colormap used to map charge density to color (e.g.
+        ``"jet"``, ``"viridis"``). Default is ``"jet"``.
+    segment_edge_color : str or None, optional
+        Color name for the edges between segments (e.g. ``"black"``).
+        If ``None`` or if ``use_continuous_colors`` is ``True``, no edge
+        loops are drawn. Default is ``None``.
+
+    Returns
+    -------
+    tuple of Geometry3D
+        A sequence of Open3D geometries: mesh, loops (if any), atom spheres,
+        and bond sticks.
+
+    Examples
+    --------
+    >>> from importlib.resources import files
+    >>> from cosmolayer.cosmosac import Component
+    >>> from cosmolayer.cosmosac.visualize import generate_geometries
+    >>> path = files("cosmolayer.data") / "C=C(N)O.cosmo"
+    >>> component = Component(path.read_text())
+    >>> geometries = generate_geometries(component)
+    >>> len(geometries) >= 1
+    True
+    >>> type(geometries[0]).__name__
+    'TriangleMesh'
+    >>> geometries_loops = generate_geometries(component, segment_edge_color="black")
+    >>> len(geometries_loops) > len(geometries)
+    True
+    """
+    mesh = surface_tessellation(
+        component,
+        original_charge_densities,
+        use_continuous_colors,
+        colormap,
+    )
+    if segment_edge_color is None or use_continuous_colors:
+        loops = []
+    else:
+        loops = find_loops(mesh, segment_edge_color)
+    atom_spheres = create_atom_spheres(component, 0.25)
+    bond_sticks = create_bond_sticks(component, 0.25, 0.1)
+    return (mesh, *loops, *atom_spheres, *bond_sticks)
+
+
 def get_parser() -> argparse.ArgumentParser:
     """Return the argument parser for cosmoview (used by sphinx-argparse)."""
     parser = argparse.ArgumentParser(
@@ -316,7 +388,7 @@ def get_parser() -> argparse.ArgumentParser:
         help="Show original charge densities instead of smoothed ones",
     )
     parser.add_argument(
-        "--continuous-colors",
+        "--use-continuous-colors",
         action="store_true",
         help="Use continuous colors instead of uniformly colored segments",
     )
@@ -338,21 +410,15 @@ def get_parser() -> argparse.ArgumentParser:
 def main() -> None:
     args = get_parser().parse_args()
     component = Component(args.cosmo_file.read_text())
-    mesh = surface_tessellation(
+    geometries = generate_geometries(
         component,
         args.show_original_charge_densities,
-        args.continuous_colors,
+        args.use_continuous_colors,
         args.colormap,
+        args.segment_edge_color,
     )
-    if args.segment_edge_color is None or args.continuous_colors:
-        loops = []
-    else:
-        loops = find_loops(mesh, args.segment_edge_color)
-    atom_spheres = create_atom_spheres(component, 0.25)
-    bond_sticks = create_bond_sticks(component, 0.25, 0.1)
-
     o3d.visualization.draw_geometries(
-        [mesh, *loops, *atom_spheres, *bond_sticks],
+        geometries,
         mesh_show_back_face=True,
         window_name=f"Surface Segments from {args.cosmo_file.name}",
     )
