@@ -7,17 +7,17 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
-<meta property="og:title" content="CosmoSpace" />
+<meta property="og:title" content="CosmoSolver" />
 <meta property="og:type" content="website" />
-<meta property="og:url" content="api/CosmoSpace.html" />
+<meta property="og:url" content="api/CosmoSolver.html" />
 <meta property="og:site_name" content="CosmoLayer dev" />
 <meta property="og:image:width" content="1146" />
 <meta property="og:image:height" content="600" />
-<meta property="og:image" content="_images/social_previews/summary_api_CosmoSpace_702d11db.png" />
+<meta property="og:image" content="_images/social_previews/summary_api_CosmoSolver_92b03c2f.png" />
 <meta property="og:image:alt" content="" />
 <meta name="twitter:card" content="summary_large_image" />
 
-    <title>CosmoSpace &#8212; CosmoLayer dev  documentation</title>
+    <title>CosmoSolver &#8212; CosmoLayer dev  documentation</title>
   
   
   
@@ -58,7 +58,7 @@
     <script src="../_static/copybutton.js?v=ccdb6887"></script>
     <script src="../_static/design-tabs.js?v=f930bc37"></script>
     <script defer="defer" src="https://cdn.jsdelivr.net/npm/mathjax@4/tex-mml-chtml.js"></script>
-    <script>DOCUMENTATION_OPTIONS.pagename = 'api/CosmoSpace';</script>
+    <script>DOCUMENTATION_OPTIONS.pagename = 'api/CosmoSolver';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
     <link rel="next" title="COSMO-SAC" href="cosmosac.html" />
@@ -364,7 +364,7 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="core.html">Core API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="CosmoLayer.html">CosmoLayer</a></li>
-<li class="toctree-l2 current active"><a class="current reference internal" href="#">CosmoSpace</a></li>
+<li class="toctree-l2 current active"><a class="current reference internal" href="#">CosmoSolver</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="cosmosac.html">COSMO-SAC</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -421,7 +421,7 @@
     
     <li class="breadcrumb-item"><a href="core.html" class="nav-link">Core API</a></li>
     
-    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">CosmoSpace</span></li>
+    <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">CosmoSolver</span></li>
   </ul>
 </nav>
 </div>
@@ -438,48 +438,45 @@
 <div id="searchbox"></div>
                 <article class="bd-article">
                   
-  <section id="cosmospace">
-<h1>CosmoSpace<a class="headerlink" href="#cosmospace" title="Link to this heading">#</a></h1>
+  <section id="cosmosolver">
+<h1>CosmoSolver<a class="headerlink" href="#cosmosolver" title="Link to this heading">#</a></h1>
 <dl class="py class">
-<dt class="sig sig-object py" id="cosmolayer.CosmoSpace">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">CosmoSpace</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmospace.html#CosmoSpace"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSpace" title="Link to this definition">#</a></dt>
-<dd><p>Implicit COSMOspace layer.</p>
-<p>Solves the following implicit equation for the activity coefficient vector
-<span class="math notranslate nohighlight">\(\boldsymbol{\gamma}\)</span>, given the segment-type weight vector <span class="math notranslate nohighlight">\(\mathbf{x}\)</span>
-(nonnegative, not necessarily normalized) and the reduced interaction energy matrix
-<span class="math notranslate nohighlight">\(\hat{\mathbf{U}}_T = {(RT)}^{-1}\mathbf{U}\)</span>:</p>
+<dt class="sig sig-object py" id="cosmolayer.CosmoSolver">
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">CosmoSolver</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="o"><span class="pre">*</span></span><span class="n"><span class="pre">args</span></span></em>, <em class="sig-param"><span class="o"><span class="pre">**</span></span><span class="n"><span class="pre">kwargs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosolver.html#CosmoSolver"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSolver" title="Link to this definition">#</a></dt>
+<dd><p>COSMO self-consistent equation solver.</p>
+<p>Solves the COSMO self-consistent equations for the logarithm of the activity
+coefficient vector, <span class="math notranslate nohighlight">\(\ln \boldsymbol{\gamma}\)</span>, given the nonnegative
+probability distribution vector <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> and the reduced interaction
+energy matrix <span class="math notranslate nohighlight">\(\mathbf{U}/(RT)\)</span>.</p>
+<p>The self-consistent equations are:</p>
 <div class="math notranslate nohighlight">
-\[\boldsymbol{\gamma} \odot (\mathbf{B} (\mathbf{x} \odot \boldsymbol{\gamma})) =
-    s \mathbf{1},\]</div>
-<p>where <span class="math notranslate nohighlight">\(\mathbf{B} = \exp(\hat{\mathbf{U}}_T)\)</span> is the matrix of Boltzmann
-factors and <span class="math notranslate nohighlight">\(s = \mathbf{1} \cdot \mathbf{x}\)</span> is the sum of the segment-type
-weights. For a physically meaningful solution, <span class="math notranslate nohighlight">\(s\)</span> must be equal to 1.</p>
-<p>Domain constraint: <span class="math notranslate nohighlight">\(\mathbf{x} \geq \mathbf{0}\)</span> elementwise, with at least one
-strictly positive component.</p>
-<p>With <span class="math notranslate nohighlight">\(s = 1\)</span>, the solution satisfies <span class="math notranslate nohighlight">\(\min(\boldsymbol{\gamma}) &gt; 0\)</span> and
-<span class="math notranslate nohighlight">\(\mathbf{a}^T \mathbf{B} \mathbf{a} = 1\)</span>, where
-<span class="math notranslate nohighlight">\(\mathbf{a} = \mathbf{x} \odot \boldsymbol{\gamma}\)</span> is the activity vector.</p>
-<p>Even though <span class="math notranslate nohighlight">\(\hat{\mathbf{U}}_T\)</span> is usually symmetric, it is not assumed to be
-so.</p>
+\[\boldsymbol{\gamma}\circ \left(
+    \mathbf{B} ({\mathbf p} \circ \boldsymbol{\gamma})
+\right) = t \mathbf{1},\]</div>
+<p>where <span class="math notranslate nohighlight">\(\mathbf{B} = \exp(-\mathbf{U}/(RT))\)</span> is the matrix of Boltzmann
+factors, <span class="math notranslate nohighlight">\(t=\mathbf{1}^T \mathbf{p}\)</span> is the sum of the probabilities, and
+<span class="math notranslate nohighlight">\(\circ\)</span> represents an elementwise product.</p>
+<p>The solution satisfies
+<span class="math notranslate nohighlight">\(\boldsymbol{\gamma}^\mathsf{T} \mathbf{M} \boldsymbol{\gamma} = t\)</span>,
+where <span class="math notranslate nohighlight">\(\mathbf{M} = \mathbf{B} \circ (\mathbf{p}\mathbf{p}^T)\)</span>.</p>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Supports batching, meaning that <span class="math notranslate nohighlight">\(\mathbf{x}\)</span> and
-<span class="math notranslate nohighlight">\(\hat{\mathbf{U}}_T\)</span> can have broadcastable leading dimensions, and
-all computations are vectorized along these dimensions.</p>
+<p>Supports batching, i.e., if <span class="math notranslate nohighlight">\(\mathbf{p}\)</span> and <span class="math notranslate nohighlight">\(\mathbf{U}/(RT)\)</span>
+can have broadcastable leading dimensions, all computations are performed
+in a single vectorized operation.</p>
 </div>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Segment-type distribution vector.
+<li><p><strong>p</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Segment-type probability distribution vector. Must be nonnegative.
 Shape: (…, num_segment_types).</p></li>
-<li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix
-<span class="math notranslate nohighlight">\(\hat{\mathbf{U}}_T = {(RT)}^{-1}\mathbf{U}\)</span>.
+<li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix <span class="math notranslate nohighlight">\(\mathbf{U}/(RT)\)</span>.
 Shape: (…, num_segment_types, num_segment_types).</p></li>
 <li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum number of iterations.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>gamma</strong> – The segment activity coefficient vector.
+<dd class="field-even"><p><strong>log_gamma</strong> – The logarithm of the segment activity coefficient vector.
 Shape: (…, num_segment_types).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -501,47 +498,49 @@ Shape: (…, num_segment_types).</p>
 <span class="gp">... </span>    <span class="n">CosmoSac2002Model</span><span class="o">.</span><span class="n">create_component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">)</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">cosmo_string</span> <span class="ow">in</span> <span class="n">cosmo_strings</span>
 <span class="gp">... </span><span class="p">]</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-<span class="gp">... </span>    <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">probabilities</span><span class="p">],</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="n">prob</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">)</span> <span class="k">for</span> <span class="n">prob</span> <span class="ow">in</span> <span class="n">probabilities</span><span class="p">],</span>
 <span class="gp">... </span><span class="p">)</span><span class="o">.</span><span class="n">requires_grad_</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">U_RT</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span>
 <span class="gp">... </span>    <span class="n">CosmoSac2002Model</span><span class="o">.</span><span class="n">create_interaction_matrices</span><span class="p">(</span><span class="mf">298.15</span><span class="p">)[</span><span class="mi">0</span><span class="p">],</span>
 <span class="gp">... </span>    <span class="n">dtype</span><span class="o">=</span><span class="n">torch</span><span class="o">.</span><span class="n">float32</span><span class="p">,</span>
 <span class="gp">... </span>    <span class="n">requires_grad</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="gp">... </span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">gamma</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">U_RT</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">gamma</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_gamma</span><span class="p">,</span> <span class="n">converged</span> <span class="o">=</span> <span class="n">CosmoSolver</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">U_RT</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">converged</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">log_gamma</span>
 <span class="go">tensor([[-4.7...e+00, -4.0...e+00, ... -1.4056e+01],</span>
-<span class="go">        [-2.1...e+01, -1.9...e+01, ... -5.3149e+00]], grad_fn=&lt;LogBackward0&gt;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="n">gamma</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+<span class="go">        [-2.1...e+01, -1.9...e+01, ... -5.3149e+00]], grad_fn=&lt;CosmoSolverBackward&gt;)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">log_gamma</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">x</span><span class="o">.</span><span class="n">grad</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">grad</span>
 <span class="go">tensor([[ 6.4...e+04,  1.1...e+04, ... -4.2...e+05],</span>
 <span class="go">        [-6.6...e+02, -6.3...e+02, ...  7.4...e+02]])</span>
 </pre></div>
 </div>
 <p class="rubric">Methods</p>
 <dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.CosmoSpace.backward">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_gamma</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmospace.html#CosmoSpace.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSpace.backward" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>grad_gamma</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Gradient of the output scalar function with respect to the segment activity
-coefficient vector.
-Shape: (…, num_segment_types).</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><ul class="simple">
-<li><p><strong>grad_x</strong> (<em>torch.Tensor</em>) – Gradient of the output scalar function with respect to the segment-type
-weights.
-Shape: (…, num_segment_types).</p></li>
-<li><p><strong>grad_U_RT</strong> (<em>torch.Tensor</em>) – Gradient of the output scalar function with respect to the reduced
-interaction energy matrix.
-Shape: (…, num_segment_types, num_segment_types).</p></li>
-<li><p><strong>None</strong> (<em>NoneType</em>) – Placeholder for the <cite>max_iter</cite> argument, which does not require a gradient.</p></li>
-</ul>
-</p>
-</dd>
+<dt class="sig sig-object py" id="cosmolayer.CosmoSolver.backward">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">backward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_log_gamma</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">grad_converged</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosolver.html#CosmoSolver.backward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSolver.backward" title="Link to this definition">#</a></dt>
+<dd><p>Define a formula for differentiating the operation with backward mode automatic differentiation.</p>
+<p>This function is to be overridden by all subclasses.
+(Defining this function is equivalent to defining the <code class="docutils literal notranslate"><span class="pre">vjp</span></code> function.)</p>
+<p>It must accept a context <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx</span></code> as the first argument, followed by
+as many outputs as the <a class="reference internal" href="#cosmolayer.CosmoSolver.forward" title="cosmolayer.CosmoSolver.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward</span></code></a> returned (None will be passed in
+for non tensor outputs of the forward function),
+and it should return as many tensors, as there were inputs to
+<a class="reference internal" href="#cosmolayer.CosmoSolver.forward" title="cosmolayer.CosmoSolver.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward</span></code></a>. Each argument is the gradient w.r.t the given output,
+and each returned value should be the gradient w.r.t. the
+corresponding input. If an input is not a Tensor or is a Tensor not
+requiring grads, you can just pass None as a gradient for that input.</p>
+<p>The context can be used to retrieve tensors saved during the forward
+pass. It also has an attribute <code class="xref py py-attr docutils literal notranslate"><span class="pre">ctx.needs_input_grad</span></code> as a tuple
+of booleans representing whether each input needs gradient. E.g.,
+<a class="reference internal" href="#cosmolayer.CosmoSolver.backward" title="cosmolayer.CosmoSolver.backward"><code class="xref py py-func docutils literal notranslate"><span class="pre">backward</span></code></a> will have <code class="docutils literal notranslate"><span class="pre">ctx.needs_input_grad[0]</span> <span class="pre">=</span> <span class="pre">True</span></code> if the
+first input to <a class="reference internal" href="#cosmolayer.CosmoSolver.forward" title="cosmolayer.CosmoSolver.forward"><code class="xref py py-func docutils literal notranslate"><span class="pre">forward</span></code></a> needs gradient computed w.r.t. the
+output.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
 <dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>Tensor</em></a> | None, <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>Tensor</em></a> | None, None]</p>
 </dd>
@@ -549,24 +548,51 @@ Shape: (…, num_segment_types, num_segment_types).</p></li>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.CosmoSpace.forward">
-<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">x</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U_RT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">1000</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmospace.html#CosmoSpace.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSpace.forward" title="Link to this definition">#</a></dt>
-<dd><dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><ul class="simple">
-<li><p><strong>x</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Segment-type weights (not necessarily normalized).
-Shape: (…, num_segment_types).</p></li>
-<li><p><strong>U_RT</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a>) – Reduced interaction energy matrix.
-Shape: (…, num_segment_types, num_segment_types).</p></li>
-<li><p><strong>max_iter</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a>) – Maximum iterations for fixed-point solver.</p></li>
+<dt class="sig sig-object py" id="cosmolayer.CosmoSolver.forward">
+<span class="property"><span class="k"><span class="pre">static</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">ctx</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">p</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">U_RT</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosolver.html#CosmoSolver.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoSolver.forward" title="Link to this definition">#</a></dt>
+<dd><p>Define the forward of the custom autograd Function.</p>
+<p>This function is to be overridden by all subclasses.
+There are two ways to define forward:</p>
+<p>Usage 1 (Combined forward and ctx):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>It must accept a context ctx as the first argument, followed by any
+number of arguments (tensors or other types).</p></li>
+<li><p>See <a class="reference external" href="https://docs.pytorch.org/docs/stable/notes/extending.html#combining-forward-context" title="(in PyTorch v2.10)"><span>Combined or separate forward() and setup_context()</span></a> for more details</p></li>
 </ul>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p><strong>gamma</strong> – Segment activity coefficient vector.
-Shape: (…, num_segment_types).</p>
-</dd>
+<p>Usage 2 (Separate forward and ctx):</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Any</span><span class="p">:</span>
+    <span class="k">pass</span>
+
+
+<span class="nd">@staticmethod</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">setup_context</span><span class="p">(</span><span class="n">ctx</span><span class="p">:</span> <span class="n">Any</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">output</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">pass</span>
+</pre></div>
+</div>
+<ul class="simple">
+<li><p>The forward no longer accepts a ctx argument.</p></li>
+<li><p>Instead, you must also override the <code class="xref py py-meth docutils literal notranslate"><span class="pre">torch.autograd.Function.setup_context</span></code>
+staticmethod to handle setting up the <code class="docutils literal notranslate"><span class="pre">ctx</span></code> object.
+<code class="docutils literal notranslate"><span class="pre">output</span></code> is the output of the forward, <code class="docutils literal notranslate"><span class="pre">inputs</span></code> are a Tuple of inputs
+to the forward.</p></li>
+<li><p>See <a class="reference external" href="https://docs.pytorch.org/docs/stable/notes/extending.html#extending-autograd" title="(in PyTorch v2.10)"><span>Extending torch.autograd</span></a> for more details</p></li>
+</ul>
+<p>The context can be used to store arbitrary data that can be then
+retrieved during the backward pass. Tensors should not be stored
+directly on <cite>ctx</cite> (though this is not currently enforced for
+backward compatibility). Instead, tensors should be saved either with
+<code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_backward</span></code> if they are intended to be used in
+<code class="docutils literal notranslate"><span class="pre">backward</span></code> (equivalently, <code class="docutils literal notranslate"><span class="pre">vjp</span></code>) or <code class="xref py py-func docutils literal notranslate"><span class="pre">ctx.save_for_forward</span></code>
+if they are intended to be used for in <code class="docutils literal notranslate"><span class="pre">jvp</span></code>.</p>
+<dl class="field-list simple">
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)">torch.Tensor</a></p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>Tensor</em></a>, <a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>Tensor</em></a>]</p>
 </dd>
 </dl>
 </dd></dl>
@@ -622,9 +648,9 @@ Shape: (…, num_segment_types).</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.CosmoSpace"><code class="docutils literal notranslate"><span class="pre">CosmoSpace</span></code></a><ul class="visible nav section-nav flex-column">
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.CosmoSpace.backward"><code class="docutils literal notranslate"><span class="pre">backward</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.CosmoSpace.forward"><code class="docutils literal notranslate"><span class="pre">forward</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.CosmoSolver"><code class="docutils literal notranslate"><span class="pre">CosmoSolver</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.CosmoSolver.backward"><code class="docutils literal notranslate"><span class="pre">backward</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.CosmoSolver.forward"><code class="docutils literal notranslate"><span class="pre">forward</span></code></a></li>
 </ul>
 </li>
 </ul>

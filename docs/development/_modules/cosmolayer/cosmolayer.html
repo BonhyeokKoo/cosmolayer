@@ -403,12 +403,13 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">cast</span>
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.cosmospace</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosmoSpace</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.cosmosolver</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosmoSolver</span>
 
 <span class="n">AREA_PER_CONTACT</span> <span class="o">=</span> <span class="mf">79.53</span>  <span class="c1"># Å²</span>
 <span class="n">COORDINATION_NUMBER</span> <span class="o">=</span> <span class="mi">10</span>
@@ -504,6 +505,7 @@
         <span class="o">*</span><span class="p">,</span>
         <span class="n">reference_temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">298.15</span><span class="p">,</span>  <span class="c1"># K</span>
         <span class="n">learn_matrices</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
@@ -538,6 +540,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_ref_temp</span> <span class="o">=</span> <span class="n">reference_temperature</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_area_per_segment</span> <span class="o">=</span> <span class="n">area_per_segment</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_kappa</span> <span class="o">=</span> <span class="n">COORDINATION_NUMBER</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">AREA_PER_CONTACT</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_max_iter</span> <span class="o">=</span> <span class="n">max_iter</span>
 
 <div class="viewcode-block" id="CosmoLayer.extra_repr">
 <a class="viewcode-back" href="../../api/CosmoLayer.html#cosmolayer.CosmoLayer.extra_repr">[docs]</a>
@@ -672,10 +675,14 @@
 <span class="sd">            Log-activity coefficients of segment types in pure compounds.</span>
 <span class="sd">            Shape: (..., num_components, num_segment_types).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">log_gamma_pure</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-            <span class="n">probs</span><span class="p">,</span> <span class="n">scaled_interactions</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">)</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">log_gamma_pure</span></div>
+        <span class="n">log_gamma_pure</span><span class="p">,</span> <span class="n">converged</span> <span class="o">=</span> <span class="n">CosmoSolver</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+            <span class="n">probs</span><span class="p">,</span> <span class="n">scaled_interactions</span><span class="o">.</span><span class="n">unsqueeze</span><span class="p">(</span><span class="o">-</span><span class="mi">3</span><span class="p">),</span> <span class="bp">self</span><span class="o">.</span><span class="n">_max_iter</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">converged</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Newton solver did not converge in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_iter</span><span class="si">}</span><span class="s2"> iterations&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">log_gamma_pure</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CosmoLayer.log_mixture_segment_activity_coefficients">
@@ -711,11 +718,16 @@
 <span class="sd">            Log-activity coefficients of segment types in the mixture.</span>
 <span class="sd">            Shape: (..., num_segment_types).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">log_gamma_mix</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="n">CosmoSpace</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="n">log_gamma_mix</span><span class="p">,</span> <span class="n">converged</span> <span class="o">=</span> <span class="n">CosmoSolver</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">mixture_probabilities</span><span class="p">(</span><span class="n">fracs</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">probs</span><span class="p">),</span>
             <span class="n">scaled_interactions</span><span class="p">,</span>
-        <span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">log_gamma_mix</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_max_iter</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">bool</span><span class="p">(</span><span class="n">converged</span><span class="o">.</span><span class="n">all</span><span class="p">()):</span>
+            <span class="k">raise</span> <span class="ne">RuntimeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Newton solver did not converge in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_max_iter</span><span class="si">}</span><span class="s2"> iterations&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">cast</span><span class="p">(</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">log_gamma_mix</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="CosmoLayer.log_residual_activity_coefficients">

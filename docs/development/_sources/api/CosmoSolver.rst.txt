@@ -1,8 +1,8 @@
-CosmoSpace
-==========
+CosmoSolver
+===========
 
 .. currentmodule:: cosmolayer
-.. autoclass:: CosmoSpace
+.. autoclass:: CosmoSolver
     :member-order: alphabetical
 
     .. rubric:: Methods

@@ -8,7 +8,7 @@ Classes
     :titlesonly:
 
     CosmoLayer
-    CosmoSpace
+    CosmoSolver
 
 .. testsetup::
 
