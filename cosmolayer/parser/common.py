@@ -10,7 +10,7 @@ SEGMENT_ROW_REGEX = re.compile(
 )
 
 ATOM_ROW_REGEX = re.compile(
-    r"^([A-Za-z0-9]+)\s+"  # atom id (e.g., N1, C1, H1)
+    r"^([A-Za-z0-9*]+)\s+"  # atom id (e.g., N1, C1, H1, C*, H*)
     + r"\s+".join([r"([+-]?\d+(?:\.\d+)?)"] * 3)  # x, y, z coordinates
     + r"(?:\s+\S+){3}"
     + r"\s*([A-Z][a-z]?)"  # element symbol
