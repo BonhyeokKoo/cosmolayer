@@ -495,12 +495,12 @@
 <span class="sd">    &gt;&gt;&gt; converged.all().item()</span>
 <span class="sd">    True</span>
 <span class="sd">    &gt;&gt;&gt; log_gamma</span>
-<span class="sd">    tensor([[-4.7...e+00, -4.0...e+00, ... -1.4056e+01],</span>
-<span class="sd">            [-2.1...e+01, -1.9...e+01, ... -5.3149e+00]], grad_fn=&lt;CosmoSolverBackward&gt;)</span>
+<span class="sd">    tensor([[-4.5...e+00, -4.0...e+00, ... -1.3...e+01],</span>
+<span class="sd">            [-2.1...e+01, -1.9...e+01, ... -5.3...e+00]], grad_fn=&lt;CosmoSolverBackward&gt;)</span>
 <span class="sd">    &gt;&gt;&gt; loss = (2 * log_gamma).exp().sum()</span>
 <span class="sd">    &gt;&gt;&gt; loss.backward()</span>
 <span class="sd">    &gt;&gt;&gt; p.grad</span>
-<span class="sd">    tensor([[ 6.4...e+04,  1.1...e+04, ... -4.2...e+05],</span>
+<span class="sd">    tensor([[ 2.1...e+02,  2.1...e+02, ... -7.4...e+05],</span>
 <span class="sd">            [-6.6...e+02, -6.3...e+02, ...  7.4...e+02]])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 

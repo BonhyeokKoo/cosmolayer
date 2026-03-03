@@ -54,9 +54,9 @@
             </div>
         </aside>
         <h2>
-            <span class="text">133 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">122<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">11<span class="text"> missing</span></button>
+            <span class="text">129 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">119<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">10<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">2<span class="text"> excluded</span></button>
         </h2>
         <p class="text">
@@ -65,7 +65,7 @@
             <a id="nextFileLink" class="nav" href="z_a97ec370a3cb32de_constants_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.4">coverage.py v7.13.4</a>,
-            created at 2026-03-01 14:55 +0000
+            created at 2026-03-03 20:44 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -634,58 +634,47 @@
     <p class="run run2"><span class="n"><a id="t552" href="#t552">552</a></span><span class="t">        <span class="op">)</span>&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t553" href="#t553">553</a></span><span class="t">        <span class="key">return</span> <span class="nam">total_profile</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t554" href="#t554">554</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t555" href="#t555">555</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_probabilities</span><span class="op">(</span><span class="nam">self</span><span class="op">,</span> <span class="nam">regularize</span><span class="op">:</span> <span class="nam">float</span> <span class="op">=</span> <span class="num">1e-10</span><span class="op">)</span> <span class="op">-></span> <span class="nam">NDArray</span><span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">float64</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t555" href="#t555">555</a></span><span class="t">    <span class="key">def</span> <span class="nam">get_probabilities</span><span class="op">(</span><span class="nam">self</span><span class="op">)</span> <span class="op">-></span> <span class="nam">NDArray</span><span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">float64</span><span class="op">]</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t556" href="#t556">556</a></span><span class="t">        <span class="str">"""Get the probabilities of segment types in the molecule.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t557" href="#t557">557</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t558" href="#t558">558</a></span><span class="t"><span class="str">        A segment type is defined by its hydrogen bonding class (NHB, OH, OT) and its</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t559" href="#t559">559</a></span><span class="t"><span class="str">        averaged charge density.</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t560" href="#t560">560</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t561" href="#t561">561</a></span><span class="t"><span class="str">        Parameters</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t562" href="#t562">562</a></span><span class="t"><span class="str">        ----------</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t563" href="#t563">563</a></span><span class="t"><span class="str">        regularize : float, optional</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t564" href="#t564">564</a></span><span class="t"><span class="str">            Minimum value for clipping probabilities. Set to 0 to disable</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t565" href="#t565">565</a></span><span class="t"><span class="str">            regularization. Default is 1e-10. If clipping occurs, the returned</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t566" href="#t566">566</a></span><span class="t"><span class="str">            distribution is renormalized to sum to 1.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t561" href="#t561">561</a></span><span class="t"><span class="str">        Returns</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t562" href="#t562">562</a></span><span class="t"><span class="str">        -------</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t563" href="#t563">563</a></span><span class="t"><span class="str">        np.ndarray</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t564" href="#t564">564</a></span><span class="t"><span class="str">            Normalized probability distribution of segment groups.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t565" href="#t565">565</a></span><span class="t"><span class="str">            Shape is (num_points,) if ``merge_profiles`` is True, otherwise</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t566" href="#t566">566</a></span><span class="t"><span class="str">            (3*num_points,).</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t567" href="#t567">567</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t568" href="#t568">568</a></span><span class="t"><span class="str">        Returns</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t569" href="#t569">569</a></span><span class="t"><span class="str">        -------</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t570" href="#t570">570</a></span><span class="t"><span class="str">        np.ndarray</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t571" href="#t571">571</a></span><span class="t"><span class="str">            Normalized probability distribution of segment groups.</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t572" href="#t572">572</a></span><span class="t"><span class="str">            Shape is (num_points,) if ``merge_profiles`` is True, otherwise</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t573" href="#t573">573</a></span><span class="t"><span class="str">            (3*num_points,).</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t574" href="#t574">574</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t575" href="#t575">575</a></span><span class="t"><span class="str">        Examples</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t576" href="#t576">576</a></span><span class="t"><span class="str">        --------</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t577" href="#t577">577</a></span><span class="t"><span class="str">        >>> import numpy as np</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t578" href="#t578">578</a></span><span class="t"><span class="str">        >>> from importlib.resources import files</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t579" href="#t579">579</a></span><span class="t"><span class="str">        >>> from cosmolayer.cosmosac import Component</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t580" href="#t580">580</a></span><span class="t"><span class="str">        >>> cosmo_string = (files("cosmolayer.data") / "C=C(N)O.cosmo").read_text()</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t581" href="#t581">581</a></span><span class="t"><span class="str">        >>> component = Component(cosmo_string, merge_profiles=True)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t582" href="#t582">582</a></span><span class="t"><span class="str">        >>> probabilities = component.get_probabilities()</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t583" href="#t583">583</a></span><span class="t"><span class="str">        >>> probabilities.shape</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t584" href="#t584">584</a></span><span class="t"><span class="str">        (51,)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t585" href="#t585">585</a></span><span class="t"><span class="str">        >>> bool(np.all(probabilities &lt;= 1))</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t586" href="#t586">586</a></span><span class="t"><span class="str">        True</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t587" href="#t587">587</a></span><span class="t"><span class="str">        >>> bool(np.isclose(probabilities.sum(), 1.0))</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t588" href="#t588">588</a></span><span class="t"><span class="str">        True</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t589" href="#t589">589</a></span><span class="t"><span class="str">        >>> component = Component(cosmo_string, merge_profiles=False)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t590" href="#t590">590</a></span><span class="t"><span class="str">        >>> probabilities_full = component.get_probabilities()</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t591" href="#t591">591</a></span><span class="t"><span class="str">        >>> probabilities_full.shape</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t592" href="#t592">592</a></span><span class="t"><span class="str">        (153,)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t593" href="#t593">593</a></span><span class="t"><span class="str">        >>> bool(np.isclose(probabilities_full.sum(), 1.0))</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t594" href="#t594">594</a></span><span class="t"><span class="str">        True</span>&nbsp;</span><span class="r"></span></p>
-    <p class="pln"><span class="n"><a id="t595" href="#t595">595</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t596" href="#t596">596</a></span><span class="t">        <span class="key">if</span> <span class="nam">regularize</span> <span class="op">&lt;</span> <span class="num">0</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t597" href="#t597">597</a></span><span class="t">            <span class="key">raise</span> <span class="nam">ValueError</span><span class="op">(</span><span class="str">"Regularization value must be non-negative."</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t598" href="#t598">598</a></span><span class="t">        <span class="nam">profiles</span> <span class="op">=</span> <span class="op">[</span><span class="nam">self</span><span class="op">.</span><span class="nam">_sigma_profiles</span><span class="op">[</span><span class="nam">segtype</span><span class="op">]</span> <span class="key">for</span> <span class="nam">segtype</span> <span class="key">in</span> <span class="nam">SEGMENT_GROUPS</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t599" href="#t599">599</a></span><span class="t">        <span class="nam">summed</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t600" href="#t600">600</a></span><span class="t">            <span class="nam">np</span><span class="op">.</span><span class="nam">sum</span><span class="op">(</span><span class="nam">profiles</span><span class="op">,</span> <span class="nam">axis</span><span class="op">=</span><span class="num">0</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t601" href="#t601">601</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_merge_profiles</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t602" href="#t602">602</a></span><span class="t">            <span class="key">else</span> <span class="nam">np</span><span class="op">.</span><span class="nam">concatenate</span><span class="op">(</span><span class="nam">profiles</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run run2"><span class="n"><a id="t603" href="#t603">603</a></span><span class="t">        <span class="op">)</span> <span class="op">/</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_area</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t604" href="#t604">604</a></span><span class="t">        <span class="nam">clipped</span> <span class="op">=</span> <span class="nam">summed</span><span class="op">.</span><span class="nam">clip</span><span class="op">(</span><span class="nam">min</span><span class="op">=</span><span class="nam">regularize</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t605" href="#t605">605</a></span><span class="t">        <span class="nam">normalized</span><span class="op">:</span> <span class="nam">NDArray</span><span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">float64</span><span class="op">]</span> <span class="op">=</span> <span class="nam">clipped</span> <span class="op">/</span> <span class="nam">clipped</span><span class="op">.</span><span class="nam">sum</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="run"><span class="n"><a id="t606" href="#t606">606</a></span><span class="t">        <span class="key">return</span> <span class="nam">normalized</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t568" href="#t568">568</a></span><span class="t"><span class="str">        Examples</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t569" href="#t569">569</a></span><span class="t"><span class="str">        --------</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t570" href="#t570">570</a></span><span class="t"><span class="str">        >>> import numpy as np</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t571" href="#t571">571</a></span><span class="t"><span class="str">        >>> from importlib.resources import files</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t572" href="#t572">572</a></span><span class="t"><span class="str">        >>> from cosmolayer.cosmosac import Component</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t573" href="#t573">573</a></span><span class="t"><span class="str">        >>> cosmo_string = (files("cosmolayer.data") / "C=C(N)O.cosmo").read_text()</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t574" href="#t574">574</a></span><span class="t"><span class="str">        >>> component = Component(cosmo_string, merge_profiles=True)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t575" href="#t575">575</a></span><span class="t"><span class="str">        >>> probabilities = component.get_probabilities()</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t576" href="#t576">576</a></span><span class="t"><span class="str">        >>> probabilities.shape</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t577" href="#t577">577</a></span><span class="t"><span class="str">        (51,)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t578" href="#t578">578</a></span><span class="t"><span class="str">        >>> bool(np.all(probabilities &lt;= 1))</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t579" href="#t579">579</a></span><span class="t"><span class="str">        True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t580" href="#t580">580</a></span><span class="t"><span class="str">        >>> bool(np.isclose(probabilities.sum(), 1.0))</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t581" href="#t581">581</a></span><span class="t"><span class="str">        True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t582" href="#t582">582</a></span><span class="t"><span class="str">        >>> component = Component(cosmo_string, merge_profiles=False)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t583" href="#t583">583</a></span><span class="t"><span class="str">        >>> probabilities_full = component.get_probabilities()</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t584" href="#t584">584</a></span><span class="t"><span class="str">        >>> probabilities_full.shape</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t585" href="#t585">585</a></span><span class="t"><span class="str">        (153,)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t586" href="#t586">586</a></span><span class="t"><span class="str">        >>> bool(np.isclose(probabilities_full.sum(), 1.0))</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t587" href="#t587">587</a></span><span class="t"><span class="str">        True</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t588" href="#t588">588</a></span><span class="t"><span class="str">        """</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t589" href="#t589">589</a></span><span class="t">        <span class="nam">profiles</span> <span class="op">=</span> <span class="op">[</span><span class="nam">self</span><span class="op">.</span><span class="nam">_sigma_profiles</span><span class="op">[</span><span class="nam">segtype</span><span class="op">]</span> <span class="key">for</span> <span class="nam">segtype</span> <span class="key">in</span> <span class="nam">SEGMENT_GROUPS</span><span class="op">]</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t590" href="#t590">590</a></span><span class="t">        <span class="nam">probabilities</span><span class="op">:</span> <span class="nam">NDArray</span><span class="op">[</span><span class="nam">np</span><span class="op">.</span><span class="nam">float64</span><span class="op">]</span> <span class="op">=</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t591" href="#t591">591</a></span><span class="t">            <span class="nam">np</span><span class="op">.</span><span class="nam">sum</span><span class="op">(</span><span class="nam">profiles</span><span class="op">,</span> <span class="nam">axis</span><span class="op">=</span><span class="num">0</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t592" href="#t592">592</a></span><span class="t">            <span class="key">if</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_merge_profiles</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t593" href="#t593">593</a></span><span class="t">            <span class="key">else</span> <span class="nam">np</span><span class="op">.</span><span class="nam">concatenate</span><span class="op">(</span><span class="nam">profiles</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t594" href="#t594">594</a></span><span class="t">        <span class="op">)</span> <span class="op">/</span> <span class="nam">self</span><span class="op">.</span><span class="nam">_area</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t595" href="#t595">595</a></span><span class="t">        <span class="key">return</span> <span class="nam">probabilities</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -695,7 +684,7 @@
             <a class="nav" href="z_a97ec370a3cb32de_constants_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.13.4">coverage.py v7.13.4</a>,
-            created at 2026-03-01 14:55 +0000
+            created at 2026-03-03 20:44 +0000
         </p>
     </div>
 </footer>

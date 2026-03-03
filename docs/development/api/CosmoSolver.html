@@ -510,12 +510,12 @@ Shape: (…, num_segment_types).</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">converged</span><span class="o">.</span><span class="n">all</span><span class="p">()</span><span class="o">.</span><span class="n">item</span><span class="p">()</span>
 <span class="go">True</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">log_gamma</span>
-<span class="go">tensor([[-4.7...e+00, -4.0...e+00, ... -1.4056e+01],</span>
-<span class="go">        [-2.1...e+01, -1.9...e+01, ... -5.3149e+00]], grad_fn=&lt;CosmoSolverBackward&gt;)</span>
+<span class="go">tensor([[-4.5...e+00, -4.0...e+00, ... -1.3...e+01],</span>
+<span class="go">        [-2.1...e+01, -1.9...e+01, ... -5.3...e+00]], grad_fn=&lt;CosmoSolverBackward&gt;)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span> <span class="o">=</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="n">log_gamma</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">loss</span><span class="o">.</span><span class="n">backward</span><span class="p">()</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span><span class="o">.</span><span class="n">grad</span>
-<span class="go">tensor([[ 6.4...e+04,  1.1...e+04, ... -4.2...e+05],</span>
+<span class="go">tensor([[ 2.1...e+02,  2.1...e+02, ... -7.4...e+05],</span>
 <span class="go">        [-6.6...e+02, -6.3...e+02, ...  7.4...e+02]])</span>
 </pre></div>
 </div>
