@@ -132,7 +132,7 @@ class Mixture:
         return len(self._components)
 
     def __getitem__(self, name: str) -> Component:
-        """Get a component by name or index.
+        """Get a component by name.
 
         Parameters
         ----------
@@ -299,15 +299,8 @@ class Mixture:
             [component.get_volume() for component in self._components.values()]
         )
 
-    def get_probabilities(self, regularize: float = 1e-10) -> NDArray[np.float64]:
+    def get_probabilities(self) -> NDArray[np.float64]:
         """Get probabilities of segment types for all components.
-
-        Parameters
-        ----------
-        regularize : float, optional
-            Minimum value for clipping probabilities. Set to 0 to disable
-            regularization. Default is 1e-10. If clipping occurs, the returned
-            distribution is renormalized to sum to 1.
 
         Returns
         -------
@@ -334,10 +327,7 @@ class Mixture:
         True
         """
         return np.stack(
-            [
-                component.get_probabilities(regularize=regularize)
-                for component in self._components.values()
-            ],
+            [component.get_probabilities() for component in self._components.values()],
             axis=0,
         )
 

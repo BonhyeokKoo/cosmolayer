@@ -94,12 +94,12 @@ class CosmoSolver(torch.autograd.Function):
     >>> converged.all().item()
     True
     >>> log_gamma
-    tensor([[-4.7...e+00, -4.0...e+00, ... -1.4056e+01],
-            [-2.1...e+01, -1.9...e+01, ... -5.3149e+00]], grad_fn=<CosmoSolverBackward>)
+    tensor([[-4.5...e+00, -4.0...e+00, ... -1.3...e+01],
+            [-2.1...e+01, -1.9...e+01, ... -5.3...e+00]], grad_fn=<CosmoSolverBackward>)
     >>> loss = (2 * log_gamma).exp().sum()
     >>> loss.backward()
     >>> p.grad
-    tensor([[ 6.4...e+04,  1.1...e+04, ... -4.2...e+05],
+    tensor([[ 2.1...e+02,  2.1...e+02, ... -7.4...e+05],
             [-6.6...e+02, -6.3...e+02, ...  7.4...e+02]])
     """
 

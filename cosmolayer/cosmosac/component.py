@@ -552,18 +552,11 @@ class Component:
         )
         return total_profile
 
-    def get_probabilities(self, regularize: float = 1e-10) -> NDArray[np.float64]:
+    def get_probabilities(self) -> NDArray[np.float64]:
         """Get the probabilities of segment types in the molecule.
 
         A segment type is defined by its hydrogen bonding class (NHB, OH, OT) and its
         averaged charge density.
-
-        Parameters
-        ----------
-        regularize : float, optional
-            Minimum value for clipping probabilities. Set to 0 to disable
-            regularization. Default is 1e-10. If clipping occurs, the returned
-            distribution is renormalized to sum to 1.
 
         Returns
         -------
@@ -593,14 +586,10 @@ class Component:
         >>> bool(np.isclose(probabilities_full.sum(), 1.0))
         True
         """
-        if regularize < 0:
-            raise ValueError("Regularization value must be non-negative.")
         profiles = [self._sigma_profiles[segtype] for segtype in SEGMENT_GROUPS]
-        summed = (
+        probabilities: NDArray[np.float64] = (
             np.sum(profiles, axis=0)
             if self._merge_profiles
             else np.concatenate(profiles)
         ) / self._area
-        clipped = summed.clip(min=regularize)
-        normalized: NDArray[np.float64] = clipped / clipped.sum()
-        return normalized
+        return probabilities
