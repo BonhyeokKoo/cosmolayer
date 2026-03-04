@@ -466,7 +466,8 @@ a hydrogen bond in e/Å².  Set to <code class="docutils literal notranslate"><s
 splitting (all surface area is assigned to the NHB class).
 Default is 0.007 e/Å².</p></li>
 <li><p><strong>merge_profiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge segment groups (NHB, OH, OT) into a single profile
-when calling get_probabilities(). Default is False.</p></li>
+when accessing <a class="reference internal" href="#cosmolayer.cosmosac.Mixture.probabilities" title="cosmolayer.cosmosac.Mixture.probabilities"><code class="xref py py-attr docutils literal notranslate"><span class="pre">probabilities</span></code></a> and <a class="reference internal" href="#cosmolayer.cosmosac.Mixture.sigma_profiles" title="cosmolayer.cosmosac.Mixture.sigma_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sigma_profiles</span></code></a>.
+Default is False.</p></li>
 <li><p><strong>regularize</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Minimum value for clipping probabilities. Default is 1e-10.</p></li>
 <li><p><strong>interaction_matrix_generator</strong> (<em>Callable</em><em>, </em><em>optional</em>) – Function to generate the interaction matrix for the mixture at a given
 temperature. Default is <code class="xref py py-func docutils literal notranslate"><span class="pre">create_cosmo_sac_2010_matrices</span></code> with default
@@ -494,19 +495,112 @@ Default is (1, 3).</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">mixture</span><span class="p">)</span>
 <span class="go">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span><span class="p">[</span><span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_area</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span><span class="p">[</span><span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">area</span>
 <span class="go">97.34554...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span><span class="p">[</span><span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">get_area</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span><span class="p">[</span><span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">area</span>
 <span class="go">103.51765...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span><span class="o">.</span><span class="n">get_component_names</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span><span class="o">.</span><span class="n">component_names</span>
 <span class="go">(&#39;1-aminoethenol&#39;, &#39;2-aminoethanol&#39;)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areas</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_areas</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">areas</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">areas</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">areas</span><span class="o">.</span><span class="n">shape</span>
 <span class="go">(2,)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">float</span><span class="p">(</span><span class="n">areas</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 <span class="go">97.34554...</span>
 </pre></div>
 </div>
+<p class="rubric">Attributes</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.area_per_segment">
+<span class="sig-name descname"><span class="pre">area_per_segment</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.area_per_segment" title="Link to this definition">#</a></dt>
+<dd><p>Reference area per segment used by the COSMO-SAC model, in Å².</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.areas">
+<span class="sig-name descname"><span class="pre">areas</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.areas" title="Link to this definition">#</a></dt>
+<dd><p>(n_components,).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cavity surface areas for all components in Å². Shape</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.component_names">
+<span class="sig-name descname"><span class="pre">component_names</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.component_names" title="Link to this definition">#</a></dt>
+<dd><p>Names of all components in the order they were provided.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.merge_profiles">
+<span class="sig-name descname"><span class="pre">merge_profiles</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.merge_profiles" title="Link to this definition">#</a></dt>
+<dd><p>Whether segment groups (NHB, OH, OT) are merged for <a class="reference internal" href="#cosmolayer.cosmosac.Mixture.sigma_profiles" title="cosmolayer.cosmosac.Mixture.sigma_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sigma_profiles</span></code></a>
+and <a class="reference internal" href="#cosmolayer.cosmosac.Mixture.probabilities" title="cosmolayer.cosmosac.Mixture.probabilities"><code class="xref py py-attr docutils literal notranslate"><span class="pre">probabilities</span></code></a>.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.probabilities">
+<span class="sig-name descname"><span class="pre">probabilities</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.probabilities" title="Link to this definition">#</a></dt>
+<dd><p>Normalized segment-type probabilities for each component.</p>
+<p>Stack of each component’s <a class="reference internal" href="Component.html#cosmolayer.cosmosac.Component.probabilities" title="cosmolayer.cosmosac.Component.probabilities"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Component.probabilities</span></code></a>. Shape is
+<code class="docutils literal notranslate"><span class="pre">(n_components,</span> <span class="pre">num_points)</span></code> if <a class="reference internal" href="#cosmolayer.cosmosac.Mixture.merge_profiles" title="cosmolayer.cosmosac.Mixture.merge_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_profiles</span></code></a> is True, else
+<code class="docutils literal notranslate"><span class="pre">(n_components,</span> <span class="pre">3*num_points)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Probabilities; each row sums to 1.0.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.sigma_profiles">
+<span class="sig-name descname"><span class="pre">sigma_profiles</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.sigma_profiles" title="Link to this definition">#</a></dt>
+<dd><p>Per-component sigma profiles (surface area vs. charge density), in Å².</p>
+<p>Stack of each component’s <a class="reference internal" href="Component.html#cosmolayer.cosmosac.Component.sigma_profile" title="cosmolayer.cosmosac.Component.sigma_profile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">Component.sigma_profile</span></code></a>. Shape is
+<code class="docutils literal notranslate"><span class="pre">(n_components,</span> <span class="pre">num_points)</span></code> when <a class="reference internal" href="#cosmolayer.cosmosac.Mixture.merge_profiles" title="cosmolayer.cosmosac.Mixture.merge_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_profiles</span></code></a> is True,
+<code class="docutils literal notranslate"><span class="pre">(n_components,</span> <span class="pre">3,</span> <span class="pre">num_points)</span></code> when False (NHB, OH, OT).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sigma profile array; last dimension is the sigma grid.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.temperature_exponents">
+<span class="sig-name descname"><span class="pre">temperature_exponents</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.temperature_exponents" title="Link to this definition">#</a></dt>
+<dd><p>Exponents used to scale each interaction matrix with temperature.</p>
+<p>Each entry scales the corresponding matrix from
+<a class="reference internal" href="#cosmolayer.cosmosac.Mixture.interaction_matrices" title="cosmolayer.cosmosac.Mixture.interaction_matrices"><code class="xref py py-meth docutils literal notranslate"><span class="pre">interaction_matrices</span></code></a> as T^exponent (e.g. 1 and 3 for the
+COSMO-SAC 2010 model).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>One exponent per interaction matrix.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of <a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.volumes">
+<span class="sig-name descname"><span class="pre">volumes</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.volumes" title="Link to this definition">#</a></dt>
+<dd><p>(n_components,).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Type<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Cavity volumes for all components in Å³. Shape</p>
+</dd>
+</dl>
+</dd></dl>
+
 <p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.add_component">
@@ -516,213 +610,29 @@ Default is (1, 3).</p></li>
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Component name.</p></li>
-<li><p><strong>cosmo_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – COSMO string.</p></li>
+<li><p><strong>cosmo_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Contents of a COSMO output file.</p></li>
 </ul>
 </dd>
 </dl>
 </dd></dl>
 
 <dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_area_per_segment">
-<span class="sig-name descname"><span class="pre">get_area_per_segment</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_area_per_segment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_area_per_segment" title="Link to this definition">#</a></dt>
-<dd><p>Get the area per segment for the mixture.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Area per segment in Å².</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_areas">
-<span class="sig-name descname"><span class="pre">get_areas</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_areas"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_areas" title="Link to this definition">#</a></dt>
-<dd><p>Get cavity surface areas for all components.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Array of cavity surface areas in Å² for each component.
-Shape: (n_components,).</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>NDArray[np.float64]</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mixture</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areas</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_areas</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">areas</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(2,)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_component_names">
-<span class="sig-name descname"><span class="pre">get_component_names</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_component_names"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_component_names" title="Link to this definition">#</a></dt>
-<dd><p>Get the names of all components in the mixture.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Tuple of component names in the order they were provided.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a>, …]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_interaction_matrices">
-<span class="sig-name descname"><span class="pre">get_interaction_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_interaction_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_interaction_matrices" title="Link to this definition">#</a></dt>
-<dd><p>Get the COSMO-SAC interaction matrices for the mixture.</p>
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.interaction_matrices">
+<span class="sig-name descname"><span class="pre">interaction_matrices</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.interaction_matrices"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.interaction_matrices" title="Link to this definition">#</a></dt>
+<dd><p>COSMO-SAC interaction matrices for the mixture at the given temperature.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – The temperature in Kelvin at which the interaction matrices are computed.</p>
+<dd class="field-odd"><p><strong>temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Temperature in K; used to scale the matrices.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Tuple of interaction matrices, one for each segment type pair.
-Each matrix has shape (n_segment_types, n_segment_types).</p>
+<dd class="field-even"><p>Matrices used in the COSMO-SAC activity coefficient calculation.
+Length and shapes match the generator (e.g. sigma–sigma and
+sigma’–sigma’ for the 2010 model).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[NDArray[np.float64], …]</p>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a> of np.ndarray</p>
 </dd>
 </dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mixture</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">matrices</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_interaction_matrices</span><span class="p">(</span><span class="mf">298.15</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">isinstance</span><span class="p">(</span><span class="n">matrices</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">)</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">len</span><span class="p">(</span><span class="n">matrices</span><span class="p">)</span>
-<span class="go">2</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">mat</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="n">matrices</span><span class="p">)</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">all</span><span class="p">(</span><span class="n">mat</span><span class="o">.</span><span class="n">shape</span> <span class="o">==</span> <span class="p">(</span><span class="mi">153</span><span class="p">,</span> <span class="mi">153</span><span class="p">)</span> <span class="k">for</span> <span class="n">mat</span> <span class="ow">in</span> <span class="n">matrices</span><span class="p">)</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_probabilities">
-<span class="sig-name descname"><span class="pre">get_probabilities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_probabilities" title="Link to this definition">#</a></dt>
-<dd><p>Get probabilities of segment types for all components.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Array of probabilities for each component.
-If merge=True: shape is (n_components, num_points).
-If merge=False: shape is (n_components, 3*num_points).</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>NDArray[np.float64]</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mixture</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(2, 153)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">))</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_sigma_profiles">
-<span class="sig-name descname"><span class="pre">get_sigma_profiles</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segment_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_sigma_profiles"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_sigma_profiles" title="Link to this definition">#</a></dt>
-<dd><p>Get sigma profiles for all components.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>segment_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Segment class (“NHB”, “OH”, or “OT”). If None, returns total profiles.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Array of sigma profiles for each component.
-Shape: (n_components, num_points).</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>NDArray[np.float64]</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mixture</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">profiles</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_sigma_profiles</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">profiles</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(2, 51)</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_temperature_exponents">
-<span class="sig-name descname"><span class="pre">get_temperature_exponents</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_temperature_exponents"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_temperature_exponents" title="Link to this definition">#</a></dt>
-<dd><p>Get the temperature exponents for the interaction matrices.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Tuple of temperature exponents.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a>, …]</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Mixture.get_volumes">
-<span class="sig-name descname"><span class="pre">get_volumes</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/mixture.html#Mixture.get_volumes"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Mixture.get_volumes" title="Link to this definition">#</a></dt>
-<dd><p>Get cavity volumes for all components.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Array of cavity volumes in Å³ for each component.
-Shape: (n_components,).</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>NDArray[np.float64]</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Mixture</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">source</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">components</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="s2">&quot;1-aminoethenol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span>    <span class="s2">&quot;2-aminoethanol&quot;</span><span class="p">:</span> <span class="p">(</span><span class="n">source</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span>
-<span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">mixture</span> <span class="o">=</span> <span class="n">Mixture</span><span class="p">(</span><span class="n">components</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">volumes</span> <span class="o">=</span> <span class="n">mixture</span><span class="o">.</span><span class="n">get_volumes</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">volumes</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(2,)</span>
-</pre></div>
-</div>
 </dd></dl>
 
 <dl class="py method">
@@ -748,7 +658,7 @@ string.</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>old_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the component to replace.</p></li>
 <li><p><strong>new_name</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Name of the new component.</p></li>
-<li><p><strong>cosmo_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – New component’s COSMO string.</p></li>
+<li><p><strong>cosmo_string</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a>) – Contents of the new component’s COSMO output file.</p></li>
 </ul>
 </dd>
 <dt class="field-even">Raises<span class="colon">:</span></dt>
@@ -811,15 +721,16 @@ string.</p>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture"><code class="docutils literal notranslate"><span class="pre">Mixture</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.area_per_segment"><code class="docutils literal notranslate"><span class="pre">area_per_segment</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.areas"><code class="docutils literal notranslate"><span class="pre">areas</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.component_names"><code class="docutils literal notranslate"><span class="pre">component_names</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.merge_profiles"><code class="docutils literal notranslate"><span class="pre">merge_profiles</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.probabilities"><code class="docutils literal notranslate"><span class="pre">probabilities</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.sigma_profiles"><code class="docutils literal notranslate"><span class="pre">sigma_profiles</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.temperature_exponents"><code class="docutils literal notranslate"><span class="pre">temperature_exponents</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.volumes"><code class="docutils literal notranslate"><span class="pre">volumes</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.add_component"><code class="docutils literal notranslate"><span class="pre">add_component</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.get_area_per_segment"><code class="docutils literal notranslate"><span class="pre">get_area_per_segment</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.get_areas"><code class="docutils literal notranslate"><span class="pre">get_areas</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.get_component_names"><code class="docutils literal notranslate"><span class="pre">get_component_names</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.get_interaction_matrices"><code class="docutils literal notranslate"><span class="pre">get_interaction_matrices</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.get_probabilities"><code class="docutils literal notranslate"><span class="pre">get_probabilities</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.get_sigma_profiles"><code class="docutils literal notranslate"><span class="pre">get_sigma_profiles</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.get_temperature_exponents"><code class="docutils literal notranslate"><span class="pre">get_temperature_exponents</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.get_volumes"><code class="docutils literal notranslate"><span class="pre">get_volumes</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.interaction_matrices"><code class="docutils literal notranslate"><span class="pre">interaction_matrices</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.remove_component"><code class="docutils literal notranslate"><span class="pre">remove_component</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Mixture.replace_component"><code class="docutils literal notranslate"><span class="pre">replace_component</span></code></a></li>
 </ul>

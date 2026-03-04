@@ -495,7 +495,7 @@ Shape: (…, num_segment_types).</p>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">species</span> <span class="ow">in</span> <span class="p">(</span><span class="s2">&quot;C=C(N)O&quot;</span><span class="p">,</span> <span class="s2">&quot;NCCO&quot;</span><span class="p">)</span>
 <span class="gp">... </span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="p">[</span>
-<span class="gp">... </span>    <span class="n">CosmoSac2002Model</span><span class="o">.</span><span class="n">create_component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">)</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
+<span class="gp">... </span>    <span class="n">CosmoSac2002Model</span><span class="o">.</span><span class="n">create_component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">)</span><span class="o">.</span><span class="n">probabilities</span>
 <span class="gp">... </span>    <span class="k">for</span> <span class="n">cosmo_string</span> <span class="ow">in</span> <span class="n">cosmo_strings</span>
 <span class="gp">... </span><span class="p">]</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>

@@ -450,7 +450,8 @@
 <span class="sd">        Default is 0.007 e/Å².</span>
 <span class="sd">    merge_profiles : bool, optional</span>
 <span class="sd">        Whether to merge segment groups (NHB, OH, OT) into a single profile</span>
-<span class="sd">        when calling get_probabilities(). Default is False.</span>
+<span class="sd">        when accessing :attr:`probabilities` and :attr:`sigma_profiles`.</span>
+<span class="sd">        Default is False.</span>
 <span class="sd">    regularize : float, optional</span>
 <span class="sd">        Minimum value for clipping probabilities. Default is 1e-10.</span>
 <span class="sd">    interaction_matrix_generator : Callable, optional</span>
@@ -481,13 +482,13 @@
 <span class="sd">    &gt;&gt;&gt; mixture = Mixture(components)</span>
 <span class="sd">    &gt;&gt;&gt; len(mixture)</span>
 <span class="sd">    2</span>
-<span class="sd">    &gt;&gt;&gt; mixture[&quot;1-aminoethenol&quot;].get_area()</span>
+<span class="sd">    &gt;&gt;&gt; mixture[&quot;1-aminoethenol&quot;].area</span>
 <span class="sd">    97.34554...</span>
-<span class="sd">    &gt;&gt;&gt; mixture[&quot;2-aminoethanol&quot;].get_area()</span>
+<span class="sd">    &gt;&gt;&gt; mixture[&quot;2-aminoethanol&quot;].area</span>
 <span class="sd">    103.51765...</span>
-<span class="sd">    &gt;&gt;&gt; mixture.get_component_names()</span>
+<span class="sd">    &gt;&gt;&gt; mixture.component_names</span>
 <span class="sd">    (&#39;1-aminoethenol&#39;, &#39;2-aminoethanol&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; areas = mixture.get_areas()</span>
+<span class="sd">    &gt;&gt;&gt; areas = mixture.areas</span>
 <span class="sd">    &gt;&gt;&gt; areas.shape</span>
 <span class="sd">    (2,)</span>
 <span class="sd">    &gt;&gt;&gt; float(areas[0])</span>
@@ -574,7 +575,7 @@
 <span class="sd">        name : str</span>
 <span class="sd">            Component name.</span>
 <span class="sd">        cosmo_string : str</span>
-<span class="sd">            COSMO string.</span>
+<span class="sd">            Contents of a COSMO output file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">)</span></div>
 
@@ -610,7 +611,7 @@
 <span class="sd">        new_name : str</span>
 <span class="sd">            Name of the new component.</span>
 <span class="sd">        cosmo_string : str</span>
-<span class="sd">            New component&#39;s COSMO string.</span>
+<span class="sd">            Contents of the new component&#39;s COSMO output file.</span>
 
 <span class="sd">        Raises</span>
 <span class="sd">        ------</span>
@@ -635,221 +636,104 @@
                     <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">component</span></div>
 
 
-<div class="viewcode-block" id="Mixture.get_area_per_segment">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_area_per_segment">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_area_per_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the area per segment for the mixture.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">area_per_segment</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Reference area per segment used by the COSMO-SAC model, in Å².&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area_per_segment</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">merge_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether segment groups (NHB, OH, OT) are merged for :attr:`sigma_profiles`</span>
+<span class="sd">        and :attr:`probabilities`.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_profiles</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Names of all components in the order they were provided.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">areas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cavity surface areas for all components in Å². Shape: (n_components,).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">component</span><span class="o">.</span><span class="n">area</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">volumes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cavity volumes for all components in Å³. Shape: (n_components,).&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">component</span><span class="o">.</span><span class="n">volume</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">values</span><span class="p">()])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalized segment-type probabilities for each component.</span>
+
+<span class="sd">        Stack of each component&#39;s :attr:`Component.probabilities`. Shape is</span>
+<span class="sd">        ``(n_components, num_points)`` if :attr:`merge_profiles` is True, else</span>
+<span class="sd">        ``(n_components, 3*num_points)``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        float</span>
-<span class="sd">            Area per segment in Å².</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area_per_segment</span></div>
-
-
-<div class="viewcode-block" id="Mixture.get_component_names">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_component_names">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_component_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the names of all components in the mixture.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        tuple[str, ...]</span>
-<span class="sd">            Tuple of component names in the order they were provided.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
-
-
-<div class="viewcode-block" id="Mixture.get_areas">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_areas">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_areas</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get cavity surface areas for all components.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        NDArray[np.float64]</span>
-<span class="sd">            Array of cavity surface areas in Å² for each component.</span>
-<span class="sd">            Shape: (n_components,).</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
-<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Mixture</span>
-<span class="sd">        &gt;&gt;&gt; source = files(&quot;cosmolayer.data&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; components = {</span>
-<span class="sd">        ...     &quot;1-aminoethenol&quot;: (source / &quot;C=C(N)O.cosmo&quot;).read_text(),</span>
-<span class="sd">        ...     &quot;2-aminoethanol&quot;: (source / &quot;NCCO.cosmo&quot;).read_text(),</span>
-<span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
-<span class="sd">        &gt;&gt;&gt; areas = mixture.get_areas()</span>
-<span class="sd">        &gt;&gt;&gt; areas.shape</span>
-<span class="sd">        (2,)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">component</span><span class="o">.</span><span class="n">get_area</span><span class="p">()</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="Mixture.get_volumes">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_volumes">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_volumes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get cavity volumes for all components.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        NDArray[np.float64]</span>
-<span class="sd">            Array of cavity volumes in Å³ for each component.</span>
-<span class="sd">            Shape: (n_components,).</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
-<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Mixture</span>
-<span class="sd">        &gt;&gt;&gt; source = files(&quot;cosmolayer.data&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; components = {</span>
-<span class="sd">        ...     &quot;1-aminoethenol&quot;: (source / &quot;C=C(N)O.cosmo&quot;).read_text(),</span>
-<span class="sd">        ...     &quot;2-aminoethanol&quot;: (source / &quot;NCCO.cosmo&quot;).read_text(),</span>
-<span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
-<span class="sd">        &gt;&gt;&gt; volumes = mixture.get_volumes()</span>
-<span class="sd">        &gt;&gt;&gt; volumes.shape</span>
-<span class="sd">        (2,)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">component</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="p">)</span></div>
-
-
-<div class="viewcode-block" id="Mixture.get_probabilities">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_probabilities">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get probabilities of segment types for all components.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        NDArray[np.float64]</span>
-<span class="sd">            Array of probabilities for each component.</span>
-<span class="sd">            If merge=True: shape is (n_components, num_points).</span>
-<span class="sd">            If merge=False: shape is (n_components, 3*num_points).</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
-<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Mixture</span>
-<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
-<span class="sd">        &gt;&gt;&gt; source = files(&quot;cosmolayer.data&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; components = {</span>
-<span class="sd">        ...     &quot;1-aminoethenol&quot;: (source / &quot;C=C(N)O.cosmo&quot;).read_text(),</span>
-<span class="sd">        ...     &quot;2-aminoethanol&quot;: (source / &quot;NCCO.cosmo&quot;).read_text(),</span>
-<span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
-<span class="sd">        &gt;&gt;&gt; probabilities = mixture.get_probabilities()</span>
-<span class="sd">        &gt;&gt;&gt; probabilities.shape</span>
-<span class="sd">        (2, 153)</span>
-<span class="sd">        &gt;&gt;&gt; bool(np.all(probabilities &lt;= 1))</span>
-<span class="sd">        True</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Probabilities; each row sums to 1.0.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">component</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
+            <span class="p">[</span><span class="n">component</span><span class="o">.</span><span class="n">probabilities</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
             <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Per-component sigma profiles (surface area vs. charge density), in Å².</span>
 
-<div class="viewcode-block" id="Mixture.get_sigma_profiles">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_sigma_profiles">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_sigma_profiles</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">segment_class</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get sigma profiles for all components.</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        segment_class : str, optional</span>
-<span class="sd">            Segment class (&quot;NHB&quot;, &quot;OH&quot;, or &quot;OT&quot;). If None, returns total profiles.</span>
+<span class="sd">        Stack of each component&#39;s :attr:`Component.sigma_profile`. Shape is</span>
+<span class="sd">        ``(n_components, num_points)`` when :attr:`merge_profiles` is True,</span>
+<span class="sd">        ``(n_components, 3, num_points)`` when False (NHB, OH, OT).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        NDArray[np.float64]</span>
-<span class="sd">            Array of sigma profiles for each component.</span>
-<span class="sd">            Shape: (n_components, num_points).</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
-<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Mixture</span>
-<span class="sd">        &gt;&gt;&gt; source = files(&quot;cosmolayer.data&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; components = {</span>
-<span class="sd">        ...     &quot;1-aminoethenol&quot;: (source / &quot;C=C(N)O.cosmo&quot;).read_text(),</span>
-<span class="sd">        ...     &quot;2-aminoethanol&quot;: (source / &quot;NCCO.cosmo&quot;).read_text(),</span>
-<span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
-<span class="sd">        &gt;&gt;&gt; profiles = mixture.get_sigma_profiles()</span>
-<span class="sd">        &gt;&gt;&gt; profiles.shape</span>
-<span class="sd">        (2, 51)</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Sigma profile array; last dimension is the sigma grid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">component</span><span class="o">.</span><span class="n">get_sigma_profile</span><span class="p">(</span><span class="n">segment_class</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">values</span><span class="p">()</span>
-            <span class="p">],</span>
+            <span class="p">[</span><span class="n">component</span><span class="o">.</span><span class="n">sigma_profile</span> <span class="k">for</span> <span class="n">component</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_components</span><span class="o">.</span><span class="n">values</span><span class="p">()],</span>
             <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
 
-
-<div class="viewcode-block" id="Mixture.get_interaction_matrices">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_interaction_matrices">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_interaction_matrices</span><span class="p">(</span>
+<div class="viewcode-block" id="Mixture.interaction_matrices">
+<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.interaction_matrices">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">interaction_matrices</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span> <span class="n">temperature</span><span class="p">:</span> <span class="nb">float</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">],</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the COSMO-SAC interaction matrices for the mixture.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;COSMO-SAC interaction matrices for the mixture at the given temperature.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        temperature : float</span>
-<span class="sd">            The temperature in Kelvin at which the interaction matrices are computed.</span>
+<span class="sd">            Temperature in K; used to scale the matrices.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        tuple[NDArray[np.float64], ...]</span>
-<span class="sd">            Tuple of interaction matrices, one for each segment type pair.</span>
-<span class="sd">            Each matrix has shape (n_segment_types, n_segment_types).</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
-<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Mixture</span>
-<span class="sd">        &gt;&gt;&gt; source = files(&quot;cosmolayer.data&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; components = {</span>
-<span class="sd">        ...     &quot;1-aminoethenol&quot;: (source / &quot;C=C(N)O.cosmo&quot;).read_text(),</span>
-<span class="sd">        ...     &quot;2-aminoethanol&quot;: (source / &quot;NCCO.cosmo&quot;).read_text(),</span>
-<span class="sd">        ... }</span>
-<span class="sd">        &gt;&gt;&gt; mixture = Mixture(components)</span>
-<span class="sd">        &gt;&gt;&gt; matrices = mixture.get_interaction_matrices(298.15)</span>
-<span class="sd">        &gt;&gt;&gt; isinstance(matrices, tuple)</span>
-<span class="sd">        True</span>
-<span class="sd">        &gt;&gt;&gt; len(matrices)</span>
-<span class="sd">        2</span>
-<span class="sd">        &gt;&gt;&gt; all(isinstance(mat, np.ndarray) for mat in matrices)</span>
-<span class="sd">        True</span>
-<span class="sd">        &gt;&gt;&gt; all(mat.shape == (153, 153) for mat in matrices)</span>
-<span class="sd">        True</span>
+<span class="sd">        tuple of np.ndarray</span>
+<span class="sd">            Matrices used in the COSMO-SAC activity coefficient calculation.</span>
+<span class="sd">            Length and shapes match the generator (e.g. sigma–sigma and</span>
+<span class="sd">            sigma&#39;–sigma&#39; for the 2010 model).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_interaction_matrix_generator</span><span class="p">(</span><span class="n">temperature</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Mixture.get_temperature_exponents">
-<a class="viewcode-back" href="../../../api/Mixture.html#cosmolayer.cosmosac.Mixture.get_temperature_exponents">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_temperature_exponents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the temperature exponents for the interaction matrices.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">temperature_exponents</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Exponents used to scale each interaction matrix with temperature.</span>
+
+<span class="sd">        Each entry scales the corresponding matrix from</span>
+<span class="sd">        :meth:`interaction_matrices` as T^exponent (e.g. 1 and 3 for the</span>
+<span class="sd">        COSMO-SAC 2010 model).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        tuple[float, ...]</span>
-<span class="sd">            Tuple of temperature exponents.</span>
+<span class="sd">        tuple of float</span>
+<span class="sd">            One exponent per interaction matrix.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_temperature_exponents</span></div>
-</div>
 
 </pre></div>
 

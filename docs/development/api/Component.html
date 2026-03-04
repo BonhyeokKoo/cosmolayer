@@ -461,7 +461,8 @@ bond in e/Å².  Set to <code class="docutils literal notranslate"><span class="
 surface area is assigned to the NHB class).
 Default is 0.007 e/Å² <span id="id3">[<a class="reference internal" href="../references.html#id7" title="Ian H. Bell, Erik Mickoleit, Chieh-Ming Hsieh, Shiang-Tai Lin, Jadran Vrabec, Cornelia Breitkopf, and Andreas Jäger. A benchmark open-source implementation of cosmo-sac. Journal of Chemical Theory and Computation, 16(4):2635–2646, February 2020. URL: http://dx.doi.org/10.1021/acs.jctc.9b01016, doi:10.1021/acs.jctc.9b01016.">1</a>]</span>.</p></li>
 <li><p><strong>merge_profiles</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to merge segment groups (NHB, OH, OT) into a single profile
-when calling get_probabilities(). Default is False.</p></li>
+when accessing <a class="reference internal" href="#cosmolayer.cosmosac.Component.probabilities" title="cosmolayer.cosmosac.Component.probabilities"><code class="xref py py-attr docutils literal notranslate"><span class="pre">probabilities</span></code></a> and <a class="reference internal" href="#cosmolayer.cosmosac.Component.sigma_profile" title="cosmolayer.cosmosac.Component.sigma_profile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sigma_profile</span></code></a>.
+Default is False.</p></li>
 </ul>
 </dd>
 <dt class="field-odd">Raises<span class="colon">:</span></dt>
@@ -477,35 +478,47 @@ when calling get_probabilities(). Default is False.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_area</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">area</span>
 <span class="go">97.34554...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">volume</span>
 <span class="go">80.07160...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma_profile</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_sigma_profile</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>When <a class="reference internal" href="#cosmolayer.cosmosac.Component.merge_profiles" title="cosmolayer.cosmosac.Component.merge_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_profiles</span></code></a> is True, <a class="reference internal" href="#cosmolayer.cosmosac.Component.sigma_profile" title="cosmolayer.cosmosac.Component.sigma_profile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sigma_profile</span></code></a> is a single
+merged profile:</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="n">merge_profiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma_profile</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">sigma_profile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma_profile</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(51,)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="nb">print</span><span class="p">(</span><span class="nb">sum</span><span class="p">(</span><span class="n">sigma_profile</span><span class="p">))</span>
 <span class="go">97.34554...</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">sigma_profiles</span> <span class="o">=</span> <span class="p">{</span>
-<span class="gp">... </span>    <span class="n">s</span><span class="p">:</span> <span class="n">component</span><span class="o">.</span><span class="n">get_sigma_profile</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-<span class="gp">... </span>    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NHB&quot;</span><span class="p">,</span> <span class="s2">&quot;OH&quot;</span><span class="p">,</span> <span class="s2">&quot;OT&quot;</span><span class="p">]</span>
-<span class="gp">... </span><span class="p">}</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NHB&quot;</span><span class="p">,</span> <span class="s2">&quot;OH&quot;</span><span class="p">,</span> <span class="s2">&quot;OT&quot;</span><span class="p">]:</span>
-<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">sigma_profiles</span><span class="p">[</span><span class="n">s</span><span class="p">]))</span>
+</pre></div>
+</div>
+<p>When <a class="reference internal" href="#cosmolayer.cosmosac.Component.merge_profiles" title="cosmolayer.cosmosac.Component.merge_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_profiles</span></code></a> is False, <a class="reference internal" href="#cosmolayer.cosmosac.Component.sigma_profile" title="cosmolayer.cosmosac.Component.sigma_profile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sigma_profile</span></code></a> is stacked
+(NHB, OH, OT), shape (3, num_points):</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="n">merge_profiles</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stacked</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">sigma_profile</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">stacked</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(3, 51)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac.segment_groups</span><span class="w"> </span><span class="kn">import</span> <span class="n">SEGMENT_GROUPS</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SEGMENT_GROUPS</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">sum</span><span class="p">(</span><span class="n">stacked</span><span class="p">[</span><span class="n">i</span><span class="p">]))</span>
 <span class="go">NHB 72.31802...</span>
 <span class="go">OH 12.25732...</span>
 <span class="go">OT 12.77019...</span>
 </pre></div>
 </div>
-<p>Plotting the sigma profiles:</p>
+<p>Plotting the sigma profiles (stacked, <a class="reference internal" href="#cosmolayer.cosmosac.Component.merge_profiles" title="cosmolayer.cosmosac.Component.merge_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_profiles</span></code></a> is False):</p>
 <div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac.segment_groups</span><span class="w"> </span><span class="kn">import</span> <span class="n">SEGMENT_GROUPS</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">matplotlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">pyplot</span> <span class="k">as</span> <span class="n">plt</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">(),</span> <span class="n">merge_profiles</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_sigma_grid</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="p">[</span><span class="s2">&quot;NHB&quot;</span><span class="p">,</span> <span class="s2">&quot;OH&quot;</span><span class="p">,</span> <span class="s2">&quot;OT&quot;</span><span class="p">]:</span>
-<span class="gp">... </span>    <span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">get_sigma_profile</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="n">label</span><span class="o">=</span><span class="n">s</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">get_sigma_profile</span><span class="p">(),</span> <span class="n">label</span><span class="o">=</span><span class="s2">&quot;Overall&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">grid</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">sigma_grid</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">label</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">SEGMENT_GROUPS</span><span class="p">):</span>
+<span class="gp">... </span>    <span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">plot</span><span class="p">(</span><span class="n">grid</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">sigma_profile</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">label</span><span class="o">=</span><span class="n">label</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Charge density (e/Å²)&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Surface area contribution (Å²)&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">legend</span><span class="p">()</span>
@@ -520,7 +533,7 @@ when calling get_probabilities(). Default is False.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">fig</span><span class="p">,</span> <span class="n">ax</span> <span class="o">=</span> <span class="n">plt</span><span class="o">.</span><span class="n">subplots</span><span class="p">(</span><span class="n">figsize</span><span class="o">=</span><span class="p">(</span><span class="mi">8</span><span class="p">,</span> <span class="mi">4</span><span class="p">))</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">p</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">probabilities</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">p</span><span class="p">)),</span> <span class="n">p</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_xlabel</span><span class="p">(</span><span class="s2">&quot;Segment type index&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">_</span> <span class="o">=</span> <span class="n">ax</span><span class="o">.</span><span class="n">set_ylabel</span><span class="p">(</span><span class="s2">&quot;Probability&quot;</span><span class="p">)</span>
@@ -528,6 +541,218 @@ when calling get_probabilities(). Default is False.</p></li>
 </pre></div>
 </div>
 <p>(<a class="reference download internal" download="" href="../_downloads/8bbd205314ae734e88e3fbc8ccee1dc0/Component-2.py"><code class="xref download docutils literal notranslate"><span class="pre">Source</span> <span class="pre">code</span></code></a>)</p>
+<p class="rubric">Attributes</p>
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.area">
+<span class="sig-name descname"><span class="pre">area</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.area" title="Link to this definition">#</a></dt>
+<dd><p>Cavity surface area of the molecule in Å².</p>
+<p>Sum of the areas of all segments from the COSMO calculation.</p>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.atom_data">
+<span class="sig-name descname"><span class="pre">atom_data</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.atom_data" title="Link to this definition">#</a></dt>
+<dd><p>Atom data from the parsed COSMO file.</p>
+<p>DataFrame columns: <code class="docutils literal notranslate"><span class="pre">id</span></code> (atom identifier), <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code> (Cartesian
+coordinates in Å), <code class="docutils literal notranslate"><span class="pre">element</span></code> (chemical symbol).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>One row per atom.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">atom_data</span>
+<span class="go">   id       x       y       z element</span>
+<span class="go">0  C1 -1.4... -0.2...  0.0...       C</span>
+<span class="go">1  C2 -0.0...  0.0...  0.0...       C</span>
+<span class="go">2  N1  0.9... -0.9... -0.0...       N</span>
+<span class="go">...</span>
+<span class="go">8  H5  1.1...  1.3... -0.4...       H</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.bonds">
+<span class="sig-name descname"><span class="pre">bonds</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.bonds" title="Link to this definition">#</a></dt>
+<dd><p>Bonds between atoms, inferred from interatomic distances.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Pairs of atom indices (i, j) for each bond.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>]]</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">bonds</span>
+<span class="go">[(0, 1), (0, 4), (0, 5), ... (2, 7), (3, 8)]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.cosmo_format">
+<span class="sig-name descname"><span class="pre">cosmo_format</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.cosmo_format" title="Link to this definition">#</a></dt>
+<dd><p>COSMO file format that was parsed.</p>
+<p>Either “TURBOMOLE” or “DMol-3”.</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">cosmo_format</span>
+<span class="go">&#39;TURBOMOLE&#39;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">cosmo_format</span>
+<span class="go">&#39;DMol-3&#39;</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.merge_profiles">
+<span class="sig-name descname"><span class="pre">merge_profiles</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.merge_profiles" title="Link to this definition">#</a></dt>
+<dd><p>Whether segment groups (NHB, OH, OT) are merged for <a class="reference internal" href="#cosmolayer.cosmosac.Component.sigma_profile" title="cosmolayer.cosmosac.Component.sigma_profile"><code class="xref py py-attr docutils literal notranslate"><span class="pre">sigma_profile</span></code></a>
+and <a class="reference internal" href="#cosmolayer.cosmosac.Component.probabilities" title="cosmolayer.cosmosac.Component.probabilities"><code class="xref py py-attr docutils literal notranslate"><span class="pre">probabilities</span></code></a>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)">bool</a></p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.probabilities">
+<span class="sig-name descname"><span class="pre">probabilities</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.probabilities" title="Link to this definition">#</a></dt>
+<dd><p>Normalized segment-type probability distribution (sigma profile / area).</p>
+<p>Segment types are defined by hydrogen bonding class (NHB, OH, OT) and
+averaged charge density. Shape is <code class="docutils literal notranslate"><span class="pre">(num_points,)</span></code> if <a class="reference internal" href="#cosmolayer.cosmosac.Component.merge_profiles" title="cosmolayer.cosmosac.Component.merge_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_profiles</span></code></a>
+is True, otherwise <code class="docutils literal notranslate"><span class="pre">(3*num_points,)</span></code>.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Probabilities summing to 1.0.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">cosmo_string</span> <span class="o">=</span> <span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">,</span> <span class="n">merge_profiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">probabilities</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(51,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">probabilities</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">))</span>
+<span class="go">True</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">,</span> <span class="n">merge_profiles</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities_full</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">probabilities</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities_full</span><span class="o">.</span><span class="n">shape</span>
+<span class="go">(153,)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">probabilities_full</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">))</span>
+<span class="go">True</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.segment_data">
+<span class="sig-name descname"><span class="pre">segment_data</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.segment_data" title="Link to this definition">#</a></dt>
+<dd><p>Segment (surface tile) data from the COSMO calculation.</p>
+<p>DataFrame columns: <code class="docutils literal notranslate"><span class="pre">atom</span></code> (parent atom index), <code class="docutils literal notranslate"><span class="pre">x</span></code>, <code class="docutils literal notranslate"><span class="pre">y</span></code>, <code class="docutils literal notranslate"><span class="pre">z</span></code>
+(segment centroid coordinates in Å), <code class="docutils literal notranslate"><span class="pre">charge</span></code> (e), <code class="docutils literal notranslate"><span class="pre">area</span></code> (Å²),
+<code class="docutils literal notranslate"><span class="pre">sigma</span></code> (screening charge density in e/Å²), <code class="docutils literal notranslate"><span class="pre">sigma_avg</span></code> (smoothed
+density in e/Å²).</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>One row per segment.</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>pd.DataFrame</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">segment_data</span>
+<span class="go">     atom         x         y  ...      area     sigma  sigma_avg</span>
+<span class="go">0       0 -0.867... -1.196...  ...  0.206...  0.010...   0.007...</span>
+<span class="go">1       0 -1.504... -1.502...  ...  0.218...  0.007...   0.005...</span>
+<span class="go">...</span>
+<span class="go">470     8  2.133...  1.152...  ...  0.145... -0.012...  -0.009...</span>
+
+<span class="go">[471 rows x 8 columns]</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.sigma_grid">
+<span class="sig-name descname"><span class="pre">sigma_grid</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.sigma_grid" title="Link to this definition">#</a></dt>
+<dd><p>Get the screening charge density grid in e/Å².</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Charge density vector in e/Å².</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">sigma_grid</span>
+<span class="go">array([-0.025, -0.024, -0.023, ... 0.023,  0.024,  0.025])</span>
+</pre></div>
+</div>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.sigma_profile">
+<span class="sig-name descname"><span class="pre">sigma_profile</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.sigma_profile" title="Link to this definition">#</a></dt>
+<dd><p>Surface area distribution over screening charge density (sigma), in Å².</p>
+<p>Shape and layout depend on <a class="reference internal" href="#cosmolayer.cosmosac.Component.merge_profiles" title="cosmolayer.cosmosac.Component.merge_profiles"><code class="xref py py-attr docutils literal notranslate"><span class="pre">merge_profiles</span></code></a>. If True, returns a single
+merged profile (sum over NHB, OH, OT), shape <code class="docutils literal notranslate"><span class="pre">(num_points,)</span></code>. If False,
+returns stacked segment profiles in SEGMENT_GROUPS order (NHB, OH, OT),
+shape <code class="docutils literal notranslate"><span class="pre">(3,</span> <span class="pre">num_points)</span></code>; <code class="docutils literal notranslate"><span class="pre">sigma_profile[0]</span></code> is NHB, <code class="docutils literal notranslate"><span class="pre">[1]</span></code> is OH,
+<code class="docutils literal notranslate"><span class="pre">[2]</span></code> is OT.</p>
+<dl class="field-list simple">
+<dt class="field-odd">Returns<span class="colon">:</span></dt>
+<dd class="field-odd"><p>Sigma profile(s). Units: Å².</p>
+</dd>
+<dt class="field-even">Return type<span class="colon">:</span></dt>
+<dd class="field-even"><p>np.ndarray</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py attribute">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.volume">
+<span class="sig-name descname"><span class="pre">volume</span></span><a class="headerlink" href="#cosmolayer.cosmosac.Component.volume" title="Link to this definition">#</a></dt>
+<dd><p>Cavity volume of the molecule in Å³.</p>
+</dd></dl>
+
 <p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.from_file">
@@ -553,7 +778,7 @@ when calling get_probabilities(). Default is False.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_area</span><span class="p">(),</span> <span class="n">component</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">area</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">volume</span>
 <span class="go">(97.34554..., 80.07160...)</span>
 </pre></div>
 </div>
@@ -584,242 +809,10 @@ when calling get_probabilities(). Default is False.</p></li>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s2">&quot;utf-8&quot;</span><span class="p">)</span> <span class="k">as</span> <span class="n">file</span><span class="p">:</span>
 <span class="gp">... </span>    <span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="o">.</span><span class="n">from_text_reader</span><span class="p">(</span><span class="n">file</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_area</span><span class="p">(),</span> <span class="n">component</span><span class="o">.</span><span class="n">get_volume</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">area</span><span class="p">,</span> <span class="n">component</span><span class="o">.</span><span class="n">volume</span>
 <span class="go">(97.34554..., 80.07160...)</span>
 </pre></div>
 </div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_area">
-<span class="sig-name descname"><span class="pre">get_area</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_area"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_area" title="Link to this definition">#</a></dt>
-<dd><p>Get the cavity surface area of the molecule in Å².</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Cavity surface area in Å². This is the sum of the areas of all
-segments from the COSMO calculation.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_atom_data">
-<span class="sig-name descname"><span class="pre">get_atom_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_atom_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_atom_data" title="Link to this definition">#</a></dt>
-<dd><p>Get the atom data.</p>
-<p>Get a pandas DataFrame containing the following columns:
-- id: atom identifier (str)
-- x, y, z: Cartesian coordinates in Å (float)
-- element: chemical element symbol (str)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Atom data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pd.DataFrame</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_atom_data</span><span class="p">()</span>
-<span class="go">   id       x       y       z element</span>
-<span class="go">0  C1 -1.4... -0.2...  0.0...       C</span>
-<span class="go">1  C2 -0.0...  0.0...  0.0...       C</span>
-<span class="go">2  N1  0.9... -0.9... -0.0...       N</span>
-<span class="go">...</span>
-<span class="go">8  H5  1.1...  1.3... -0.4...       H</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_bonds">
-<span class="sig-name descname"><span class="pre">get_bonds</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_bonds"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_bonds" title="Link to this definition">#</a></dt>
-<dd><p>Get the bonds between atoms.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>List of bonds between atoms. Each bond is represented as a tuple of two
-integers, the indices of the atoms in the bond.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#list" title="(in Python v3.14)">list</a>[<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#tuple" title="(in Python v3.14)">tuple</a>[<a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>, <a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)">int</a>]]</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_bonds</span><span class="p">()</span>
-<span class="go">[(0, 1), (0, 4), (0, 5), ... (2, 7), (3, 8)]</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_format">
-<span class="sig-name descname"><span class="pre">get_format</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_format"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_format" title="Link to this definition">#</a></dt>
-<dd><p>Get the COSMO file format that was parsed.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>The detected file format. Either “TURBOMOLE” or “DMol-3”.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)">str</a></p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span>
-<span class="go">&#39;TURBOMOLE&#39;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="o">.</span><span class="n">from_file</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_format</span><span class="p">()</span>
-<span class="go">&#39;DMol-3&#39;</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_probabilities">
-<span class="sig-name descname"><span class="pre">get_probabilities</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_probabilities"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_probabilities" title="Link to this definition">#</a></dt>
-<dd><p>Get the probabilities of segment types in the molecule.</p>
-<p>A segment type is defined by its hydrogen bonding class (NHB, OH, OT) and its
-averaged charge density.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Normalized probability distribution of segment groups.
-Shape is (num_points,) if <code class="docutils literal notranslate"><span class="pre">merge_profiles</span></code> is True, otherwise
-(3*num_points,).</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>np.ndarray</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">cosmo_string</span> <span class="o">=</span> <span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read_text</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">,</span> <span class="n">merge_profiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(51,)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">all</span><span class="p">(</span><span class="n">probabilities</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">))</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">probabilities</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">))</span>
-<span class="go">True</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">cosmo_string</span><span class="p">,</span> <span class="n">merge_profiles</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities_full</span> <span class="o">=</span> <span class="n">component</span><span class="o">.</span><span class="n">get_probabilities</span><span class="p">()</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">probabilities_full</span><span class="o">.</span><span class="n">shape</span>
-<span class="go">(153,)</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="nb">bool</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">isclose</span><span class="p">(</span><span class="n">probabilities_full</span><span class="o">.</span><span class="n">sum</span><span class="p">(),</span> <span class="mf">1.0</span><span class="p">))</span>
-<span class="go">True</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_segment_data">
-<span class="sig-name descname"><span class="pre">get_segment_data</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_segment_data"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_segment_data" title="Link to this definition">#</a></dt>
-<dd><p>Get the segment data.</p>
-<p>Get a pandas DataFrame containing the following columns:
-- atom: index of the atom associated with the segment (int)
-- x, y, z: segment coordinates in Å² (float)
-- charge: segment charge in e (float)
-- area: segment surface area in Å² (float)
-- sigma: screening charge density in e/Å² (float)
-- sigma_avg: smoothed charge density in e/Å² (float)</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Segment data.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>pd.DataFrame</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_segment_data</span><span class="p">()</span>
-<span class="go">     atom         x         y  ...      area     sigma  sigma_avg</span>
-<span class="go">0       0 -0.867... -1.196...  ...  0.206...  0.010...   0.007...</span>
-<span class="go">1       0 -1.504... -1.502...  ...  0.218...  0.007...   0.005...</span>
-<span class="go">...</span>
-<span class="go">470     8  2.133...  1.152...  ...  0.145... -0.012...  -0.009...</span>
-
-<span class="go">[471 rows x 8 columns]</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_sigma_grid">
-<span class="sig-name descname"><span class="pre">get_sigma_grid</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_sigma_grid"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_sigma_grid" title="Link to this definition">#</a></dt>
-<dd><p>Get the screening charge density grid in e/Å².</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Charge density vector in e/Å².</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p>np.ndarray</p>
-</dd>
-</dl>
-<p class="rubric">Examples</p>
-<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">cosmolayer.cosmosac</span><span class="w"> </span><span class="kn">import</span> <span class="n">Component</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">path</span> <span class="o">=</span> <span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer.data&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span> <span class="o">=</span> <span class="n">Component</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">read_text</span><span class="p">())</span>
-<span class="gp">&gt;&gt;&gt; </span><span class="n">component</span><span class="o">.</span><span class="n">get_sigma_grid</span><span class="p">()</span>
-<span class="go">array([-0.025, -0.024, -0.023, ... 0.023,  0.024,  0.025])</span>
-</pre></div>
-</div>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_sigma_profile">
-<span class="sig-name descname"><span class="pre">get_sigma_profile</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">segment_class</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_sigma_profile"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_sigma_profile" title="Link to this definition">#</a></dt>
-<dd><p>Get the sigma profile for a given segment class or the overall sigma profile.</p>
-<p>The segment classes are:
-- NHB: Non-hydrogen-bonding segments
-- OH: Segments associated with hydroxyl groups
-- OT: Segments associated with other hydrogen-bonding groups</p>
-<dl class="field-list simple">
-<dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>segment_class</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em>, </em><em>optional</em>) – Segment class. If None, returns the total sigma profile.</p>
-</dd>
-<dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Sigma profile for the given segment class or the overall sigma profile.
-Shape: (num_points,). Units: Å².</p>
-</dd>
-<dt class="field-odd">Return type<span class="colon">:</span></dt>
-<dd class="field-odd"><p>np.ndarray</p>
-</dd>
-</dl>
-</dd></dl>
-
-<dl class="py method">
-<dt class="sig sig-object py" id="cosmolayer.cosmosac.Component.get_volume">
-<span class="sig-name descname"><span class="pre">get_volume</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/component.html#Component.get_volume"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.Component.get_volume" title="Link to this definition">#</a></dt>
-<dd><p>Get the cavity volume of the molecule in Å³.</p>
-<dl class="field-list simple">
-<dt class="field-odd">Returns<span class="colon">:</span></dt>
-<dd class="field-odd"><p>Cavity volume in Å³.</p>
-</dd>
-<dt class="field-even">Return type<span class="colon">:</span></dt>
-<dd class="field-even"><p><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)">float</a></p>
-</dd>
-</dl>
 </dd></dl>
 
 </dd></dl>
@@ -874,17 +867,18 @@ Shape: (num_points,). Units: Å².</p>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component"><code class="docutils literal notranslate"><span class="pre">Component</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.area"><code class="docutils literal notranslate"><span class="pre">area</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.atom_data"><code class="docutils literal notranslate"><span class="pre">atom_data</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.bonds"><code class="docutils literal notranslate"><span class="pre">bonds</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.cosmo_format"><code class="docutils literal notranslate"><span class="pre">cosmo_format</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.merge_profiles"><code class="docutils literal notranslate"><span class="pre">merge_profiles</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.probabilities"><code class="docutils literal notranslate"><span class="pre">probabilities</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.segment_data"><code class="docutils literal notranslate"><span class="pre">segment_data</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.sigma_grid"><code class="docutils literal notranslate"><span class="pre">sigma_grid</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.sigma_profile"><code class="docutils literal notranslate"><span class="pre">sigma_profile</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.volume"><code class="docutils literal notranslate"><span class="pre">volume</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.from_file"><code class="docutils literal notranslate"><span class="pre">from_file</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.from_text_reader"><code class="docutils literal notranslate"><span class="pre">from_text_reader</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_area"><code class="docutils literal notranslate"><span class="pre">get_area</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_atom_data"><code class="docutils literal notranslate"><span class="pre">get_atom_data</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_bonds"><code class="docutils literal notranslate"><span class="pre">get_bonds</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_format"><code class="docutils literal notranslate"><span class="pre">get_format</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_probabilities"><code class="docutils literal notranslate"><span class="pre">get_probabilities</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_segment_data"><code class="docutils literal notranslate"><span class="pre">get_segment_data</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_sigma_grid"><code class="docutils literal notranslate"><span class="pre">get_sigma_grid</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_sigma_profile"><code class="docutils literal notranslate"><span class="pre">get_sigma_profile</span></code></a></li>
-<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.Component.get_volume"><code class="docutils literal notranslate"><span class="pre">get_volume</span></code></a></li>
 </ul>
 </li>
 </ul>

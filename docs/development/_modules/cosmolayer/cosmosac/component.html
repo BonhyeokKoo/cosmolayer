@@ -452,7 +452,8 @@
 <span class="sd">        Default is 0.007 e/Å² :cite:`Bell2020`.</span>
 <span class="sd">    merge_profiles : bool, optional</span>
 <span class="sd">        Whether to merge segment groups (NHB, OH, OT) into a single profile</span>
-<span class="sd">        when calling get_probabilities(). Default is False.</span>
+<span class="sd">        when accessing :attr:`probabilities` and :attr:`sigma_profile`.</span>
+<span class="sd">        Default is False.</span>
 
 <span class="sd">    Raises</span>
 <span class="sd">    ------</span>
@@ -468,38 +469,51 @@
 <span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
 <span class="sd">    &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">    &gt;&gt;&gt; component = Component(path.read_text())</span>
-<span class="sd">    &gt;&gt;&gt; component.get_area()</span>
+<span class="sd">    &gt;&gt;&gt; component.area</span>
 <span class="sd">    97.34554...</span>
-<span class="sd">    &gt;&gt;&gt; component.get_volume()</span>
+<span class="sd">    &gt;&gt;&gt; component.volume</span>
 <span class="sd">    80.07160...</span>
-<span class="sd">    &gt;&gt;&gt; sigma_profile = component.get_sigma_profile()</span>
+
+<span class="sd">    When :attr:`merge_profiles` is True, :attr:`sigma_profile` is a single</span>
+<span class="sd">    merged profile:</span>
+
+<span class="sd">    &gt;&gt;&gt; component = Component(path.read_text(), merge_profiles=True)</span>
+<span class="sd">    &gt;&gt;&gt; sigma_profile = component.sigma_profile</span>
+<span class="sd">    &gt;&gt;&gt; sigma_profile.shape</span>
+<span class="sd">    (51,)</span>
 <span class="sd">    &gt;&gt;&gt; print(sum(sigma_profile))</span>
 <span class="sd">    97.34554...</span>
-<span class="sd">    &gt;&gt;&gt; sigma_profiles = {</span>
-<span class="sd">    ...     s: component.get_sigma_profile(s)</span>
-<span class="sd">    ...     for s in [&quot;NHB&quot;, &quot;OH&quot;, &quot;OT&quot;]</span>
-<span class="sd">    ... }</span>
-<span class="sd">    &gt;&gt;&gt; for s in [&quot;NHB&quot;, &quot;OH&quot;, &quot;OT&quot;]:</span>
-<span class="sd">    ...     print(s, sum(sigma_profiles[s]))</span>
+
+<span class="sd">    When :attr:`merge_profiles` is False, :attr:`sigma_profile` is stacked</span>
+<span class="sd">    (NHB, OH, OT), shape (3, num_points):</span>
+
+<span class="sd">    &gt;&gt;&gt; component = Component(path.read_text(), merge_profiles=False)</span>
+<span class="sd">    &gt;&gt;&gt; stacked = component.sigma_profile</span>
+<span class="sd">    &gt;&gt;&gt; stacked.shape</span>
+<span class="sd">    (3, 51)</span>
+<span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac.segment_groups import SEGMENT_GROUPS</span>
+<span class="sd">    &gt;&gt;&gt; for i, s in enumerate(SEGMENT_GROUPS):</span>
+<span class="sd">    ...     print(s, sum(stacked[i]))</span>
 <span class="sd">    NHB 72.31802...</span>
 <span class="sd">    OH 12.25732...</span>
 <span class="sd">    OT 12.77019...</span>
 
-<span class="sd">    Plotting the sigma profiles:</span>
+<span class="sd">    Plotting the sigma profiles (stacked, :attr:`merge_profiles` is False):</span>
+
 
 <span class="sd">    .. plot::</span>
 <span class="sd">        :context: close-figs</span>
 
 <span class="sd">        &gt;&gt;&gt; from importlib.resources import files</span>
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
+<span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac.segment_groups import SEGMENT_GROUPS</span>
 <span class="sd">        &gt;&gt;&gt; from matplotlib import pyplot as plt</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
-<span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
+<span class="sd">        &gt;&gt;&gt; component = Component(path.read_text(), merge_profiles=False)</span>
 <span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots(figsize=(8, 4))</span>
-<span class="sd">        &gt;&gt;&gt; grid = component.get_sigma_grid()</span>
-<span class="sd">        &gt;&gt;&gt; for s in [&quot;NHB&quot;, &quot;OH&quot;, &quot;OT&quot;]:</span>
-<span class="sd">        ...     _ = ax.plot(grid, component.get_sigma_profile(s), label=s)</span>
-<span class="sd">        &gt;&gt;&gt; _ = ax.plot(grid, component.get_sigma_profile(), label=&quot;Overall&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; grid = component.sigma_grid</span>
+<span class="sd">        &gt;&gt;&gt; for i, label in enumerate(SEGMENT_GROUPS):</span>
+<span class="sd">        ...     _ = ax.plot(grid, component.sigma_profile[i], label=label)</span>
 <span class="sd">        &gt;&gt;&gt; _ = ax.set_xlabel(&quot;Charge density (e/Å²)&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; _ = ax.set_ylabel(&quot;Surface area contribution (Å²)&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; _ = ax.legend()</span>
@@ -516,7 +530,7 @@
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
 <span class="sd">        &gt;&gt;&gt; fig, ax = plt.subplots(figsize=(8, 4))</span>
-<span class="sd">        &gt;&gt;&gt; p = component.get_probabilities()</span>
+<span class="sd">        &gt;&gt;&gt; p = component.probabilities</span>
 <span class="sd">        &gt;&gt;&gt; _ = ax.bar(range(len(p)), p)</span>
 <span class="sd">        &gt;&gt;&gt; _ = ax.set_xlabel(&quot;Segment type index&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; _ = ax.set_ylabel(&quot;Probability&quot;)</span>
@@ -735,7 +749,7 @@
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; with open(path, encoding=&quot;utf-8&quot;) as file:</span>
 <span class="sd">        ...     component = Component.from_text_reader(file)</span>
-<span class="sd">        &gt;&gt;&gt; component.get_area(), component.get_volume()</span>
+<span class="sd">        &gt;&gt;&gt; component.area, component.volume</span>
 <span class="sd">        (97.34554..., 80.07160...)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -767,7 +781,7 @@
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = Component.from_file(path)</span>
-<span class="sd">        &gt;&gt;&gt; component.get_area(), component.get_volume()</span>
+<span class="sd">        &gt;&gt;&gt; component.area, component.volume</span>
 <span class="sd">        (97.34554..., 80.07160...)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -778,42 +792,24 @@
             <span class="k">return</span> <span class="bp">cls</span><span class="o">.</span><span class="n">from_text_reader</span><span class="p">(</span><span class="n">file</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Component.get_area">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_area">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_area</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the cavity surface area of the molecule in Å².</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">area</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cavity surface area of the molecule in Å².</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        float</span>
-<span class="sd">            Cavity surface area in Å². This is the sum of the areas of all</span>
-<span class="sd">            segments from the COSMO calculation.</span>
+<span class="sd">        Sum of the areas of all segments from the COSMO calculation.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">volume</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Cavity volume of the molecule in Å³.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span>
 
-<div class="viewcode-block" id="Component.get_volume">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_volume">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_volume</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the cavity volume of the molecule in Å³.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">cosmo_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;COSMO file format that was parsed.</span>
 
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        float</span>
-<span class="sd">            Cavity volume in Å³.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_volume</span></div>
-
-
-<div class="viewcode-block" id="Component.get_format">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_format">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_format</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the COSMO file format that was parsed.</span>
-
-<span class="sd">        Returns</span>
-<span class="sd">        -------</span>
-<span class="sd">        str</span>
-<span class="sd">            The detected file format. Either &quot;TURBOMOLE&quot; or &quot;DMol-3&quot;.</span>
+<span class="sd">        Either &quot;TURBOMOLE&quot; or &quot;DMol-3&quot;.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -821,30 +817,26 @@
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = Component.from_file(path)</span>
-<span class="sd">        &gt;&gt;&gt; component.get_format()</span>
+<span class="sd">        &gt;&gt;&gt; component.cosmo_format</span>
 <span class="sd">        &#39;TURBOMOLE&#39;</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = Component.from_file(path)</span>
-<span class="sd">        &gt;&gt;&gt; component.get_format()</span>
+<span class="sd">        &gt;&gt;&gt; component.cosmo_format</span>
 <span class="sd">        &#39;DMol-3&#39;</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">atom_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Atom data from the parsed COSMO file.</span>
 
-<div class="viewcode-block" id="Component.get_atom_data">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_atom_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_atom_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the atom data.</span>
-
-<span class="sd">        Get a pandas DataFrame containing the following columns:</span>
-<span class="sd">        - id: atom identifier (str)</span>
-<span class="sd">        - x, y, z: Cartesian coordinates in Å (float)</span>
-<span class="sd">        - element: chemical element symbol (str)</span>
+<span class="sd">        DataFrame columns: ``id`` (atom identifier), ``x``, ``y``, ``z`` (Cartesian</span>
+<span class="sd">        coordinates in Å), ``element`` (chemical symbol).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        pd.DataFrame</span>
-<span class="sd">            Atom data.</span>
+<span class="sd">            One row per atom.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -852,7 +844,7 @@
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
-<span class="sd">        &gt;&gt;&gt; component.get_atom_data()</span>
+<span class="sd">        &gt;&gt;&gt; component.atom_data</span>
 <span class="sd">           id       x       y       z element</span>
 <span class="sd">        0  C1 -1.4... -0.2...  0.0...       C</span>
 <span class="sd">        1  C2 -0.0...  0.0...  0.0...       C</span>
@@ -861,26 +853,21 @@
 <span class="sd">        8  H5  1.1...  1.3... -0.4...       H</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_atom_data</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">segment_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Segment (surface tile) data from the COSMO calculation.</span>
 
-<div class="viewcode-block" id="Component.get_segment_data">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_segment_data">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_segment_data</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the segment data.</span>
-
-<span class="sd">        Get a pandas DataFrame containing the following columns:</span>
-<span class="sd">        - atom: index of the atom associated with the segment (int)</span>
-<span class="sd">        - x, y, z: segment coordinates in Å² (float)</span>
-<span class="sd">        - charge: segment charge in e (float)</span>
-<span class="sd">        - area: segment surface area in Å² (float)</span>
-<span class="sd">        - sigma: screening charge density in e/Å² (float)</span>
-<span class="sd">        - sigma_avg: smoothed charge density in e/Å² (float)</span>
+<span class="sd">        DataFrame columns: ``atom`` (parent atom index), ``x``, ``y``, ``z``</span>
+<span class="sd">        (segment centroid coordinates in Å), ``charge`` (e), ``area`` (Å²),</span>
+<span class="sd">        ``sigma`` (screening charge density in e/Å²), ``sigma_avg`` (smoothed</span>
+<span class="sd">        density in e/Å²).</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        pd.DataFrame</span>
-<span class="sd">            Segment data.</span>
+<span class="sd">            One row per segment.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -888,7 +875,7 @@
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
-<span class="sd">        &gt;&gt;&gt; component.get_segment_data()</span>
+<span class="sd">        &gt;&gt;&gt; component.segment_data</span>
 <span class="sd">             atom         x         y  ...      area     sigma  sigma_avg</span>
 <span class="sd">        0       0 -0.867... -1.196...  ...  0.206...  0.010...   0.007...</span>
 <span class="sd">        1       0 -1.504... -1.502...  ...  0.218...  0.007...   0.005...</span>
@@ -898,19 +885,16 @@
 <span class="sd">        [471 rows x 8 columns]</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_segment_data</span>
 
-
-<div class="viewcode-block" id="Component.get_bonds">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_bonds">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the bonds between atoms.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">bonds</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">tuple</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Bonds between atoms, inferred from interatomic distances.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        list[tuple[int, int]]</span>
-<span class="sd">            List of bonds between atoms. Each bond is represented as a tuple of two</span>
-<span class="sd">            integers, the indices of the atoms in the bond.</span>
+<span class="sd">            Pairs of atom indices (i, j) for each bond.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -918,15 +902,13 @@
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
-<span class="sd">        &gt;&gt;&gt; component.get_bonds()</span>
+<span class="sd">        &gt;&gt;&gt; component.bonds</span>
 <span class="sd">        [(0, 1), (0, 4), (0, 5), ... (2, 7), (3, 8)]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bonds</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bonds</span>
 
-
-<div class="viewcode-block" id="Component.get_sigma_grid">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_sigma_grid">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_sigma_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_grid</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the screening charge density grid in e/Å².</span>
 
 <span class="sd">        Returns</span>
@@ -940,63 +922,56 @@
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = Component(path.read_text())</span>
-<span class="sd">        &gt;&gt;&gt; component.get_sigma_grid()</span>
+<span class="sd">        &gt;&gt;&gt; component.sigma_grid</span>
 <span class="sd">        array([-0.025, -0.024, -0.023, ... 0.023,  0.024,  0.025])</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_grid</span>
 
-
-<div class="viewcode-block" id="Component.get_sigma_profile">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_sigma_profile">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_sigma_profile</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">segment_class</span><span class="p">:</span> <span class="nb">str</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the sigma profile for a given segment class or the overall sigma profile.</span>
-
-<span class="sd">        The segment classes are:</span>
-<span class="sd">        - NHB: Non-hydrogen-bonding segments</span>
-<span class="sd">        - OH: Segments associated with hydroxyl groups</span>
-<span class="sd">        - OT: Segments associated with other hydrogen-bonding groups</span>
-
-<span class="sd">        Parameters</span>
-<span class="sd">        ----------</span>
-<span class="sd">        segment_class : str, optional</span>
-<span class="sd">            Segment class. If None, returns the total sigma profile.</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">merge_profiles</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Whether segment groups (NHB, OH, OT) are merged for :attr:`sigma_profile`</span>
+<span class="sd">        and :attr:`probabilities`.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
-<span class="sd">        np.ndarray</span>
-<span class="sd">            Sigma profile for the given segment class or the overall sigma profile.</span>
-<span class="sd">            Shape: (num_points,). Units: Å².</span>
+<span class="sd">        bool</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">segment_class</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">profile</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span><span class="p">[</span>
-                    <span class="n">segment_class</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-                <span class="p">]</span>
-                <span class="k">return</span> <span class="n">profile</span>
-            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Invalid segment class: </span><span class="si">{</span><span class="n">segment_class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="kn">from</span><span class="w"> </span><span class="nn">e</span>
-        <span class="n">total_profile</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
-            <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
-        <span class="p">)</span>
-        <span class="k">return</span> <span class="n">total_profile</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_profiles</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">sigma_profile</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Surface area distribution over screening charge density (sigma), in Å².</span>
 
-<div class="viewcode-block" id="Component.get_probabilities">
-<a class="viewcode-back" href="../../../api/Component.html#cosmolayer.cosmosac.Component.get_probabilities">[docs]</a>
-    <span class="k">def</span><span class="w"> </span><span class="nf">get_probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get the probabilities of segment types in the molecule.</span>
-
-<span class="sd">        A segment type is defined by its hydrogen bonding class (NHB, OH, OT) and its</span>
-<span class="sd">        averaged charge density.</span>
+<span class="sd">        Shape and layout depend on :attr:`merge_profiles`. If True, returns a single</span>
+<span class="sd">        merged profile (sum over NHB, OH, OT), shape ``(num_points,)``. If False,</span>
+<span class="sd">        returns stacked segment profiles in SEGMENT_GROUPS order (NHB, OH, OT),</span>
+<span class="sd">        shape ``(3, num_points)``; ``sigma_profile[0]`` is NHB, ``[1]`` is OH,</span>
+<span class="sd">        ``[2]`` is OT.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        np.ndarray</span>
-<span class="sd">            Normalized probability distribution of segment groups.</span>
-<span class="sd">            Shape is (num_points,) if ``merge_profiles`` is True, otherwise</span>
-<span class="sd">            (3*num_points,).</span>
+<span class="sd">            Sigma profile(s). Units: Å².</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_merge_profiles</span><span class="p">:</span>
+            <span class="n">total_profile</span><span class="p">:</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span>
+                <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span><span class="o">.</span><span class="n">values</span><span class="p">()),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span>
+            <span class="p">)</span>
+            <span class="k">return</span> <span class="n">total_profile</span>
+        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">stack</span><span class="p">([</span><span class="bp">self</span><span class="o">.</span><span class="n">_sigma_profiles</span><span class="p">[</span><span class="n">seg</span><span class="p">]</span> <span class="k">for</span> <span class="n">seg</span> <span class="ow">in</span> <span class="n">SEGMENT_GROUPS</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Normalized segment-type probability distribution (sigma profile / area).</span>
+
+<span class="sd">        Segment types are defined by hydrogen bonding class (NHB, OH, OT) and</span>
+<span class="sd">        averaged charge density. Shape is ``(num_points,)`` if :attr:`merge_profiles`</span>
+<span class="sd">        is True, otherwise ``(3*num_points,)``.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        np.ndarray</span>
+<span class="sd">            Probabilities summing to 1.0.</span>
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
@@ -1005,7 +980,7 @@
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac import Component</span>
 <span class="sd">        &gt;&gt;&gt; cosmo_string = (files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;).read_text()</span>
 <span class="sd">        &gt;&gt;&gt; component = Component(cosmo_string, merge_profiles=True)</span>
-<span class="sd">        &gt;&gt;&gt; probabilities = component.get_probabilities()</span>
+<span class="sd">        &gt;&gt;&gt; probabilities = component.probabilities</span>
 <span class="sd">        &gt;&gt;&gt; probabilities.shape</span>
 <span class="sd">        (51,)</span>
 <span class="sd">        &gt;&gt;&gt; bool(np.all(probabilities &lt;= 1))</span>
@@ -1013,7 +988,7 @@
 <span class="sd">        &gt;&gt;&gt; bool(np.isclose(probabilities.sum(), 1.0))</span>
 <span class="sd">        True</span>
 <span class="sd">        &gt;&gt;&gt; component = Component(cosmo_string, merge_profiles=False)</span>
-<span class="sd">        &gt;&gt;&gt; probabilities_full = component.get_probabilities()</span>
+<span class="sd">        &gt;&gt;&gt; probabilities_full = component.probabilities</span>
 <span class="sd">        &gt;&gt;&gt; probabilities_full.shape</span>
 <span class="sd">        (153,)</span>
 <span class="sd">        &gt;&gt;&gt; bool(np.isclose(probabilities_full.sum(), 1.0))</span>
@@ -1026,7 +1001,6 @@
             <span class="k">else</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">(</span><span class="n">profiles</span><span class="p">)</span>
         <span class="p">)</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">_area</span>
         <span class="k">return</span> <span class="n">probabilities</span></div>
-</div>
 
 </pre></div>
 

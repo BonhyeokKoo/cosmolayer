@@ -480,7 +480,7 @@
 <span class="sd">    ...     for species in (&quot;C=C(N)O&quot;, &quot;NCCO&quot;)</span>
 <span class="sd">    ... ]</span>
 <span class="sd">    &gt;&gt;&gt; probabilities = [</span>
-<span class="sd">    ...     CosmoSac2002Model.create_component(cosmo_string).get_probabilities()</span>
+<span class="sd">    ...     CosmoSac2002Model.create_component(cosmo_string).probabilities</span>
 <span class="sd">    ...     for cosmo_string in cosmo_strings</span>
 <span class="sd">    ... ]</span>
 <span class="sd">    &gt;&gt;&gt; p = torch.stack(</span>

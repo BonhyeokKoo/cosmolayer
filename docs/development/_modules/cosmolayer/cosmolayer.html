@@ -470,9 +470,9 @@
 <span class="sd">    ...     &quot;water&quot;: (source / &quot;O.cosmo&quot;).read_text(),</span>
 <span class="sd">    ... }</span>
 <span class="sd">    &gt;&gt;&gt; mixture = CosmoSac2002Model.create_mixture(components)</span>
-<span class="sd">    &gt;&gt;&gt; interaction_matrices = mixture.get_interaction_matrices(T_ref)</span>
-<span class="sd">    &gt;&gt;&gt; exponents = mixture.get_temperature_exponents()</span>
-<span class="sd">    &gt;&gt;&gt; area_per_segment = mixture.get_area_per_segment()</span>
+<span class="sd">    &gt;&gt;&gt; interaction_matrices = mixture.interaction_matrices(T_ref)</span>
+<span class="sd">    &gt;&gt;&gt; exponents = mixture.temperature_exponents</span>
+<span class="sd">    &gt;&gt;&gt; area_per_segment = mixture.area_per_segment</span>
 <span class="sd">    &gt;&gt;&gt; cosmo_layer = CosmoLayer(interaction_matrices, exponents, area_per_segment)</span>
 <span class="sd">    &gt;&gt;&gt; cosmo_layer</span>
 <span class="sd">    CosmoLayer(</span>
@@ -483,9 +483,9 @@
 <span class="sd">    )</span>
 <span class="sd">    &gt;&gt;&gt; T = torch.tensor(373.15)</span>
 <span class="sd">    &gt;&gt;&gt; x = torch.tensor([0.5, 0.5], requires_grad=True)</span>
-<span class="sd">    &gt;&gt;&gt; a = torch.tensor(mixture.get_areas())</span>
-<span class="sd">    &gt;&gt;&gt; v = torch.tensor(mixture.get_volumes())</span>
-<span class="sd">    &gt;&gt;&gt; P = torch.tensor(mixture.get_probabilities())</span>
+<span class="sd">    &gt;&gt;&gt; a = torch.tensor(mixture.areas)</span>
+<span class="sd">    &gt;&gt;&gt; v = torch.tensor(mixture.volumes)</span>
+<span class="sd">    &gt;&gt;&gt; P = torch.tensor(mixture.probabilities)</span>
 <span class="sd">    &gt;&gt;&gt; ln_gamma = cosmo_layer(T, x, a, v, P)</span>
 <span class="sd">    &gt;&gt;&gt; ln_gamma.tolist()</span>
 <span class="sd">    [0.805809..., 0.648071...]</span>

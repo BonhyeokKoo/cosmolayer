@@ -473,7 +473,7 @@
 <span class="sd">    &gt;&gt;&gt; from cosmolayer.cosmosac.model import CosmoSac2002Model</span>
 <span class="sd">    &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">    &gt;&gt;&gt; component = CosmoSac2002Model.create_component(path.read_text())</span>
-<span class="sd">    &gt;&gt;&gt; component.get_area()</span>
+<span class="sd">    &gt;&gt;&gt; component.area</span>
 <span class="sd">    97.34554...</span>
 
 <span class="sd">    Inspecting model parameters:</span>
@@ -603,9 +603,9 @@
 <span class="sd">        &gt;&gt;&gt; from cosmolayer.cosmosac.model import CosmoSac2010Model</span>
 <span class="sd">        &gt;&gt;&gt; path = files(&quot;cosmolayer.data&quot;) / &quot;C=C(N)O.cosmo&quot;</span>
 <span class="sd">        &gt;&gt;&gt; component = CosmoSac2010Model.create_component(path.read_text())</span>
-<span class="sd">        &gt;&gt;&gt; component.get_area()</span>
+<span class="sd">        &gt;&gt;&gt; component.area</span>
 <span class="sd">        97.34554...</span>
-<span class="sd">        &gt;&gt;&gt; component.get_probabilities().shape</span>
+<span class="sd">        &gt;&gt;&gt; component.probabilities.shape</span>
 <span class="sd">        (153,)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Component</span><span class="p">(</span>
@@ -664,7 +664,7 @@
 <span class="sd">        &gt;&gt;&gt; mixture = CosmoSac2002Model.create_mixture(components)</span>
 <span class="sd">        &gt;&gt;&gt; len(mixture)</span>
 <span class="sd">        2</span>
-<span class="sd">        &gt;&gt;&gt; mixture.get_interaction_matrices(298.15)[0].shape</span>
+<span class="sd">        &gt;&gt;&gt; mixture.interaction_matrices(298.15)[0].shape</span>
 <span class="sd">        (51, 51)</span>
 
 <span class="sd">        Creating a mixture with the COSMO-SAC 2010 model:</span>
@@ -672,7 +672,7 @@
 <span class="sd">        &gt;&gt;&gt; mixture = CosmoSac2010Model.create_mixture(components)</span>
 <span class="sd">        &gt;&gt;&gt; len(mixture)</span>
 <span class="sd">        2</span>
-<span class="sd">        &gt;&gt;&gt; matrices = mixture.get_interaction_matrices(298.15)</span>
+<span class="sd">        &gt;&gt;&gt; matrices = mixture.interaction_matrices(298.15)</span>
 <span class="sd">        &gt;&gt;&gt; len(matrices)</span>
 <span class="sd">        2</span>
 <span class="sd">        &gt;&gt;&gt; all(m.shape == (153, 153) for m in matrices)</span>

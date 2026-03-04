@@ -5,25 +5,29 @@ Mixture
 .. autoclass:: Mixture
     :member-order: alphabetical
 
+    .. rubric:: Attributes
+
+    .. autoattribute:: area_per_segment
+        :no-index-entry:
+    .. autoattribute:: areas
+        :no-index-entry:
+    .. autoattribute:: component_names
+        :no-index-entry:
+    .. autoattribute:: merge_profiles
+        :no-index-entry:
+    .. autoattribute:: probabilities
+        :no-index-entry:
+    .. autoattribute:: sigma_profiles
+        :no-index-entry:
+    .. autoattribute:: temperature_exponents
+        :no-index-entry:
+    .. autoattribute:: volumes
+        :no-index-entry:
     .. rubric:: Methods
 
     .. automethod:: add_component
         :no-index-entry:
-    .. automethod:: get_area_per_segment
-        :no-index-entry:
-    .. automethod:: get_areas
-        :no-index-entry:
-    .. automethod:: get_component_names
-        :no-index-entry:
-    .. automethod:: get_interaction_matrices
-        :no-index-entry:
-    .. automethod:: get_probabilities
-        :no-index-entry:
-    .. automethod:: get_sigma_profiles
-        :no-index-entry:
-    .. automethod:: get_temperature_exponents
-        :no-index-entry:
-    .. automethod:: get_volumes
+    .. automethod:: interaction_matrices
         :no-index-entry:
     .. automethod:: remove_component
         :no-index-entry:
