@@ -13,6 +13,7 @@ import numpy as np
 import pytest
 
 from cosmolayer.cosmosac import Component
+from cosmolayer.cosmosac.segment_groups import SEGMENT_GROUPS
 
 
 def load_reference_sigma_profiles(
@@ -104,9 +105,10 @@ def test_dmol3_parser_integration() -> None:
     2. The Component class correctly processes DMol-3 data
     3. Calculated sigma profiles match precalculated reference values
     """
-    # Load the COSMO file using the Component class with default parameters
+    # Load the COSMO file using the Component class with merge_profiles=False for
+    # stacked sigma_profile
     cosmo_path = files("cosmolayer.data") / "NCCO.cosmo"
-    component = Component.from_file(cosmo_path)
+    component = Component(cosmo_path.read_text(), merge_profiles=False)
 
     # Load reference sigma profiles
     sigma_path = files("cosmolayer.data") / "NCCO.sigma3"
@@ -115,7 +117,7 @@ def test_dmol3_parser_integration() -> None:
     )
 
     # Get calculated sigma grid
-    calculated_sigma_grid = component.get_sigma_grid()
+    calculated_sigma_grid = component.sigma_grid
 
     # Verify sigma grid matches exactly
     np.testing.assert_allclose(
@@ -126,17 +128,18 @@ def test_dmol3_parser_integration() -> None:
         err_msg="Sigma grid does not match expected values",
     )
 
-    # Get calculated sigma profiles for each segment group
+    # Get calculated sigma profiles (stacked in SEGMENT_GROUPS order: NHB, OH, OT)
+    calculated_stacked = component.sigma_profile
     calculated_profiles = {
-        group: component.get_sigma_profile(group) for group in ["NHB", "OH", "OT"]
+        seg: calculated_stacked[i] for i, seg in enumerate(SEGMENT_GROUPS)
     }
 
     # Verify basic properties match metadata from .sigma file
-    assert component.get_area() == pytest.approx(expected_area, abs=1e-4)
-    assert component.get_volume() == pytest.approx(expected_volume, abs=1e-5)
+    assert component.area == pytest.approx(expected_area, abs=1e-4)
+    assert component.volume == pytest.approx(expected_volume, abs=1e-5)
 
     # Verify that the calculated profiles have reasonable properties
-    for group_name in ["NHB", "OH", "OT"]:
+    for group_name in SEGMENT_GROUPS:
         calculated = calculated_profiles[group_name]
         expected = expected_profiles[group_name]
 
