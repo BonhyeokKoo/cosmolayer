@@ -9,6 +9,8 @@ Classes
 
     CosmoLayer
     CosmoSolver
+    MixtureDatapoint
+    MixtureDataset
 
 .. testsetup::
 

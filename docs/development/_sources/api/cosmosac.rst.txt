@@ -8,6 +8,7 @@ Classes
     :titlesonly:
 
     Component
+    CosmoSacMixtureDatapoint
     Mixture
     Model
 
