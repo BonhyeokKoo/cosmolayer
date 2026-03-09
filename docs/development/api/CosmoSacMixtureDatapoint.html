@@ -363,9 +363,11 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 has-children"><a class="reference internal" href="core.html">Core API</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
 <li class="toctree-l2"><a class="reference internal" href="CosmoLayer.html">CosmoLayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoLightningModule.html">CosmoLightningModule</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSolver.html">CosmoSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="MixtureDatapoint.html">MixtureDatapoint</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MixtureDataset.html">MixtureDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MixtureInferenceDataset.html">MixtureInferenceDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MixtureTrainingDataset.html">MixtureTrainingDataset</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="cosmosac.html">COSMO-SAC</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
@@ -453,8 +455,9 @@
 <code class="docutils literal notranslate"><span class="pre">mole_fractions</span></code> and rows of <code class="docutils literal notranslate"><span class="pre">component_targets</span></code>.</p></li>
 <li><p><strong>mole_fractions</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – Mole fractions for each component (should sum to 1).</p></li>
 <li><p><strong>temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Temperature in Kelvin.</p></li>
-<li><p><strong>targets</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – Target values for the mixture (e.g. activity coefficients, excess
-properties). Length defines the number of training targets.</p></li>
+<li><p><strong>targets</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>] </em><em>| </em><em>None</em><em>, </em><em>optional</em>) – Target values for the mixture (e.g. activity coefficients, excess
+properties). Length defines the number of training targets. If <code class="docutils literal notranslate"><span class="pre">None</span></code>,
+no training targets are stored.</p></li>
 <li><p><strong>model</strong> (<a class="reference internal" href="Model.html#cosmolayer.cosmosac.Model" title="cosmolayer.cosmosac.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">Model</span></code></a>) – COSMO-SAC model used to load components and compute probabilities.</p></li>
 </ul>
 </dd>
@@ -493,6 +496,65 @@ and targets:</p>
 <span class="go">1</span>
 </pre></div>
 </div>
+<p class="rubric">Methods</p>
+<dl class="py method">
+<dt class="sig sig-object py" id="cosmolayer.cosmosac.CosmoSacMixtureDatapoint.from_series">
+<span class="property"><span class="k"><span class="pre">classmethod</span></span><span class="w"> </span></span><span class="sig-name descname"><span class="pre">from_series</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">series</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">cosmo_files</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">mole_fractions</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">temperature</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">targets</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">model</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">Model(area_per_segment=7.25,</span> <span class="pre">averaging_radius=np.float64(1.5191269449366247),</span> <span class="pre">f_decay=3.57,</span> <span class="pre">sigma_0=0.007,</span> <span class="pre">merge_profiles=False,</span> <span class="pre">temperature_exponents=(1,</span> <span class="pre">3))</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmosac/datapoint.html#CosmoSacMixtureDatapoint.from_series"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.cosmosac.CosmoSacMixtureDatapoint.from_series" title="Link to this definition">#</a></dt>
+<dd><p>Build a mixture datapoint from one row of a DataFrame (as a Series).</p>
+<p>This method is useful for building
+<a class="reference internal" href="MixtureTrainingDataset.html#cosmolayer.MixtureTrainingDataset" title="cosmolayer.MixtureTrainingDataset"><code class="xref py py-class docutils literal notranslate"><span class="pre">MixtureTrainingDataset</span></code></a>
+instances from a pandas DataFrame using <code class="xref py py-meth docutils literal notranslate"><span class="pre">pandas.DataFrame.apply</span></code>.</p>
+<p>Column specifiers can be column names (strings), in which case values
+are taken from <code class="docutils literal notranslate"><span class="pre">series[key]</span></code>, or literal numbers or paths (floats or
+os.PathLike), which are converted to strings and used as-is. This allows
+mixing DataFrame columns with fixed values (e.g. same solvent, same
+temperature, or same mole fractions for all datapoints).</p>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">importlib.resources</span><span class="w"> </span><span class="kn">import</span> <span class="n">files</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">data</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">files</span><span class="p">(</span><span class="s2">&quot;cosmolayer&quot;</span><span class="p">)</span> <span class="o">/</span> <span class="s2">&quot;data&quot;</span><span class="p">))</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">row</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="p">{</span>
+<span class="gp">... </span>        <span class="s2">&quot;file_a&quot;</span><span class="p">:</span> <span class="n">data</span> <span class="o">/</span> <span class="s2">&quot;C=C(N)O.cosmo&quot;</span><span class="p">,</span>
+<span class="gp">... </span>        <span class="s2">&quot;target_1&quot;</span><span class="p">:</span> <span class="mf">1.2</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="p">}</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point</span> <span class="o">=</span> <span class="n">CosmoSacMixtureDatapoint</span><span class="o">.</span><span class="n">from_series</span><span class="p">(</span>
+<span class="gp">... </span>    <span class="n">series</span><span class="o">=</span><span class="n">row</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">cosmo_files</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;file_a&quot;</span><span class="p">,</span> <span class="n">data</span> <span class="o">/</span> <span class="s2">&quot;NCCO.cosmo&quot;</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">mole_fractions</span><span class="o">=</span><span class="p">[</span><span class="mf">0.25</span><span class="p">,</span> <span class="mf">0.75</span><span class="p">],</span>
+<span class="gp">... </span>    <span class="n">temperature</span><span class="o">=</span><span class="mf">298.15</span><span class="p">,</span>
+<span class="gp">... </span>    <span class="n">targets</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;target_1&quot;</span><span class="p">],</span>
+<span class="gp">... </span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point</span><span class="o">.</span><span class="n">num_components</span><span class="p">,</span> <span class="n">point</span><span class="o">.</span><span class="n">num_targets</span>
+<span class="go">(2, 1)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">point</span><span class="o">.</span><span class="n">mole_fractions</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+<span class="go">[0.25, 0.75]</span>
+</pre></div>
+</div>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters<span class="colon">:</span></dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>series</strong> (<em>pd.Series</em>) – One row of a DataFrame (e.g. from <code class="docutils literal notranslate"><span class="pre">df.iloc[i]</span></code> or <code class="docutils literal notranslate"><span class="pre">df.iterrows()</span></code>).</p></li>
+<li><p><strong>cosmo_files</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/pathlib.html#pathlib.Path" title="(in Python v3.14)"><em>pathlib.Path</em></a><em>]</em>) – For each component, either a column name (str) or a path to a COSMO
+file (pathlib.Path).</p></li>
+<li><p><strong>mole_fractions</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – For each component, either a column name (str) or a literal mole
+fraction (float). Values should sum to 1.</p></li>
+<li><p><strong>temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Column name for temperature in Kelvin, or a literal temperature.</p></li>
+<li><p><strong>targets</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/stdtypes.html#str" title="(in Python v3.14)"><em>str</em></a><em> | </em><a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>]</em>) – For each target, either a column name (str) or a literal value (float).</p></li>
+<li><p><strong>model</strong> (<a class="reference internal" href="Model.html#cosmolayer.cosmosac.Model" title="cosmolayer.cosmosac.Model"><em>Model</em></a><em>, </em><em>optional</em>) – COSMO-SAC model used to load components. Default is
+<code class="xref py py-class docutils literal notranslate"><span class="pre">CosmoSac2010Model</span></code>.</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns<span class="colon">:</span></dt>
+<dd class="field-even"><p>A datapoint built from the series values.</p>
+</dd>
+<dt class="field-odd">Return type<span class="colon">:</span></dt>
+<dd class="field-odd"><p><a class="reference internal" href="#cosmolayer.cosmosac.CosmoSacMixtureDatapoint" title="cosmolayer.cosmosac.CosmoSacMixtureDatapoint">CosmoSacMixtureDatapoint</a></p>
+</dd>
+</dl>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -544,7 +606,10 @@ and targets:</p>
   </div>
   <nav class="bd-toc-nav page-toc" aria-labelledby="pst-page-navigation-heading-2">
     <ul class="visible nav section-nav flex-column">
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.CosmoSacMixtureDatapoint"><code class="docutils literal notranslate"><span class="pre">CosmoSacMixtureDatapoint</span></code></a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.CosmoSacMixtureDatapoint"><code class="docutils literal notranslate"><span class="pre">CosmoSacMixtureDatapoint</span></code></a><ul class="visible nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#cosmolayer.cosmosac.CosmoSacMixtureDatapoint.from_series"><code class="docutils literal notranslate"><span class="pre">from_series</span></code></a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 

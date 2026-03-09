@@ -1,0 +1,19 @@
+CosmoLightningModule
+====================
+
+.. currentmodule:: cosmolayer
+.. autoclass:: CosmoLightningModule
+    :member-order: alphabetical
+
+    .. rubric:: Methods
+
+    .. automethod:: configure_optimizers
+        :no-index-entry:
+    .. automethod:: forward
+        :no-index-entry:
+    .. automethod:: test_step
+        :no-index-entry:
+    .. automethod:: training_step
+        :no-index-entry:
+    .. automethod:: validation_step
+        :no-index-entry:

@@ -61,7 +61,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/CosmoLayer';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="CosmoSolver" href="CosmoSolver.html" />
+    <link rel="next" title="CosmoLightningModule" href="CosmoLightningModule.html" />
     <link rel="prev" title="Core API" href="core.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -364,9 +364,11 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="core.html">Core API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">CosmoLayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoLightningModule.html">CosmoLightningModule</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSolver.html">CosmoSolver</a></li>
 <li class="toctree-l2"><a class="reference internal" href="MixtureDatapoint.html">MixtureDatapoint</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MixtureDataset.html">MixtureDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MixtureInferenceDataset.html">MixtureInferenceDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MixtureTrainingDataset.html">MixtureTrainingDataset</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="cosmosac.html">COSMO-SAC</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -445,7 +447,7 @@
 <h1>CosmoLayer<a class="headerlink" href="#cosmolayer" title="Link to this heading">#</a></h1>
 <dl class="py class">
 <dt class="sig sig-object py" id="cosmolayer.CosmoLayer">
-<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">CosmoLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interaction_matrices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_per_segment</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">298.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_matrices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer" title="Link to this definition">#</a></dt>
+<span class="property"><span class="k"><span class="pre">class</span></span><span class="w"> </span></span><span class="sig-prename descclassname"><span class="pre">cosmolayer.</span></span><span class="sig-name descname"><span class="pre">CosmoLayer</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">interaction_matrices</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">exponents</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">area_per_segment</span></span></em>, <em class="sig-param"><span class="keyword-only-separator o"><abbr title="Keyword-only parameters separator (PEP 3102)"><span class="pre">*</span></abbr></span></em>, <em class="sig-param"><span class="n"><span class="pre">output_transform</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">reference_temperature</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">298.15</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">learn_matrices</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">False</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">max_iter</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">100</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer" title="Link to this definition">#</a></dt>
 <dd><p>Differentiable COSMO-type activity coefficient layer.</p>
 <p>This class assumes that the interaction energy matrix <span class="math notranslate nohighlight">\(\mathbf{U}\)</span> can depend
 on the temperature <span class="math notranslate nohighlight">\(T\)</span> through the following relationship:</p>
@@ -468,6 +470,10 @@ Must be square matrices, all with the same shape.</p></li>
 <li><p><strong>exponents</strong> (<em>Sequence</em><em>[</em><a class="reference external" href="https://docs.python.org/3/library/functions.html#int" title="(in Python v3.14)"><em>int</em></a><em>]</em>) – The temperature exponents <span class="math notranslate nohighlight">\((\alpha_1, \ldots, \alpha_N)\)</span>. Must have the
 same length as the number of interaction energy matrices.</p></li>
 <li><p><strong>area_per_segment</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a>) – Area of each surface segment.</p></li>
+<li><p><strong>output_transform</strong> (<em>Callable</em><em>[</em><em>[</em><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a><em>]</em><em>, </em><a class="reference external" href="https://docs.pytorch.org/docs/stable/tensors.html#torch.Tensor" title="(in PyTorch v2.10)"><em>torch.Tensor</em></a><em>]</em><em>, </em><em>optional</em>) – Function to transform the output of the layer from the logarithms of the
+activity coefficients to another tensor-valued quantity of interest.
+If <code class="docutils literal notranslate"><span class="pre">None</span></code> (default), the logarithms of the activity coefficients are
+returned.</p></li>
 <li><p><strong>reference_temperature</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#float" title="(in Python v3.14)"><em>float</em></a><em>, </em><em>optional</em>) – Reference temperature <span class="math notranslate nohighlight">\(T_{\rm ref}\)</span>. Default is 298.15 K.</p></li>
 <li><p><strong>learn_matrices</strong> (<a class="reference external" href="https://docs.python.org/3/library/functions.html#bool" title="(in Python v3.14)"><em>bool</em></a><em>, </em><em>optional</em>) – Whether to register all scaled interaction energy matrices as trainable
 parameters. Default is False.</p></li>
@@ -529,6 +535,9 @@ parameters. Default is False.</p></li>
 <dt class="sig sig-object py" id="cosmolayer.CosmoLayer.forward">
 <span class="sig-name descname"><span class="pre">forward</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">temp</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">fracs</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">areas</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">volumes</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">probs</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmolayer.html#CosmoLayer.forward"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.CosmoLayer.forward" title="Link to this definition">#</a></dt>
 <dd><p>Forward pass of the CosmoLayer.</p>
+<p>The output of the layer is the logarithm of the activity coefficients of the
+components, optionally transformed by the user-provided <code class="docutils literal notranslate"><span class="pre">output_transform</span></code>
+function.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><ul class="simple">
@@ -546,7 +555,9 @@ Shape: (…, num_components, num_segment_types).</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
-<dd class="field-even"><p>Logarithms of the activity coefficients.
+<dd class="field-even"><p>Logarithms of the activity coefficients, or the result of the
+<code class="docutils literal notranslate"><span class="pre">output_transform</span></code> function applied to the logarithms of the activity
+coefficients.
 Shape: (…, num_components).</p>
 </dd>
 <dt class="field-odd">Return type<span class="colon">:</span></dt>
@@ -759,11 +770,11 @@ Shape: (…, num_segment_types, num_segment_types).</p>
       </div>
     </a>
     <a class="right-next"
-       href="CosmoSolver.html"
+       href="CosmoLightningModule.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">CosmoSolver</p>
+        <p class="prev-next-title">CosmoLightningModule</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>

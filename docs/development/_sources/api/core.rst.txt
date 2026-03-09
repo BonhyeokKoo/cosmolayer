@@ -8,9 +8,11 @@ Classes
     :titlesonly:
 
     CosmoLayer
+    CosmoLightningModule
     CosmoSolver
     MixtureDatapoint
-    MixtureDataset
+    MixtureInferenceDataset
+    MixtureTrainingDataset
 
 .. testsetup::
 

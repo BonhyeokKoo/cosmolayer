@@ -1,7 +1,0 @@
-MixtureDataset
-==============
-
-.. currentmodule:: cosmolayer
-.. autoclass:: MixtureDataset
-    :member-order: alphabetical
-

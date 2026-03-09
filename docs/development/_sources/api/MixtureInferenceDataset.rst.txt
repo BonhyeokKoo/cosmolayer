@@ -1,0 +1,7 @@
+MixtureInferenceDataset
+=======================
+
+.. currentmodule:: cosmolayer
+.. autoclass:: MixtureInferenceDataset
+    :member-order: alphabetical
+

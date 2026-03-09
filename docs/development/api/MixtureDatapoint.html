@@ -60,7 +60,7 @@
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/MixtureDatapoint';</script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="MixtureDataset" href="MixtureDataset.html" />
+    <link rel="next" title="MixtureInferenceDataset" href="MixtureInferenceDataset.html" />
     <link rel="prev" title="CosmoSolver" href="CosmoSolver.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
@@ -363,9 +363,11 @@
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
 <li class="toctree-l1 current active has-children"><a class="reference internal" href="core.html">Core API</a><details open="open"><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul class="current">
 <li class="toctree-l2"><a class="reference internal" href="CosmoLayer.html">CosmoLayer</a></li>
+<li class="toctree-l2"><a class="reference internal" href="CosmoLightningModule.html">CosmoLightningModule</a></li>
 <li class="toctree-l2"><a class="reference internal" href="CosmoSolver.html">CosmoSolver</a></li>
 <li class="toctree-l2 current active"><a class="current reference internal" href="#">MixtureDatapoint</a></li>
-<li class="toctree-l2"><a class="reference internal" href="MixtureDataset.html">MixtureDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MixtureInferenceDataset.html">MixtureInferenceDataset</a></li>
+<li class="toctree-l2"><a class="reference internal" href="MixtureTrainingDataset.html">MixtureTrainingDataset</a></li>
 </ul>
 </details></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="cosmosac.html">COSMO-SAC</a><details><summary><span class="toctree-toggle" role="presentation"><i class="fa-solid fa-chevron-down"></i></span></summary><ul>
@@ -495,11 +497,11 @@ and number of training targets.</p>
 <p class="rubric">Methods</p>
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.MixtureDatapoint.get_inputs">
-<span class="sig-name descname"><span class="pre">get_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmodata.html#MixtureDatapoint.get_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.MixtureDatapoint.get_inputs" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_inputs</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float64</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmodata.html#MixtureDatapoint.get_inputs"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.MixtureDatapoint.get_inputs" title="Link to this definition">#</a></dt>
 <dd><p>Convert physical inputs to torch tensors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dtype</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.dtype" title="(in PyTorch v2.10)"><em>torch.dtype</em></a>) – Data type used for all returned tensors.</p>
+<dd class="field-odd"><p><strong>dtype</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.dtype" title="(in PyTorch v2.10)"><em>torch.dtype</em></a>) – Data type used for all returned tensors. Default is <code class="docutils literal notranslate"><span class="pre">torch.float64</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Temperature, mole fractions, areas, volumes, and probabilities
@@ -513,11 +515,11 @@ as torch tensors.</p>
 
 <dl class="py method">
 <dt class="sig sig-object py" id="cosmolayer.MixtureDatapoint.get_targets">
-<span class="sig-name descname"><span class="pre">get_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmodata.html#MixtureDatapoint.get_targets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.MixtureDatapoint.get_targets" title="Link to this definition">#</a></dt>
+<span class="sig-name descname"><span class="pre">get_targets</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">dtype</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">torch.float64</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/cosmolayer/cosmodata.html#MixtureDatapoint.get_targets"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#cosmolayer.MixtureDatapoint.get_targets" title="Link to this definition">#</a></dt>
 <dd><p>Convert target arrays to torch tensors.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
-<dd class="field-odd"><p><strong>dtype</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.dtype" title="(in PyTorch v2.10)"><em>torch.dtype</em></a>) – Data type used for all returned tensors.</p>
+<dd class="field-odd"><p><strong>dtype</strong> (<a class="reference external" href="https://docs.pytorch.org/docs/stable/tensor_attributes.html#torch.dtype" title="(in PyTorch v2.10)"><em>torch.dtype</em></a>) – Data type used for all returned tensors. Default is <code class="docutils literal notranslate"><span class="pre">torch.float64</span></code>.</p>
 </dd>
 <dt class="field-even">Returns<span class="colon">:</span></dt>
 <dd class="field-even"><p>Training targets as torch tensors.</p>
@@ -552,11 +554,11 @@ as torch tensors.</p>
       </div>
     </a>
     <a class="right-next"
-       href="MixtureDataset.html"
+       href="MixtureInferenceDataset.html"
        title="next page">
       <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">MixtureDataset</p>
+        <p class="prev-next-title">MixtureInferenceDataset</p>
       </div>
       <i class="fa-solid fa-angle-right"></i>
     </a>
