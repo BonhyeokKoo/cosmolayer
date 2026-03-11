@@ -443,6 +443,12 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
+<span class="sd">    min_sigma : float</span>
+<span class="sd">        Minimum screening charge density in e/Å².</span>
+<span class="sd">    max_sigma : float</span>
+<span class="sd">        Maximum screening charge density in e/Å².</span>
+<span class="sd">    num_points : int</span>
+<span class="sd">        Number of discrete points in the sigma grid.</span>
 <span class="sd">    area_per_segment : float</span>
 <span class="sd">        Reference surface area of a single segment in Å².</span>
 <span class="sd">    averaging_radius : float</span>
@@ -486,6 +492,9 @@
 <span class="sd">    (1,)</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
+    <span class="n">min_sigma</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">max_sigma</span><span class="p">:</span> <span class="nb">float</span>
+    <span class="n">num_points</span><span class="p">:</span> <span class="nb">int</span>
     <span class="n">area_per_segment</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">averaging_radius</span><span class="p">:</span> <span class="nb">float</span>
     <span class="n">f_decay</span><span class="p">:</span> <span class="nb">float</span>
@@ -574,9 +583,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">create_component</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">cosmo_string</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">min_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.025</span><span class="p">,</span>
-        <span class="n">max_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.025</span><span class="p">,</span>
-        <span class="n">num_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">51</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Component</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a :class:`~cosmolayer.cosmosac.component.Component` consistent</span>
 <span class="sd">        with this model.</span>
@@ -585,12 +591,6 @@
 <span class="sd">        ----------</span>
 <span class="sd">        cosmo_string : str</span>
 <span class="sd">            Contents of a COSMO output file.</span>
-<span class="sd">        min_sigma : float, optional</span>
-<span class="sd">            Minimum screening charge density in e/Å². Default is -0.025.</span>
-<span class="sd">        max_sigma : float, optional</span>
-<span class="sd">            Maximum screening charge density in e/Å². Default is 0.025.</span>
-<span class="sd">        num_points : int, optional</span>
-<span class="sd">            Number of discrete points in the sigma grid. Default is 51.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -610,9 +610,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">Component</span><span class="p">(</span>
             <span class="n">cosmo_string</span><span class="p">,</span>
-            <span class="n">min_sigma</span><span class="o">=</span><span class="n">min_sigma</span><span class="p">,</span>
-            <span class="n">max_sigma</span><span class="o">=</span><span class="n">max_sigma</span><span class="p">,</span>
-            <span class="n">num_points</span><span class="o">=</span><span class="n">num_points</span><span class="p">,</span>
+            <span class="n">min_sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_sigma</span><span class="p">,</span>
+            <span class="n">max_sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span><span class="p">,</span>
+            <span class="n">num_points</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_points</span><span class="p">,</span>
             <span class="n">averaging_radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">averaging_radius</span><span class="p">,</span>
             <span class="n">f_decay</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">f_decay</span><span class="p">,</span>
             <span class="n">sigma_0</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">sigma_0</span><span class="p">,</span>
@@ -625,9 +625,6 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">create_mixture</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">components</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">str</span><span class="p">],</span>
-        <span class="n">min_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="mf">0.025</span><span class="p">,</span>
-        <span class="n">max_sigma</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.025</span><span class="p">,</span>
-        <span class="n">num_points</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">51</span><span class="p">,</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="s2">&quot;Mixture&quot;</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a :class:`~cosmolayer.cosmosac.mixture.Mixture` consistent with</span>
 <span class="sd">        this model.</span>
@@ -637,12 +634,6 @@
 <span class="sd">        components : dict[str, str]</span>
 <span class="sd">            Dictionary mapping component names to COSMO strings (contents of</span>
 <span class="sd">            COSMO output files).</span>
-<span class="sd">        min_sigma : float, optional</span>
-<span class="sd">            Minimum screening charge density in e/Å². Default is -0.025.</span>
-<span class="sd">        max_sigma : float, optional</span>
-<span class="sd">            Maximum screening charge density in e/Å². Default is 0.025.</span>
-<span class="sd">        num_points : int, optional</span>
-<span class="sd">            Number of discrete points in the sigma grid. Default is 51.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -681,9 +672,9 @@
 
         <span class="k">return</span> <span class="n">Mixture</span><span class="p">(</span>
             <span class="n">components</span><span class="p">,</span>
-            <span class="n">min_sigma</span><span class="o">=</span><span class="n">min_sigma</span><span class="p">,</span>
-            <span class="n">max_sigma</span><span class="o">=</span><span class="n">max_sigma</span><span class="p">,</span>
-            <span class="n">num_points</span><span class="o">=</span><span class="n">num_points</span><span class="p">,</span>
+            <span class="n">min_sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">min_sigma</span><span class="p">,</span>
+            <span class="n">max_sigma</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">max_sigma</span><span class="p">,</span>
+            <span class="n">num_points</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">num_points</span><span class="p">,</span>
             <span class="n">area_per_segment</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">area_per_segment</span><span class="p">,</span>
             <span class="n">averaging_radius</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">averaging_radius</span><span class="p">,</span>
             <span class="n">f_decay</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">f_decay</span><span class="p">,</span>
@@ -692,11 +683,21 @@
             <span class="n">interaction_matrix_generator</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">interaction_matrix_generator</span><span class="p">,</span>
             <span class="n">temperature_exponents</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">temperature_exponents</span><span class="p">,</span>
         <span class="p">)</span></div>
-</div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">num_segment_types</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Number of segment types.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">merge_profiles</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_points</span>
+        <span class="k">return</span> <span class="mi">3</span> <span class="o">*</span> <span class="bp">self</span><span class="o">.</span><span class="n">num_points</span></div>
 
 
 
 <span class="n">CosmoSac2002Model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span>
+    <span class="n">min_sigma</span><span class="o">=-</span><span class="mf">0.025</span><span class="p">,</span>
+    <span class="n">max_sigma</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span>
+    <span class="n">num_points</span><span class="o">=</span><span class="mi">51</span><span class="p">,</span>
     <span class="n">area_per_segment</span><span class="o">=</span><span class="n">COSMO_SAC_2002_AREA_PER_SEGMENT</span><span class="p">,</span>
     <span class="n">averaging_radius</span><span class="o">=</span><span class="n">COSMO_SAC_2002_AVERAGING_RADIUS</span><span class="p">,</span>
     <span class="n">f_decay</span><span class="o">=</span><span class="n">COSMO_SAC_2002_F_DECAY</span><span class="p">,</span>
@@ -707,6 +708,9 @@
 <span class="p">)</span>
 
 <span class="n">CosmoSac2010Model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span>
+    <span class="n">min_sigma</span><span class="o">=-</span><span class="mf">0.025</span><span class="p">,</span>
+    <span class="n">max_sigma</span><span class="o">=</span><span class="mf">0.025</span><span class="p">,</span>
+    <span class="n">num_points</span><span class="o">=</span><span class="mi">51</span><span class="p">,</span>
     <span class="n">area_per_segment</span><span class="o">=</span><span class="n">COSMO_SAC_2010_AREA_PER_SEGMENT</span><span class="p">,</span>
     <span class="n">averaging_radius</span><span class="o">=</span><span class="n">COSMO_SAC_2010_AVERAGING_RADIUS</span><span class="p">,</span>
     <span class="n">f_decay</span><span class="o">=</span><span class="n">COSMO_SAC_2010_F_DECAY</span><span class="p">,</span>

@@ -8,8 +8,8 @@ Classes
     :titlesonly:
 
     CosmoLayer
-    CosmoLightningModule
     CosmoSolver
+    LogGammaLightningModule
     MixtureDatapoint
     MixtureInferenceDataset
     MixtureTrainingDataset

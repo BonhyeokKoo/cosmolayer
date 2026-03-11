@@ -1,8 +1,8 @@
-CosmoLightningModule
-====================
+LogGammaLightningModule
+=======================
 
 .. currentmodule:: cosmolayer
-.. autoclass:: CosmoLightningModule
+.. autoclass:: LogGammaLightningModule
     :member-order: alphabetical
 
     .. rubric:: Methods
@@ -10,6 +10,10 @@ CosmoLightningModule
     .. automethod:: configure_optimizers
         :no-index-entry:
     .. automethod:: forward
+        :no-index-entry:
+    .. automethod:: on_fit_start
+        :no-index-entry:
+    .. automethod:: predict_from_log_gamma
         :no-index-entry:
     .. automethod:: test_step
         :no-index-entry:

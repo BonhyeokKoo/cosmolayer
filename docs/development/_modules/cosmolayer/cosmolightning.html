@@ -399,36 +399,90 @@
   <h1>Source code for cosmolayer.cosmolightning</h1><div class="highlight"><pre>
 <span></span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">.. module:: cosmolayer.cosmolightning</span>
-<span class="sd">   :synopsis: PyTorch Lightning wrapper for CosmoLayer training.</span>
+<span class="sd">   :synopsis: PyTorch Lightning module for batched CosmoLayer training.</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Callable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">__future__</span><span class="w"> </span><span class="kn">import</span> <span class="n">annotations</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">collections.abc</span><span class="w"> </span><span class="kn">import</span> <span class="n">Sequence</span>
+
+<span class="kn">import</span><span class="w"> </span><span class="nn">numpy</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">np</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">torch</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">lightning</span><span class="w"> </span><span class="kn">import</span> <span class="n">pytorch</span> <span class="k">as</span> <span class="n">pl</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">numpy.typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">NDArray</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torch</span><span class="w"> </span><span class="kn">import</span> <span class="n">distributed</span> <span class="k">as</span> <span class="n">td</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">torch.nn</span><span class="w"> </span><span class="kn">import</span> <span class="n">functional</span> <span class="k">as</span> <span class="n">F</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">torchmetrics.functional</span><span class="w"> </span><span class="kn">import</span> <span class="n">r2_score</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">torchmetrics</span><span class="w"> </span><span class="kn">import</span> <span class="n">MeanAbsoluteError</span><span class="p">,</span> <span class="n">MeanSquaredError</span><span class="p">,</span> <span class="n">R2Score</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">.cosmodata</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputsType</span><span class="p">,</span> <span class="n">Tensor1D</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.cosmodata</span><span class="w"> </span><span class="kn">import</span> <span class="n">InputsType</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.cosmolayer</span><span class="w"> </span><span class="kn">import</span> <span class="n">CosmoLayer</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">.utils</span><span class="w"> </span><span class="kn">import</span> <span class="n">is_loss_function</span>
+
+<span class="n">EPSILON</span> <span class="o">=</span> <span class="mf">1e-8</span>
 
 
-<div class="viewcode-block" id="CosmoLightningModule">
-<a class="viewcode-back" href="../../api/CosmoLightningModule.html#cosmolayer.CosmoLightningModule">[docs]</a>
-<span class="k">class</span><span class="w"> </span><span class="nc">CosmoLightningModule</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;PyTorch Lightning wrapper for training a :class:`~cosmolayer.CosmoLayer`.</span>
+<div class="viewcode-block" id="LogGammaLightningModule">
+<a class="viewcode-back" href="../../api/LogGammaLightningModule.html#cosmolayer.LogGammaLightningModule">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">LogGammaLightningModule</span><span class="p">(</span><span class="n">pl</span><span class="o">.</span><span class="n">LightningModule</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;PyTorch Lightning module for batched training of a learnable</span>
+<span class="sd">    :class:`~cosmolayer.CosmoLayer`.</span>
+
+<span class="sd">    This class is the canonical high-level training interface for CosmoLayer.</span>
+<span class="sd">    It constructs an internal :class:`~cosmolayer.CosmoLayer` with learnable</span>
+<span class="sd">    interaction matrices and defines the optimization, training, validation,</span>
+<span class="sd">    test, and prediction logic.</span>
+
+<span class="sd">    The targets are the log-activity coefficients of the components. In order to</span>
+<span class="sd">    handle other tasks, the user must subclass :class:`LogGammaLightningModule` and</span>
+<span class="sd">    override the :meth:`~LogGammaLightningModule.predict_from_log_gamma` method. For</span>
+<span class="sd">    instance:</span>
+
+<span class="sd">    .. code-block:: python</span>
+
+<span class="sd">        from scipy.constants import R</span>
+
+<span class="sd">        class ExcessGibbsLightningModule(LogGammaLightningModule):</span>
+<span class="sd">            def predict_from_log_gamma(self, T, x, log_gamma):</span>
+<span class="sd">                return (R * T * (x * log_gamma).sum(dim=-1)).unsqueeze(-1)</span>
+
+<span class="sd">    The module is batch-first throughout. All inputs must represent a minibatch</span>
+<span class="sd">    of ``b`` datapoints, and the returned predictions must have leading</span>
+<span class="sd">    dimension ``b``. Targets must have the same shape as the predictions.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    cosmo_layer : CosmoLayer</span>
-<span class="sd">        COSMO layer used to compute predictions.</span>
+<span class="sd">    num_segment_types : int</span>
+<span class="sd">        Number of COSMO segment types.</span>
+<span class="sd">    temperature_exponents : tuple[int, ...]</span>
+<span class="sd">        Exponents defining the temperature dependence of the interaction</span>
+<span class="sd">        matrices.</span>
+<span class="sd">    area_per_segment : float</span>
+<span class="sd">        Area associated with one segment.</span>
+<span class="sd">    reference_temperature : float, optional</span>
+<span class="sd">        Reference temperature used by :class:`CosmoLayer`.</span>
+<span class="sd">        Default is ``298.15``.</span>
+<span class="sd">    max_iter : int, optional</span>
+<span class="sd">        Maximum number of internal fixed-point or iterative solver steps used</span>
+<span class="sd">        by :class:`CosmoLayer`. Default is ``100``.</span>
 <span class="sd">    learning_rate : float, optional</span>
 <span class="sd">        Learning rate for the Adam optimizer. Default is ``1e-3``.</span>
 <span class="sd">    weight_decay : float, optional</span>
 <span class="sd">        Weight decay for the Adam optimizer. Default is ``0.0``.</span>
-<span class="sd">    loss_function : Callable[[torch.Tensor, torch.Tensor], torch.Tensor], optional</span>
-<span class="sd">        Loss function used in training, validation, and test steps.</span>
-<span class="sd">        Default is :func:`torch.nn.functional.mse_loss`.</span>
+<span class="sd">    loss_function : str, optional</span>
+<span class="sd">        Loss function used in training, validation, and test steps. Must be a</span>
+<span class="sd">        valid loss function from :mod:`torch.nn.functional`.</span>
+<span class="sd">        Default is ``&quot;mse_loss&quot;``.</span>
+<span class="sd">    initialization : Sequence[NDArray[np.float64]] | int, optional</span>
+<span class="sd">        Initialization for the learnable interaction matrices.</span>
+
+<span class="sd">        - If an ``int`` is provided, it is interpreted as the random seed used</span>
+<span class="sd">          to sample one matrix per temperature exponent from a standard normal</span>
+<span class="sd">          distribution.</span>
+<span class="sd">        - If a sequence of NumPy arrays is provided, it must contain exactly</span>
+<span class="sd">          one array per temperature exponent, and each array must have shape</span>
+<span class="sd">          ``(num_segment_types, num_segment_types)``.</span>
+
+<span class="sd">        Default is ``42``.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -437,9 +491,9 @@
 <span class="sd">    &gt;&gt;&gt; import cosmolayer as cl</span>
 <span class="sd">    &gt;&gt;&gt; from cosmolayer import cosmosac</span>
 <span class="sd">    &gt;&gt;&gt; model = cosmosac.CosmoSac2010Model</span>
-<span class="sd">    &gt;&gt;&gt; cosmo_layer = cl.CosmoLayer(</span>
-<span class="sd">    ...     interaction_matrices=model.create_interaction_matrices(298.15),</span>
-<span class="sd">    ...     exponents=model.temperature_exponents,</span>
+<span class="sd">    &gt;&gt;&gt; module = LogGammaLightningModule(</span>
+<span class="sd">    ...     num_segment_types=model.num_segment_types,</span>
+<span class="sd">    ...     temperature_exponents=model.temperature_exponents,</span>
 <span class="sd">    ...     area_per_segment=model.area_per_segment,</span>
 <span class="sd">    ... )</span>
 <span class="sd">    &gt;&gt;&gt; solute_path = files(&quot;cosmolayer.data&quot;) / &quot;NCCO.cosmo&quot;</span>
@@ -451,50 +505,233 @@
 <span class="sd">    ...     targets=[-0.2, 0.02],</span>
 <span class="sd">    ...     model=model,</span>
 <span class="sd">    ... )</span>
-<span class="sd">    &gt;&gt;&gt; module = CosmoLightningModule(cosmo_layer=cosmo_layer)</span>
-<span class="sd">    &gt;&gt;&gt; preds = module(datapoint.get_inputs())</span>
-<span class="sd">    &gt;&gt;&gt; preds.tolist()</span>
-<span class="sd">    [-0.208..., 0.018...]</span>
+<span class="sd">    &gt;&gt;&gt; single_inputs = datapoint.get_inputs()</span>
+<span class="sd">    &gt;&gt;&gt; batched_inputs = tuple(x.unsqueeze(0) for x in single_inputs)</span>
+<span class="sd">    &gt;&gt;&gt; preds = module(batched_inputs)</span>
+<span class="sd">    &gt;&gt;&gt; preds.shape</span>
+<span class="sd">    torch.Size([1, 2])</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span>  <span class="c1"># noqa: PLR0913</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">cosmo_layer</span><span class="p">:</span> <span class="n">CosmoLayer</span><span class="p">,</span>
+        <span class="n">num_segment_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">temperature_exponents</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">int</span><span class="p">],</span>
+        <span class="n">area_per_segment</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">reference_temperature</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">298.15</span><span class="p">,</span>
+        <span class="n">max_iter</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
         <span class="n">learning_rate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1e-3</span><span class="p">,</span>
         <span class="n">weight_decay</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.0</span><span class="p">,</span>
-        <span class="n">loss_function</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[</span>
-            <span class="p">[</span><span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span>
-        <span class="p">]</span> <span class="o">=</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">,</span>
-    <span class="p">):</span>
+        <span class="n">normalize_targets</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+        <span class="n">loss_function</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s2">&quot;mse_loss&quot;</span><span class="p">,</span>
+        <span class="n">initialization</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">42</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">cosmo_layer</span> <span class="o">=</span> <span class="n">cosmo_layer</span>
+
+        <span class="k">if</span> <span class="n">num_segment_types</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;num_segment_types must be a positive integer&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">temperature_exponents</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;temperature_exponents must not be empty&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">area_per_segment</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;area_per_segment must be positive&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">reference_temperature</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;reference_temperature must be positive&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">max_iter</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;max_iter must be a positive integer&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">learning_rate</span> <span class="o">&lt;=</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;learning_rate must be positive&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">weight_decay</span> <span class="o">&lt;</span> <span class="mf">0.0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;weight_decay must be non-negative&quot;</span><span class="p">)</span>
+        <span class="n">loss_callable</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">F</span><span class="p">,</span> <span class="n">loss_function</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">is_loss_function</span><span class="p">(</span><span class="n">loss_callable</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported loss_function &#39;</span><span class="si">{</span><span class="n">loss_function</span><span class="si">}</span><span class="s2">&#39;.&quot;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;initialization&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">normalize_targets</span> <span class="o">=</span> <span class="n">normalize_targets</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span> <span class="o">=</span> <span class="n">learning_rate</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">weight_decay</span> <span class="o">=</span> <span class="n">weight_decay</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">loss_function</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">save_hyperparameters</span><span class="p">(</span><span class="n">ignore</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;cosmo_layer&quot;</span><span class="p">,</span> <span class="s2">&quot;loss_function&quot;</span><span class="p">])</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span> <span class="o">=</span> <span class="n">loss_callable</span>
 
-<div class="viewcode-block" id="CosmoLightningModule.forward">
-<a class="viewcode-back" href="../../api/CosmoLightningModule.html#cosmolayer.CosmoLightningModule.forward">[docs]</a>
+        <span class="n">initial_matrices</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_build_initial_matrices</span><span class="p">(</span>
+            <span class="n">initialization</span><span class="o">=</span><span class="n">initialization</span><span class="p">,</span>
+            <span class="n">num_segment_types</span><span class="o">=</span><span class="n">num_segment_types</span><span class="p">,</span>
+            <span class="n">num_matrices</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">temperature_exponents</span><span class="p">),</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">cosmo_layer</span> <span class="o">=</span> <span class="n">CosmoLayer</span><span class="p">(</span>
+            <span class="n">interaction_matrices</span><span class="o">=</span><span class="n">initial_matrices</span><span class="p">,</span>
+            <span class="n">exponents</span><span class="o">=</span><span class="n">temperature_exponents</span><span class="p">,</span>
+            <span class="n">area_per_segment</span><span class="o">=</span><span class="n">area_per_segment</span><span class="p">,</span>
+            <span class="n">reference_temperature</span><span class="o">=</span><span class="n">reference_temperature</span><span class="p">,</span>
+            <span class="n">max_iter</span><span class="o">=</span><span class="n">max_iter</span><span class="p">,</span>
+            <span class="n">learn_matrices</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_mae</span> <span class="o">=</span> <span class="n">MeanAbsoluteError</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_rmse</span> <span class="o">=</span> <span class="n">MeanSquaredError</span><span class="p">(</span><span class="n">squared</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_r2</span> <span class="o">=</span> <span class="n">R2Score</span><span class="p">()</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;target_mean&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">register_buffer</span><span class="p">(</span><span class="s2">&quot;target_std&quot;</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">1.0</span><span class="p">))</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_build_initial_matrices</span><span class="p">(</span>
+        <span class="n">initialization</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]</span> <span class="o">|</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">num_segment_types</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+        <span class="n">num_matrices</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="n">NDArray</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">]]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create and validate the initial interaction matrices.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">initialization</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="n">rng</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">initialization</span><span class="p">)</span>
+            <span class="k">return</span> <span class="p">[</span>
+                <span class="n">rng</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="p">(</span><span class="n">num_segment_types</span><span class="p">,</span> <span class="n">num_segment_types</span><span class="p">))</span>
+                <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">num_matrices</span><span class="p">)</span>
+            <span class="p">]</span>
+
+        <span class="n">matrices</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">asarray</span><span class="p">(</span><span class="n">matrix</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span> <span class="k">for</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="n">initialization</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">matrices</span><span class="p">)</span> <span class="o">!=</span> <span class="n">num_matrices</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;initialization must contain exactly one matrix per temperature &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;exponent: expected </span><span class="si">{</span><span class="n">num_matrices</span><span class="si">}</span><span class="s2">, got </span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">matrices</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">expected_shape</span> <span class="o">=</span> <span class="p">(</span><span class="n">num_segment_types</span><span class="p">,</span> <span class="n">num_segment_types</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">index</span><span class="p">,</span> <span class="n">matrix</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">matrices</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">matrix</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">expected_shape</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;Each initialization matrix must have shape &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">expected_shape</span><span class="si">}</span><span class="s2">; matrix </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> has shape </span><span class="si">{</span><span class="n">matrix</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">np</span><span class="o">.</span><span class="n">isfinite</span><span class="p">(</span><span class="n">matrix</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Initialization matrix </span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s2"> contains non-finite values&quot;</span>
+                <span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">matrices</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_infer_batch_size</span><span class="p">(</span><span class="n">predictions</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span> <span class="n">targets</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Infer the minibatch size from prediction and target tensors.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">predictions</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">targets</span><span class="o">.</span><span class="n">ndim</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Predictions and targets must be batched tensors with a leading &quot;</span>
+                <span class="s2">&quot;batch dimension&quot;</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">predictions</span><span class="o">.</span><span class="n">shape</span> <span class="o">!=</span> <span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Predictions and targets must have the same shape; &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;got </span><span class="si">{</span><span class="n">predictions</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+
+    <span class="nd">@torch</span><span class="o">.</span><span class="n">no_grad</span><span class="p">()</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">_compute_target_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">trainer</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">trainer</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">trainer</span><span class="p">,</span> <span class="s2">&quot;datamodule&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dataloader</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">datamodule</span><span class="o">.</span><span class="n">train_dataloader</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataloader</span> <span class="o">=</span> <span class="n">trainer</span><span class="o">.</span><span class="n">train_dataloader</span>
+
+        <span class="k">if</span> <span class="n">dataloader</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Training dataloader is unavailable; cannot normalize targets&quot;</span>
+            <span class="p">)</span>
+
+        <span class="n">count</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">target_sum</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">target_sumsq</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">|</span> <span class="kc">None</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">for</span> <span class="n">batch</span> <span class="ow">in</span> <span class="n">dataloader</span><span class="p">:</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">batch</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">detach</span><span class="p">()</span>
+
+            <span class="n">batch_count</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">tensor</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]),</span> <span class="n">device</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+            <span class="n">batch_sum</span> <span class="o">=</span> <span class="n">targets</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">batch_sumsq</span> <span class="o">=</span> <span class="p">(</span><span class="n">targets</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="n">dim</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">target_sum</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">count</span> <span class="o">=</span> <span class="n">count</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="n">targets</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+                <span class="n">target_sum</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">batch_sum</span><span class="p">)</span>
+                <span class="n">target_sumsq</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">zeros_like</span><span class="p">(</span><span class="n">batch_sumsq</span><span class="p">)</span>
+
+            <span class="n">count</span> <span class="o">=</span> <span class="n">count</span> <span class="o">+</span> <span class="n">batch_count</span>
+            <span class="n">target_sum</span> <span class="o">=</span> <span class="n">target_sum</span> <span class="o">+</span> <span class="n">batch_sum</span>
+            <span class="n">target_sumsq</span> <span class="o">=</span> <span class="n">target_sumsq</span> <span class="o">+</span> <span class="n">batch_sumsq</span>
+
+        <span class="k">if</span> <span class="n">target_sum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">count</span><span class="o">.</span><span class="n">item</span><span class="p">()</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Training dataloader is empty; cannot normalize targets&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">td</span><span class="o">.</span><span class="n">is_available</span><span class="p">()</span> <span class="ow">and</span> <span class="n">td</span><span class="o">.</span><span class="n">is_initialized</span><span class="p">():</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">all_reduce</span><span class="p">(</span><span class="n">count</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">td</span><span class="o">.</span><span class="n">ReduceOp</span><span class="o">.</span><span class="n">SUM</span><span class="p">)</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">all_reduce</span><span class="p">(</span><span class="n">target_sum</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">td</span><span class="o">.</span><span class="n">ReduceOp</span><span class="o">.</span><span class="n">SUM</span><span class="p">)</span>
+            <span class="n">td</span><span class="o">.</span><span class="n">all_reduce</span><span class="p">(</span><span class="n">target_sumsq</span><span class="p">,</span> <span class="n">op</span><span class="o">=</span><span class="n">td</span><span class="o">.</span><span class="n">ReduceOp</span><span class="o">.</span><span class="n">SUM</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">target_sum</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">target_sumsq</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Training dataloader is empty; cannot normalize targets&quot;</span><span class="p">)</span>
+
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">target_sum</span> <span class="o">/</span> <span class="n">count</span>
+        <span class="n">variance</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">clamp</span><span class="p">(</span><span class="n">target_sumsq</span> <span class="o">/</span> <span class="n">count</span> <span class="o">-</span> <span class="n">mean</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="nb">min</span><span class="o">=</span><span class="mf">0.0</span><span class="p">)</span>
+        <span class="n">std</span> <span class="o">=</span> <span class="n">torch</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">variance</span> <span class="o">+</span> <span class="n">EPSILON</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span> <span class="o">=</span> <span class="n">mean</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span> <span class="o">=</span> <span class="n">std</span><span class="o">.</span><span class="n">to</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">device</span><span class="p">)</span>
+
+<div class="viewcode-block" id="LogGammaLightningModule.forward">
+<a class="viewcode-back" href="../../api/LogGammaLightningModule.html#cosmolayer.LogGammaLightningModule.forward">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">forward</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inputs</span><span class="p">:</span> <span class="n">InputsType</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute model predictions for one datapoint.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Compute predictions for a minibatch of datapoints.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
 <span class="sd">        inputs : InputsType</span>
-<span class="sd">            Input tuple ``(temperature, mole_fractions, areas, volumes,</span>
-<span class="sd">            probabilities)``.</span>
+<span class="sd">            Batched input tuple ``(temperature, mole_fractions, areas, volumes,</span>
+<span class="sd">            probabilities)``. All tensors must be batch-first and represent the</span>
+<span class="sd">            same minibatch of size ``b``.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        torch.Tensor</span>
-<span class="sd">            Predicted target values.</span>
+<span class="sd">            Batched predictions with leading dimension ``b``.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">predictions</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cosmo_layer</span><span class="p">(</span><span class="o">*</span><span class="n">inputs</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">predictions</span></div>
+        <span class="n">temperature</span><span class="p">,</span> <span class="n">mole_fractions</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">volumes</span><span class="p">,</span> <span class="n">probabilities</span> <span class="o">=</span> <span class="n">inputs</span>
+        <span class="n">log_gamma</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">cosmo_layer</span><span class="p">(</span>
+            <span class="n">temperature</span><span class="p">,</span> <span class="n">mole_fractions</span><span class="p">,</span> <span class="n">areas</span><span class="p">,</span> <span class="n">volumes</span><span class="p">,</span> <span class="n">probabilities</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">predict_from_log_gamma</span><span class="p">(</span><span class="n">temperature</span><span class="p">,</span> <span class="n">mole_fractions</span><span class="p">,</span> <span class="n">log_gamma</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CosmoLightningModule.configure_optimizers">
-<a class="viewcode-back" href="../../api/CosmoLightningModule.html#cosmolayer.CosmoLightningModule.configure_optimizers">[docs]</a>
+<div class="viewcode-block" id="LogGammaLightningModule.predict_from_log_gamma">
+<a class="viewcode-back" href="../../api/LogGammaLightningModule.html#cosmolayer.LogGammaLightningModule.predict_from_log_gamma">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">predict_from_log_gamma</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">T</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">x</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+        <span class="n">log_gamma</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">,</span>
+    <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Convert log-activity coefficients to final predictions.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        T : torch.Tensor</span>
+<span class="sd">            Temperature in the same units as the reference temperature.</span>
+<span class="sd">            Shape: (...,).</span>
+<span class="sd">        x : torch.Tensor</span>
+<span class="sd">            Mole fractions of the components. Must sum to 1.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+<span class="sd">        log_gamma : torch.Tensor</span>
+<span class="sd">            Logarithms of the activity coefficients.</span>
+<span class="sd">            Shape: (..., num_components).</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        torch.Tensor</span>
+<span class="sd">            Final predictions.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">log_gamma</span></div>
+
+
+<div class="viewcode-block" id="LogGammaLightningModule.configure_optimizers">
+<a class="viewcode-back" href="../../api/LogGammaLightningModule.html#cosmolayer.LogGammaLightningModule.configure_optimizers">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">configure_optimizers</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Optimizer</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Configure the optimizer used during training.</span>
 
@@ -504,21 +741,32 @@
 <span class="sd">            Adam optimizer over all module parameters.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="n">torch</span><span class="o">.</span><span class="n">optim</span><span class="o">.</span><span class="n">Adam</span><span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span> <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span> <span class="n">weight_decay</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_decay</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">(),</span>
+            <span class="n">lr</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">learning_rate</span><span class="p">,</span>
+            <span class="n">weight_decay</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">weight_decay</span><span class="p">,</span>
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="CosmoLightningModule.training_step">
-<a class="viewcode-back" href="../../api/CosmoLightningModule.html#cosmolayer.CosmoLightningModule.training_step">[docs]</a>
+<div class="viewcode-block" id="LogGammaLightningModule.on_fit_start">
+<a class="viewcode-back" href="../../api/LogGammaLightningModule.html#cosmolayer.LogGammaLightningModule.on_fit_start">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">on_fit_start</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_targets</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_compute_target_statistics</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="LogGammaLightningModule.training_step">
+<a class="viewcode-back" href="../../api/LogGammaLightningModule.html#cosmolayer.LogGammaLightningModule.training_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">training_step</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">InputsType</span><span class="p">,</span> <span class="n">Tensor1D</span><span class="p">],</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">InputsType</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run one training step and log epoch-level training loss.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run one training step on a minibatch.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        batch : tuple[InputsType, Tensor1D]</span>
-<span class="sd">            Input tensors and ground-truth targets.</span>
+<span class="sd">        batch : tuple[InputsType, torch.Tensor]</span>
+<span class="sd">            Batched inputs and batched ground-truth targets. Targets must have</span>
+<span class="sd">            the same shape as the model predictions, with leading dimension</span>
+<span class="sd">            equal to the minibatch size.</span>
 <span class="sd">        batch_idx : int</span>
 <span class="sd">            Index of the current batch.</span>
 
@@ -528,29 +776,37 @@
 <span class="sd">            Training loss for the batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">batch</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infer_batch_size</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_targets</span><span class="p">:</span>
+            <span class="n">target_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span>
+            <span class="n">target_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">(</span><span class="n">targets</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">target_std</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="p">(</span><span class="n">predictions</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">target_std</span>
+        <span class="n">loss</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
             <span class="s2">&quot;train_loss&quot;</span><span class="p">,</span>
             <span class="n">loss</span><span class="p">,</span>
             <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">batch_size</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">loss</span></div>
 
 
-<div class="viewcode-block" id="CosmoLightningModule.validation_step">
-<a class="viewcode-back" href="../../api/CosmoLightningModule.html#cosmolayer.CosmoLightningModule.validation_step">[docs]</a>
+<div class="viewcode-block" id="LogGammaLightningModule.validation_step">
+<a class="viewcode-back" href="../../api/LogGammaLightningModule.html#cosmolayer.LogGammaLightningModule.validation_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">validation_step</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">InputsType</span><span class="p">,</span> <span class="n">Tensor1D</span><span class="p">],</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">InputsType</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run one validation step and log epoch-level validation loss.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run one validation step on a minibatch.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        batch : tuple[InputsType, Tensor1D]</span>
-<span class="sd">            Input tensors and ground-truth targets.</span>
+<span class="sd">        batch : tuple[InputsType, torch.Tensor]</span>
+<span class="sd">            Batched inputs and batched ground-truth targets. Targets must have</span>
+<span class="sd">            the same shape as the model predictions, with leading dimension</span>
+<span class="sd">            equal to the minibatch size.</span>
 <span class="sd">        batch_idx : int</span>
 <span class="sd">            Index of the current batch.</span>
 
@@ -560,29 +816,38 @@
 <span class="sd">            Validation loss for the batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">batch</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infer_batch_size</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_targets</span><span class="p">:</span>
+            <span class="n">target_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span>
+            <span class="n">target_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span>
+            <span class="n">targets</span> <span class="o">=</span> <span class="p">(</span><span class="n">targets</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">target_std</span>
+            <span class="n">predictions</span> <span class="o">=</span> <span class="p">(</span><span class="n">predictions</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">target_std</span>
+        <span class="n">loss</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log</span><span class="p">(</span>
             <span class="s2">&quot;val_loss&quot;</span><span class="p">,</span>
             <span class="n">loss</span><span class="p">,</span>
             <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">batch_size</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
+            <span class="n">prog_bar</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">loss</span></div>
 
 
-<div class="viewcode-block" id="CosmoLightningModule.test_step">
-<a class="viewcode-back" href="../../api/CosmoLightningModule.html#cosmolayer.CosmoLightningModule.test_step">[docs]</a>
+<div class="viewcode-block" id="LogGammaLightningModule.test_step">
+<a class="viewcode-back" href="../../api/LogGammaLightningModule.html#cosmolayer.LogGammaLightningModule.test_step">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">test_step</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">InputsType</span><span class="p">,</span> <span class="n">Tensor1D</span><span class="p">],</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">batch</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">InputsType</span><span class="p">,</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">],</span> <span class="n">batch_idx</span><span class="p">:</span> <span class="nb">int</span>
     <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span><span class="p">:</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run one test step and log standard regression metrics.</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Run one test step on a minibatch and update regression metrics.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        batch : tuple[InputsType, Tensor1D]</span>
-<span class="sd">            Input tensors and ground-truth targets.</span>
+<span class="sd">        batch : tuple[InputsType, torch.Tensor]</span>
+<span class="sd">            Batched inputs and batched ground-truth targets. Targets must have</span>
+<span class="sd">            the same shape as the model predictions, with leading dimension</span>
+<span class="sd">            equal to the minibatch size.</span>
 <span class="sd">        batch_idx : int</span>
 <span class="sd">            Index of the current batch.</span>
 
@@ -592,18 +857,31 @@
 <span class="sd">            Test loss for the batch.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">inputs</span><span class="p">,</span> <span class="n">targets</span> <span class="o">=</span> <span class="n">batch</span>
-        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">forward</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
-        <span class="n">loss</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="n">predictions</span> <span class="o">=</span> <span class="bp">self</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+        <span class="n">batch_size</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_infer_batch_size</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="n">loss_predictions</span> <span class="o">=</span> <span class="n">predictions</span>
+        <span class="n">loss_targets</span> <span class="o">=</span> <span class="n">targets</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">normalize_targets</span><span class="p">:</span>
+            <span class="n">target_mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_mean</span>
+            <span class="n">target_std</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">target_std</span>
+            <span class="n">loss_targets</span> <span class="o">=</span> <span class="p">(</span><span class="n">targets</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">target_std</span>
+            <span class="n">loss_predictions</span> <span class="o">=</span> <span class="p">(</span><span class="n">predictions</span> <span class="o">-</span> <span class="n">target_mean</span><span class="p">)</span> <span class="o">/</span> <span class="n">target_std</span>
+        <span class="n">loss</span><span class="p">:</span> <span class="n">torch</span><span class="o">.</span><span class="n">Tensor</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loss_function</span><span class="p">(</span><span class="n">loss_predictions</span><span class="p">,</span> <span class="n">loss_targets</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_mae</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_rmse</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">test_r2</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span>
+
         <span class="bp">self</span><span class="o">.</span><span class="n">log_dict</span><span class="p">(</span>
             <span class="p">{</span>
                 <span class="s2">&quot;test_loss&quot;</span><span class="p">:</span> <span class="n">loss</span><span class="p">,</span>
-                <span class="s2">&quot;test_mae&quot;</span><span class="p">:</span> <span class="n">F</span><span class="o">.</span><span class="n">l1_loss</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">),</span>
-                <span class="s2">&quot;test_rmse&quot;</span><span class="p">:</span> <span class="n">F</span><span class="o">.</span><span class="n">mse_loss</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">)</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(),</span>
-                <span class="s2">&quot;test_r2&quot;</span><span class="p">:</span> <span class="n">r2_score</span><span class="p">(</span><span class="n">predictions</span><span class="p">,</span> <span class="n">targets</span><span class="p">),</span>
+                <span class="s2">&quot;test_mae&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_mae</span><span class="p">,</span>
+                <span class="s2">&quot;test_rmse&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_rmse</span><span class="p">,</span>
+                <span class="s2">&quot;test_r2&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">test_r2</span><span class="p">,</span>
             <span class="p">},</span>
             <span class="n">on_step</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
             <span class="n">on_epoch</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-            <span class="n">batch_size</span><span class="o">=</span><span class="n">targets</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+            <span class="n">batch_size</span><span class="o">=</span><span class="n">batch_size</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">loss</span></div>
 </div>
