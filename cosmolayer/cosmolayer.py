@@ -3,6 +3,7 @@
    :synopsis: Differentiable COSMO-type activity coefficient layer.
 """
 
+import warnings
 from collections.abc import Sequence
 from typing import cast
 
@@ -141,6 +142,14 @@ class CosmoLayer(torch.nn.Module):
         self._kappa = COORDINATION_NUMBER / (2 * AREA_PER_CONTACT)
         self._max_iter = max_iter
 
+    def _check_convergence(self, converged: torch.Tensor) -> None:
+        if not bool(converged.all()):
+            warnings.warn(
+                f"COSMO solver did not converge in {self._max_iter} iterations",
+                RuntimeWarning,
+                stacklevel=2,
+            )
+
     def extra_repr(self) -> str:
         """Return a string representation of the CosmoLayer."""
         return (
@@ -263,10 +272,7 @@ class CosmoLayer(torch.nn.Module):
         log_gamma_pure, converged = CosmoSolver.apply(
             probs, scaled_interactions.unsqueeze(-3), self._max_iter
         )
-        if not bool(converged.all()):
-            raise RuntimeError(
-                f"Newton solver did not converge in {self._max_iter} iterations"
-            )
+        self._check_convergence(converged)
         return cast(torch.Tensor, log_gamma_pure)
 
     def log_mixture_segment_activity_coefficients(
@@ -305,10 +311,7 @@ class CosmoLayer(torch.nn.Module):
             scaled_interactions,
             self._max_iter,
         )
-        if not bool(converged.all()):
-            raise RuntimeError(
-                f"Newton solver did not converge in {self._max_iter} iterations"
-            )
+        self._check_convergence(converged)
         return cast(torch.Tensor, log_gamma_mix)
 
     def log_residual_activity_coefficients(
