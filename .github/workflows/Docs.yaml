@@ -113,6 +113,7 @@ jobs:
             git add -f $dir/*
           done
           touch docs/.nojekyll
+          git add -f docs/.nojekyll
           git commit -m "Docs from $GITHUB_REF $GITHUB_SHA" || echo "Branch is up to date"
           git push -f origin gh-pages
           echo "::endgroup::"
