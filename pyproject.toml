@@ -78,7 +78,8 @@ where = ["."]
 [tool.setuptools.package-data]
 cosmolayer = [
     "py.typed",
-    "data/*.csv"
+    "data/*.csv",
+    "data/*.cosmo",
 ]
 
 [tool.versioningit]
