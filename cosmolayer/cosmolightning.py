@@ -171,6 +171,101 @@ class LogGammaLightningModule(pl.LightningModule):
 
         self.register_buffer("target_mean", torch.tensor(0.0))
         self.register_buffer("target_std", torch.tensor(1.0))
+        self.register_buffer(
+            "_non_converged_train_count", torch.zeros(1), persistent=False
+        )
+        self.register_buffer("_train_datapoint_count", torch.zeros(1), persistent=False)
+
+    @staticmethod
+    def _masked_loss(
+        loss_function: object,
+        predictions: torch.Tensor,
+        targets: torch.Tensor,
+        converged: torch.Tensor,
+    ) -> torch.Tensor:
+        """Compute a batch loss excluding non-converged datapoints."""
+        valid_sample = LogGammaLightningModule._valid_datapoint_mask(
+            predictions, converged
+        )
+        valid_for_outputs = valid_sample
+        while valid_for_outputs.ndim < predictions.ndim:
+            valid_for_outputs = valid_for_outputs.unsqueeze(-1)
+        safe_predictions = torch.where(
+            valid_for_outputs,
+            predictions,
+            torch.zeros_like(predictions),
+        )
+        safe_targets = torch.where(
+            valid_for_outputs,
+            targets,
+            torch.zeros_like(targets),
+        )
+        elementwise: torch.Tensor = loss_function(  # type: ignore[operator]
+            safe_predictions, safe_targets, reduction="none"
+        )
+        if elementwise.ndim > 1:
+            per_sample = elementwise.mean(dim=tuple(range(1, elementwise.ndim)))
+        else:
+            per_sample = elementwise
+        valid = valid_sample
+        while valid.ndim < per_sample.ndim:
+            valid = valid.unsqueeze(-1)
+        valid = valid & torch.isfinite(per_sample)
+        valid_mask = valid.to(predictions.dtype)
+        per_sample = torch.where(valid, per_sample, torch.zeros_like(per_sample))
+        valid_count = valid_mask.sum()
+        if valid_count == 0:
+            safe = torch.nan_to_num(predictions, nan=0.0, posinf=0.0, neginf=0.0)
+            return (safe - safe).sum()
+        return (valid_mask * per_sample).sum() / valid_count
+
+    @staticmethod
+    def _valid_datapoint_mask(
+        predictions: torch.Tensor, converged: torch.Tensor
+    ) -> torch.Tensor:
+        """Datapoints that converged and produced finite predictions."""
+        if predictions.ndim > 1:
+            finite = torch.isfinite(predictions).all(dim=tuple(range(1, predictions.ndim)))
+        else:
+            finite = torch.isfinite(predictions)
+        return converged & finite
+
+    def _predict_with_convergence(
+        self, inputs: InputsType
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        temperature, mole_fractions, areas, volumes, probabilities = inputs
+        log_gamma, converged = self.cosmo_layer(
+            temperature,
+            mole_fractions,
+            areas,
+            volumes,
+            probabilities,
+            return_converged=True,
+        )
+        predictions = self.predict_from_log_gamma(
+            temperature, mole_fractions, log_gamma
+        )
+        return predictions, converged
+
+    def _batch_loss(
+        self, batch: tuple[InputsType, torch.Tensor], *, track_non_converged: bool
+    ) -> tuple[torch.Tensor, int]:
+        inputs, targets = batch
+        predictions, converged = self._predict_with_convergence(inputs)
+        batch_size = self._infer_batch_size(predictions, targets)
+        if self.normalize_targets:
+            targets = (targets - self.target_mean) / self.target_std
+            predictions = (predictions - self.target_mean) / self.target_std
+        loss = self._masked_loss(
+            self.loss_function, predictions, targets, converged
+        )
+        if track_non_converged:
+            valid = self._valid_datapoint_mask(predictions, converged)
+            self._non_converged_train_count += (~valid).sum().to(
+                self._non_converged_train_count.dtype
+            )
+            self._train_datapoint_count += converged.numel()
+        return loss, batch_size
 
     @staticmethod
     def _build_initial_matrices(
@@ -338,8 +433,24 @@ class LogGammaLightningModule(pl.LightningModule):
         )
 
     def on_fit_start(self) -> None:
+        self._non_converged_train_count.zero_()
+        self._train_datapoint_count.zero_()
         if self.normalize_targets:
             self._compute_target_statistics()
+
+    def on_fit_end(self) -> None:
+        non_converged = self._non_converged_train_count.clone()
+        total = self._train_datapoint_count.clone()
+        if td.is_available() and td.is_initialized():
+            td.all_reduce(non_converged, op=td.ReduceOp.SUM)
+            td.all_reduce(total, op=td.ReduceOp.SUM)
+        if self.trainer.is_global_zero:
+            excluded = int(non_converged.item())
+            seen = int(total.item())
+            print(
+                f"Training complete: {excluded} of {seen} datapoints did not "
+                "converge and were excluded from the loss."
+            )
 
     def training_step(
         self, batch: tuple[InputsType, torch.Tensor], batch_idx: int
@@ -360,15 +471,7 @@ class LogGammaLightningModule(pl.LightningModule):
         torch.Tensor
             Training loss for the batch.
         """
-        inputs, targets = batch
-        predictions = self(inputs)
-        batch_size = self._infer_batch_size(predictions, targets)
-        if self.normalize_targets:
-            target_mean = self.target_mean
-            target_std = self.target_std
-            targets = (targets - target_mean) / target_std
-            predictions = (predictions - target_mean) / target_std
-        loss: torch.Tensor = self.loss_function(predictions, targets)
+        loss, batch_size = self._batch_loss(batch, track_non_converged=True)
         self.log(
             "train_loss",
             loss,
@@ -397,15 +500,7 @@ class LogGammaLightningModule(pl.LightningModule):
         torch.Tensor
             Validation loss for the batch.
         """
-        inputs, targets = batch
-        predictions = self(inputs)
-        batch_size = self._infer_batch_size(predictions, targets)
-        if self.normalize_targets:
-            target_mean = self.target_mean
-            target_std = self.target_std
-            targets = (targets - target_mean) / target_std
-            predictions = (predictions - target_mean) / target_std
-        loss: torch.Tensor = self.loss_function(predictions, targets)
+        loss, batch_size = self._batch_loss(batch, track_non_converged=False)
         self.log(
             "val_loss",
             loss,
@@ -436,7 +531,7 @@ class LogGammaLightningModule(pl.LightningModule):
             Test loss for the batch.
         """
         inputs, targets = batch
-        predictions = self(inputs)
+        predictions, converged = self._predict_with_convergence(inputs)
         batch_size = self._infer_batch_size(predictions, targets)
         loss_predictions = predictions
         loss_targets = targets
@@ -445,7 +540,9 @@ class LogGammaLightningModule(pl.LightningModule):
             target_std = self.target_std
             loss_targets = (targets - target_mean) / target_std
             loss_predictions = (predictions - target_mean) / target_std
-        loss: torch.Tensor = self.loss_function(loss_predictions, loss_targets)
+        loss = self._masked_loss(
+            self.loss_function, loss_predictions, loss_targets, converged
+        )
 
         self.test_mae.update(predictions, targets)
         self.test_rmse.update(predictions, targets)

@@ -7,6 +7,7 @@
 
 from __future__ import annotations
 
+import warnings
 from typing import Any
 
 import torch
@@ -14,8 +15,8 @@ from torch.autograd.function import FunctionCtx, NestedIOFunction
 
 from .utils import log_matmul_exp
 
-NEWTON_STEP_TOLERANCE = {torch.float32: 1e-5, torch.float64: 1e-10}
-NEWTON_RESIDUAL_TOLERANCE = {torch.float32: 1e-6, torch.float64: 1e-12}
+NEWTON_STEP_TOLERANCE = {torch.float32: 1e-4, torch.float64: 1e-10}
+NEWTON_RESIDUAL_TOLERANCE = {torch.float32: 1e-5, torch.float64: 1e-12}
 
 
 class CosmoSolver(torch.autograd.Function):
@@ -129,6 +130,18 @@ class CosmoSolver(torch.autograd.Function):
                 converged = (delta_norm < step_tol) & (f_norm < resid_tol)
                 if bool(converged.all()):
                     break
+            if not bool(converged.all()):
+                failed = ~converged
+                warnings.warn(
+                    "COSMO Newton solver did not converge for "
+                    f"{int(failed.sum().item())}/{converged.numel()} rows after "
+                    f"{max_iter} iterations "
+                    f"(max_delta_norm={delta_norm[failed].max().item():.3e}, "
+                    f"max_f_norm={f_norm[failed].max().item():.3e}, "
+                    f"step_tol={step_tol:.1e}, resid_tol={resid_tol:.1e})",
+                    RuntimeWarning,
+                    stacklevel=2,
+                )
             return log_gamma, converged
 
     @staticmethod
@@ -152,7 +165,7 @@ class CosmoSolver(torch.autograd.Function):
         log_gamma, converged = CosmoSolver._logspace_newton_solver(
             p, U_RT, max_iter=max_iter
         )
-        ctx.save_for_backward(log_gamma, p, U_RT)
+        ctx.save_for_backward(log_gamma, p, U_RT, converged)
 
         return log_gamma.squeeze(-1), converged
 
@@ -165,7 +178,15 @@ class CosmoSolver(torch.autograd.Function):
         if grad_log_gamma is None:
             return None, None, None
 
-        log_gamma, p, U_RT = ctx.saved_tensors
+        log_gamma, p, U_RT, converged = ctx.saved_tensors
+        conv_mask = converged
+        while conv_mask.ndim < grad_log_gamma.ndim:
+            conv_mask = conv_mask.unsqueeze(-1)
+        grad_log_gamma = torch.where(
+            conv_mask,
+            grad_log_gamma,
+            torch.zeros_like(grad_log_gamma),
+        )
 
         gamma = log_gamma.exp()
         B = torch.exp(-U_RT)
@@ -178,8 +199,31 @@ class CosmoSolver(torch.autograd.Function):
         Id = torch.eye(log_A.shape[-1], dtype=log_A.dtype, device=log_A.device)
         J = torch.exp(log_gamma.mT + log_A - log_A_gamma) + Id
 
-        # Solve (∂F/∂log_gamma)^T v = dL/dlog_gamma
-        v = torch.linalg.solve(J.mT, grad_log_gamma.unsqueeze(-1))
+        # Solve only rows that are finite and converged. A single singular row in
+        # a batched solve would otherwise raise and stop the whole training step.
+        rhs = grad_log_gamma.unsqueeze(-1)
+        good = converged
+        good = good & torch.isfinite(grad_log_gamma).all(dim=-1)
+        good = good & torch.isfinite(J).all(dim=(-2, -1))
+        good = good & torch.isfinite(log_A_gamma).all(dim=(-2, -1))
+
+        n_types = J.shape[-1]
+        v = torch.zeros_like(rhs)
+        v_flat = v.reshape(-1, n_types, 1)
+        J_flat = J.reshape(-1, n_types, n_types)
+        rhs_flat = rhs.reshape(-1, n_types, 1)
+        good_flat = good.reshape(-1)
+        good_indices = good_flat.nonzero(as_tuple=False).flatten()
+        if good_indices.numel() > 0:
+            solved, info = torch.linalg.solve_ex(
+                J_flat[good_indices].mT,
+                rhs_flat[good_indices],
+                check_errors=False,
+            )
+            solved_finite = torch.isfinite(solved).all(dim=(-2, -1))
+            solved_ok = (info == 0) & solved_finite
+            if bool(solved_ok.any()):
+                v_flat[good_indices[solved_ok]] = solved[solved_ok]
 
         # r = v / (A @ gamma)
         r = v / log_A_gamma.exp()
@@ -190,6 +234,25 @@ class CosmoSolver(torch.autograd.Function):
         # grad_U_RT: r_i * B_ij * (p_j * gamma_j)
         pg = p * gamma.squeeze(-1)
         grad_U_RT = r * B * pg.unsqueeze(-2)
+
+        conv_mask_p = converged
+        while conv_mask_p.ndim < grad_p.ndim:
+            conv_mask_p = conv_mask_p.unsqueeze(-1)
+        grad_p = torch.where(
+            conv_mask_p,
+            grad_p,
+            torch.zeros_like(grad_p),
+        )
+
+        conv_mask_u = converged
+        while conv_mask_u.ndim < grad_U_RT.ndim:
+            conv_mask_u = conv_mask_u.unsqueeze(-1)
+        grad_U_RT = torch.where(conv_mask_u, grad_U_RT, torch.zeros_like(grad_U_RT))
+
+        # Remove non-finite entries before broadcast reduction; zero incoming gradients
+        # can still encounter singular intermediate quantities in failed solves.
+        grad_p = torch.nan_to_num(grad_p, nan=0.0, posinf=0.0, neginf=0.0)
+        grad_U_RT = torch.nan_to_num(grad_U_RT, nan=0.0, posinf=0.0, neginf=0.0)
 
         # Reduce to original shapes if broadcasting happened
         ctx_any: Any = ctx

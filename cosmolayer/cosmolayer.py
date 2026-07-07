@@ -250,7 +250,9 @@ class CosmoLayer(torch.nn.Module):
         self,
         scaled_interactions: torch.Tensor,
         probs: torch.Tensor,
-    ) -> torch.Tensor:
+        *,
+        return_converged: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         """Compute the log-activity coefficients of segment types in pure compounds.
 
         Parameters
@@ -273,6 +275,8 @@ class CosmoLayer(torch.nn.Module):
             probs, scaled_interactions.unsqueeze(-3), self._max_iter
         )
         self._check_convergence(converged)
+        if return_converged:
+            return log_gamma_pure, converged
         return cast(torch.Tensor, log_gamma_pure)
 
     def log_mixture_segment_activity_coefficients(
@@ -281,7 +285,9 @@ class CosmoLayer(torch.nn.Module):
         fracs: torch.Tensor,
         areas: torch.Tensor,
         probs: torch.Tensor,
-    ) -> torch.Tensor:
+        *,
+        return_converged: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         """Compute the log-activity coefficients of segment types in the mixture.
 
         Parameters
@@ -312,6 +318,8 @@ class CosmoLayer(torch.nn.Module):
             self._max_iter,
         )
         self._check_convergence(converged)
+        if return_converged:
+            return log_gamma_mix, converged
         return cast(torch.Tensor, log_gamma_mix)
 
     def log_residual_activity_coefficients(
@@ -320,7 +328,9 @@ class CosmoLayer(torch.nn.Module):
         fracs: torch.Tensor,
         areas: torch.Tensor,
         probs: torch.Tensor,
-    ) -> torch.Tensor:
+        *,
+        return_converged: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         """Compute the logarithms of the residual activity coefficients.
 
         Parameters
@@ -346,16 +356,19 @@ class CosmoLayer(torch.nn.Module):
             Shape: (..., num_components).
         """
         scaled_interactions = self.scaled_interactions(temperature)
-        log_gamma_pure = self.log_pure_segment_activity_coefficients(
-            scaled_interactions, probs
+        log_gamma_pure, converged_pure = self.log_pure_segment_activity_coefficients(
+            scaled_interactions, probs, return_converged=True
         )
-        log_gamma_mix = self.log_mixture_segment_activity_coefficients(
-            scaled_interactions, fracs, areas, probs
+        log_gamma_mix, converged_mix = self.log_mixture_segment_activity_coefficients(
+            scaled_interactions, fracs, areas, probs, return_converged=True
         )
+        converged = converged_mix & converged_pure.all(dim=-1)
         num_segments = areas / self._area_per_segment
         log_gamma_res: torch.Tensor = num_segments * (
             probs * (log_gamma_mix.unsqueeze(-2) - log_gamma_pure)
         ).sum(dim=-1)
+        if return_converged:
+            return log_gamma_res, converged
         return log_gamma_res
 
     def log_activity_coefficients(
@@ -365,7 +378,9 @@ class CosmoLayer(torch.nn.Module):
         areas: torch.Tensor,
         volumes: torch.Tensor,
         probs: torch.Tensor,
-    ) -> torch.Tensor:
+        *,
+        return_converged: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         """Compute the logarithms of the activity coefficients.
 
         Parameters
@@ -396,10 +411,13 @@ class CosmoLayer(torch.nn.Module):
         log_gamma_c = self.log_combinatorial_activity_coefficients(
             fracs, areas, volumes
         )
-        log_gamma_r = self.log_residual_activity_coefficients(
-            temperature, fracs, areas, probs
+        log_gamma_r, converged = self.log_residual_activity_coefficients(
+            temperature, fracs, areas, probs, return_converged=True
         )
-        return log_gamma_c + log_gamma_r
+        log_gamma = log_gamma_c + log_gamma_r
+        if return_converged:
+            return log_gamma, converged
+        return log_gamma
 
     def forward(
         self,
@@ -408,7 +426,9 @@ class CosmoLayer(torch.nn.Module):
         areas: torch.Tensor,
         volumes: torch.Tensor,
         probs: torch.Tensor,
-    ) -> torch.Tensor:
+        *,
+        return_converged: bool = False,
+    ) -> torch.Tensor | tuple[torch.Tensor, torch.Tensor]:
         """Forward pass of the CosmoLayer.
 
         Parameters
@@ -436,4 +456,6 @@ class CosmoLayer(torch.nn.Module):
             Logarithms of the activity coefficients.
             Shape: (..., num_components).
         """
-        return self.log_activity_coefficients(temp, fracs, areas, volumes, probs)
+        return self.log_activity_coefficients(
+            temp, fracs, areas, volumes, probs, return_converged=return_converged
+        )

@@ -96,3 +96,65 @@ def test_cosmosolve_gradients() -> None:
         raise_exception=True,
     )
     assert result is True
+
+
+def test_cosmosolve_warns_with_nonconvergence_diagnostics() -> None:
+    """Non-converged forward solves include final residual diagnostics."""
+    n = 4
+    batch_size = 2
+    x, U_RT = create_random_problem(n, batch_size)
+
+    with pytest.warns(
+        RuntimeWarning,
+        match=r"max_delta_norm=.*max_f_norm=.*step_tol=.*resid_tol=",
+    ):
+        _, converged = CosmoSolver.apply(x, U_RT, 1)
+
+    assert not converged.all().item()
+
+
+def test_cosmosolve_backward_solves_only_good_rows(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """Backward skips rows that were marked non-converged during forward."""
+    n = 4
+    batch_size = 2
+    x, U_RT = create_random_problem(n, batch_size)
+
+    def fake_solver(
+        p: torch.Tensor,
+        U_RT: torch.Tensor,
+        max_iter: int,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        del U_RT, max_iter
+        log_gamma = torch.zeros((*p.shape, 1), dtype=p.dtype, device=p.device)
+        converged = torch.tensor([True, False], device=p.device)
+        return log_gamma, converged
+
+    solve_batch_sizes = []
+    original_solve_ex = torch.linalg.solve_ex
+
+    def recording_solve_ex(
+        A: torch.Tensor,
+        B: torch.Tensor,
+        *,
+        left: bool = True,
+        check_errors: bool = False,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        solve_batch_sizes.append(A.shape[0])
+        return original_solve_ex(A, B, left=left, check_errors=check_errors)
+
+    monkeypatch.setattr(CosmoSolver, "_logspace_newton_solver", fake_solver)
+    monkeypatch.setattr(torch.linalg, "solve_ex", recording_solve_ex)
+
+    log_gamma, converged = CosmoSolver.apply(x, U_RT)
+    assert converged.tolist() == [True, False]
+
+    loss = log_gamma.sum()
+    loss.backward()
+
+    assert solve_batch_sizes == [1]
+    assert x.grad is not None
+    assert U_RT.grad is not None
+    assert torch.isfinite(x.grad).all()
+    assert torch.isfinite(U_RT.grad).all()
