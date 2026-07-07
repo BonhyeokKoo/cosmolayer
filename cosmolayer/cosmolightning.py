@@ -5,6 +5,7 @@
 
 from __future__ import annotations
 
+import warnings
 from collections.abc import Sequence
 
 import numpy as np
@@ -361,8 +362,33 @@ class LogGammaLightningModule(pl.LightningModule):
             Training loss for the batch.
         """
         inputs, targets = batch
-        predictions = self(inputs)
+        with warnings.catch_warnings(record=True) as caught_warnings:
+            warnings.simplefilter("always", RuntimeWarning)
+            predictions = self(inputs)
         batch_size = self._infer_batch_size(predictions, targets)
+        skipped = any(
+            "COSMO solver did not converge" in str(warning.message)
+            for warning in caught_warnings
+        )
+        if skipped:
+            loss = torch.zeros((), dtype=targets.dtype, device=targets.device)
+            for parameter in self.parameters():
+                loss = loss + parameter.sum() * 0.0
+            self.log(
+                "train_loss_step",
+                loss,
+                on_step=True,
+                on_epoch=False,
+                batch_size=batch_size,
+            )
+            self.log(
+                "train_batch_skipped",
+                torch.tensor(1.0, device=targets.device),
+                on_step=True,
+                on_epoch=False,
+                batch_size=batch_size,
+            )
+            return loss
         if self.normalize_targets:
             target_mean = self.target_mean
             target_std = self.target_std
@@ -374,6 +400,20 @@ class LogGammaLightningModule(pl.LightningModule):
             loss,
             on_step=False,
             on_epoch=True,
+            batch_size=batch_size,
+        )
+        self.log(
+            "train_loss_step",
+            loss,
+            on_step=True,
+            on_epoch=False,
+            batch_size=batch_size,
+        )
+        self.log(
+            "train_batch_skipped",
+            torch.tensor(0.0, device=targets.device),
+            on_step=True,
+            on_epoch=False,
             batch_size=batch_size,
         )
         return loss

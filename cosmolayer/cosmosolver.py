@@ -14,8 +14,8 @@ from torch.autograd.function import FunctionCtx, NestedIOFunction
 
 from .utils import log_matmul_exp
 
-NEWTON_STEP_TOLERANCE = {torch.float32: 1e-5, torch.float64: 1e-10}
-NEWTON_RESIDUAL_TOLERANCE = {torch.float32: 1e-6, torch.float64: 1e-12}
+NEWTON_STEP_TOLERANCE = {torch.float32: 1e-4, torch.float64: 1e-10}
+NEWTON_RESIDUAL_TOLERANCE = {torch.float32: 1e-5, torch.float64: 1e-12}
 
 
 class CosmoSolver(torch.autograd.Function):
