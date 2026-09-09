@@ -6,6 +6,7 @@
 from __future__ import annotations
 
 from collections.abc import Sequence
+from typing import Any, cast
 
 import numpy as np
 import torch
@@ -298,6 +299,77 @@ class LogGammaLightningModule(pl.LightningModule):
         )
         return self.predict_from_log_gamma(temperature, mole_fractions, log_gamma)
 
+    def forward_with_convergence(
+        self, inputs: InputsType
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Compute predictions and a same-shaped solver-convergence mask."""
+        temperature, mole_fractions, areas, volumes, probabilities = inputs
+        log_gamma, component_converged = self.cosmo_layer.forward_with_convergence(
+            temperature,
+            mole_fractions,
+            areas,
+            volumes,
+            probabilities,
+        )
+        predictions = self.predict_from_log_gamma(
+            temperature, mole_fractions, log_gamma
+        )
+        return predictions, self.prediction_convergence_mask(
+            component_converged, predictions
+        )
+
+    def prediction_convergence_mask(
+        self,
+        component_converged: torch.Tensor,
+        predictions: torch.Tensor,
+    ) -> torch.Tensor:
+        """Map component-level convergence to the final prediction shape."""
+        if component_converged.shape == predictions.shape:
+            return component_converged
+        row_converged = component_converged.reshape(
+            component_converged.shape[0], -1
+        ).all(dim=1)
+        return row_converged.reshape(
+            row_converged.shape[0], *([1] * (predictions.ndim - 1))
+        ).expand_as(predictions)
+
+    def _zero_connected_loss(self) -> torch.Tensor:
+        """Return zero connected to every trainable parameter."""
+        return torch.stack(
+            [parameter.sum() * 0.0 for parameter in self.parameters()]
+        ).sum()
+
+    def _masked_loss(
+        self,
+        predictions: torch.Tensor,
+        targets: torch.Tensor,
+        prediction_converged: torch.Tensor,
+    ) -> tuple[torch.Tensor, int]:
+        """Compute loss using only converged, finite predictions and targets."""
+        self._infer_batch_size(predictions, targets)
+        valid = (
+            prediction_converged & torch.isfinite(predictions) & torch.isfinite(targets)
+        )
+        valid_count = int(valid.sum().item())
+        if valid_count == 0:
+            return self._zero_connected_loss(), 0
+        return self.loss_function(predictions[valid], targets[valid]), valid_count
+
+    def _batch_loss(
+        self,
+        batch: tuple[InputsType, torch.Tensor],
+        *,
+        track_non_converged: bool,
+    ) -> tuple[torch.Tensor, int]:
+        """Compute masked loss while retaining the subclass extension hook."""
+        del track_non_converged
+        inputs, targets = batch
+        predictions, prediction_converged = self.forward_with_convergence(inputs)
+        if self.normalize_targets:
+            targets = (targets - self.target_mean) / self.target_std
+            predictions = (predictions - self.target_mean) / self.target_std
+        return self._masked_loss(predictions, targets, prediction_converged)
+
     def predict_from_log_gamma(
         self,
         T: torch.Tensor,
@@ -362,15 +434,9 @@ class LogGammaLightningModule(pl.LightningModule):
         torch.Tensor
             Training loss for the batch.
         """
-        inputs, targets = batch
-        predictions = self(inputs)
-        batch_size = self._infer_batch_size(predictions, targets)
-        if self.normalize_targets:
-            target_mean = self.target_mean
-            target_std = self.target_std
-            targets = (targets - target_mean) / target_std
-            predictions = (predictions - target_mean) / target_std
-        loss: torch.Tensor = self.loss_function(predictions, targets)
+        _, targets = batch
+        batch_size = int(targets.shape[0])
+        loss, _ = self._batch_loss(batch, track_non_converged=True)
         self.log(
             "train_loss",
             loss,
@@ -399,15 +465,9 @@ class LogGammaLightningModule(pl.LightningModule):
         torch.Tensor
             Validation loss for the batch.
         """
-        inputs, targets = batch
-        predictions = self(inputs)
-        batch_size = self._infer_batch_size(predictions, targets)
-        if self.normalize_targets:
-            target_mean = self.target_mean
-            target_std = self.target_std
-            targets = (targets - target_mean) / target_std
-            predictions = (predictions - target_mean) / target_std
-        loss: torch.Tensor = self.loss_function(predictions, targets)
+        _, targets = batch
+        batch_size = int(targets.shape[0])
+        loss, _ = self._batch_loss(batch, track_non_converged=False)
         self.log(
             "val_loss",
             loss,
@@ -438,7 +498,7 @@ class LogGammaLightningModule(pl.LightningModule):
             Test loss for the batch.
         """
         inputs, targets = batch
-        predictions = self(inputs)
+        predictions, prediction_converged = self.forward_with_convergence(inputs)
         batch_size = self._infer_batch_size(predictions, targets)
         loss_predictions = predictions
         loss_targets = targets
@@ -447,11 +507,17 @@ class LogGammaLightningModule(pl.LightningModule):
             target_std = self.target_std
             loss_targets = (targets - target_mean) / target_std
             loss_predictions = (predictions - target_mean) / target_std
-        loss: torch.Tensor = self.loss_function(loss_predictions, loss_targets)
+        loss, _ = self._masked_loss(
+            loss_predictions, loss_targets, prediction_converged
+        )
 
-        self.test_mae.update(predictions, targets)
-        self.test_rmse.update(predictions, targets)
-        self.test_r2.update(predictions, targets)
+        valid = (
+            prediction_converged & torch.isfinite(predictions) & torch.isfinite(targets)
+        )
+        if bool(valid.any()):
+            cast(Any, self.test_mae).update(predictions[valid], targets[valid])
+            cast(Any, self.test_rmse).update(predictions[valid], targets[valid])
+            cast(Any, self.test_r2).update(predictions[valid], targets[valid])
 
         self.log_dict(
             {
@@ -465,3 +531,17 @@ class LogGammaLightningModule(pl.LightningModule):
             batch_size=batch_size,
         )
         return loss
+
+    def predict_step(
+        self,
+        batch: InputsType | tuple[InputsType, torch.Tensor],
+        batch_idx: int,
+        dataloader_idx: int = 0,
+    ) -> torch.Tensor:
+        """Predict while marking excluded predictions as NaN."""
+        del batch_idx, dataloader_idx
+        is_training_batch = isinstance(batch[0], (tuple, list))
+        inputs = cast(InputsType, batch[0] if is_training_batch else batch)
+        predictions, prediction_converged = self.forward_with_convergence(inputs)
+        valid = prediction_converged & torch.isfinite(predictions)
+        return predictions.masked_fill(~valid, torch.nan)

@@ -440,6 +440,48 @@ class CosmoLayer(torch.nn.Module):
         )
         return log_gamma_c + log_gamma_r
 
+    def forward_with_convergence(
+        self,
+        temp: torch.Tensor,
+        fracs: torch.Tensor,
+        areas: torch.Tensor,
+        volumes: torch.Tensor,
+        probs: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        """Return activity coefficients and a component-level convergence mask."""
+        scaled_interactions = self.scaled_interactions(temp)
+        pure_args = (probs, scaled_interactions.unsqueeze(-3), self._max_iter)
+        mixture_args = (
+            self.mixture_probabilities(fracs, areas, probs),
+            scaled_interactions,
+            self._max_iter,
+        )
+        if self._implicit_diff:
+            log_gamma_pure, pure_converged = CosmoSolver.apply(*pure_args)
+            log_gamma_mix, mixture_converged = CosmoSolver.apply(*mixture_args)
+        else:
+            log_gamma_pure, pure_converged = CosmoSolver.logspace_newton_solver(
+                *pure_args
+            )
+            log_gamma_mix, mixture_converged = CosmoSolver.logspace_newton_solver(
+                *mixture_args
+            )
+            log_gamma_pure = log_gamma_pure.squeeze(-1)
+            log_gamma_mix = log_gamma_mix.squeeze(-1)
+        self._check_convergence(pure_converged)
+        self._check_convergence(mixture_converged)
+
+        num_segments = areas / self._area_per_segment
+        log_gamma_res = num_segments * (
+            probs * (log_gamma_mix.unsqueeze(-2) - log_gamma_pure)
+        ).sum(dim=-1)
+        log_gamma = (
+            self.log_combinatorial_activity_coefficients(fracs, areas, volumes)
+            + log_gamma_res
+        )
+        component_converged = pure_converged & mixture_converged.unsqueeze(-1)
+        return log_gamma, component_converged
+
     def forward(
         self,
         temp: torch.Tensor,

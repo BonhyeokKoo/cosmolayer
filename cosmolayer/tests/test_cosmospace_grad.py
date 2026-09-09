@@ -53,6 +53,67 @@ def test_cosmosolve_output_shapes() -> None:
     assert U_RT.grad.shape == U_RT.shape
 
 
+def test_forward_excludes_only_singular_systems(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A singular Newton system does not terminate its batch peers."""
+    original_solve_ex = torch.linalg.solve_ex
+
+    def partial_solve_ex(
+        A: torch.Tensor,
+        B: torch.Tensor,
+        *,
+        check_errors: bool = False,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        solution, info = original_solve_ex(A, B, check_errors=check_errors)
+        info = info.clone()
+        info[1] = 1
+        return solution, info
+
+    monkeypatch.setattr(torch.linalg, "solve_ex", partial_solve_ex)
+    x, U_RT = create_random_problem(n=5, batch_size=2)
+
+    log_gamma, converged = CosmoSolver.logspace_newton_solver(x, U_RT, 100)
+
+    assert torch.isfinite(log_gamma).all()
+    assert converged.tolist() == [True, False]
+
+
+def test_backward_excludes_only_nonconverged_systems(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    """A failed system gets zero gradients without discarding its batch peers."""
+
+    def fake_solver(
+        p: torch.Tensor,
+        U_RT: torch.Tensor,
+        max_iter: int,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        del max_iter
+        batch_shape = torch.broadcast_shapes(p.shape[:-1], U_RT.shape[:-2])
+        log_gamma = torch.zeros(
+            (*batch_shape, p.shape[-1], 1), dtype=p.dtype, device=p.device
+        )
+        converged = torch.tensor([True, False], device=p.device)
+        return log_gamma, converged
+
+    monkeypatch.setattr(
+        CosmoSolver, "logspace_newton_solver", staticmethod(fake_solver)
+    )
+    x, U_RT = create_random_problem(n=4, batch_size=2, dtype=torch.float64)
+
+    log_gamma, converged = CosmoSolver.apply(x, U_RT)
+    assert converged.tolist() == [True, False]
+    log_gamma.sum().backward()
+
+    assert x.grad is not None
+    assert U_RT.grad is not None
+    assert x.grad[0].abs().sum() > 0
+    assert U_RT.grad[0].abs().sum() > 0
+    torch.testing.assert_close(x.grad[1], torch.zeros_like(x.grad[1]))
+    torch.testing.assert_close(U_RT.grad[1], torch.zeros_like(U_RT.grad[1]))
+
+
 @pytest.mark.parametrize("normalized_x", [True, False])
 def test_cosmosolve_solution(normalized_x: bool) -> None:
     """Test that the solution satisfies the fixed-point equation."""

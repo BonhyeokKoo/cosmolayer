@@ -23,9 +23,10 @@ class _DummyTrainer:
 
 
 class _DummyCosmoLayer(torch.nn.Module):
-    def __init__(self) -> None:
+    def __init__(self, converged: torch.Tensor | None = None) -> None:
         super().__init__()
         self.scale = torch.nn.Parameter(torch.tensor(2.0))
+        self.converged = converged
 
     def forward(
         self,
@@ -37,6 +38,22 @@ class _DummyCosmoLayer(torch.nn.Module):
     ) -> torch.Tensor:
         del temp, areas, volumes, probs
         return fracs * self.scale
+
+    def forward_with_convergence(
+        self,
+        temp: torch.Tensor,
+        fracs: torch.Tensor,
+        areas: torch.Tensor,
+        volumes: torch.Tensor,
+        probs: torch.Tensor,
+    ) -> tuple[torch.Tensor, torch.Tensor]:
+        predictions = self.forward(temp, fracs, areas, volumes, probs)
+        converged = (
+            torch.ones_like(predictions, dtype=torch.bool)
+            if self.converged is None
+            else self.converged
+        )
+        return predictions, converged
 
 
 class _ScaledLogGammaLightningModule(LogGammaLightningModule):
@@ -56,6 +73,25 @@ class _ScaledLogGammaLightningModule(LogGammaLightningModule):
     ) -> torch.Tensor:
         del T, x
         return self.scale * log_gamma
+
+
+class _FirstComponentLightningModule(LogGammaLightningModule):
+    def predict_from_log_gamma(
+        self,
+        T: torch.Tensor,
+        x: torch.Tensor,
+        log_gamma: torch.Tensor,
+    ) -> torch.Tensor:
+        del T, x
+        return log_gamma[..., :1]
+
+    def prediction_convergence_mask(
+        self,
+        component_converged: torch.Tensor,
+        predictions: torch.Tensor,
+    ) -> torch.Tensor:
+        del predictions
+        return component_converged[..., :1]
 
 
 def _make_batch() -> tuple[InputsType, Tensor1D]:
@@ -112,6 +148,88 @@ def test_training_step_uses_loss_function(monkeypatch: pytest.MonkeyPatch) -> No
     loss = module.training_step(batch, 0)
 
     torch.testing.assert_close(loss, torch.tensor(0.0))
+
+
+def test_training_step_excludes_only_nonconverged_predictions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = LogGammaLightningModule(
+        num_segment_types=4,
+        temperature_exponents=(1,),
+        area_per_segment=1.0,
+    )
+    module.cosmo_layer = cast(
+        CosmoLayer,
+        _DummyCosmoLayer(torch.tensor([True, False, True])),
+    )
+    inputs, targets = _make_batch()
+    targets = targets.clone()
+    targets[1] = 1000.0
+    monkeypatch.setattr(module, "log", lambda *args, **kwargs: None)
+
+    loss = module.training_step((inputs, targets), 0)
+    loss.backward()
+
+    torch.testing.assert_close(loss, torch.tensor(0.0))
+    assert module.cosmo_layer.scale.grad is not None
+    torch.testing.assert_close(module.cosmo_layer.scale.grad, torch.tensor(0.0))
+
+
+def test_training_step_handles_all_nonconverged_predictions(
+    monkeypatch: pytest.MonkeyPatch,
+) -> None:
+    module = LogGammaLightningModule(
+        num_segment_types=4,
+        temperature_exponents=(1,),
+        area_per_segment=1.0,
+    )
+    module.cosmo_layer = cast(
+        CosmoLayer,
+        _DummyCosmoLayer(torch.tensor([False, False, False])),
+    )
+    monkeypatch.setattr(module, "log", lambda *args, **kwargs: None)
+
+    loss = module.training_step(_make_batch(), 0)
+    loss.backward()
+
+    torch.testing.assert_close(loss, torch.tensor(0.0))
+    assert module.cosmo_layer.scale.grad is not None
+    torch.testing.assert_close(module.cosmo_layer.scale.grad, torch.tensor(0.0))
+
+
+def test_predict_step_marks_nonconverged_predictions_as_nan() -> None:
+    module = LogGammaLightningModule(
+        num_segment_types=4,
+        temperature_exponents=(1,),
+        area_per_segment=1.0,
+    )
+    module.cosmo_layer = cast(
+        CosmoLayer,
+        _DummyCosmoLayer(torch.tensor([True, False, True])),
+    )
+    inputs, _ = _make_batch()
+
+    predictions = module.predict_step(inputs, 0)
+
+    torch.testing.assert_close(
+        predictions,
+        torch.tensor([0.2, torch.nan, 1.2]),
+        equal_nan=True,
+    )
+
+
+def test_prediction_convergence_mask_is_overridable() -> None:
+    module = _FirstComponentLightningModule(
+        num_segment_types=4,
+        temperature_exponents=(1,),
+        area_per_segment=1.0,
+    )
+    component_converged = torch.tensor([[True, False], [False, True]])
+    predictions = torch.zeros((2, 1))
+
+    mask = module.prediction_convergence_mask(component_converged, predictions)
+
+    torch.testing.assert_close(mask, torch.tensor([[True], [False]]))
 
 
 def test_validation_and_test_steps_run(monkeypatch: pytest.MonkeyPatch) -> None:

@@ -14,8 +14,8 @@ from torch.autograd.function import FunctionCtx
 
 from .utils import log_matmul_exp
 
-NEWTON_STEP_TOLERANCE = {torch.float32: 1e-5, torch.float64: 1e-10}
-NEWTON_RESIDUAL_TOLERANCE = {torch.float32: 1e-6, torch.float64: 1e-12}
+NEWTON_STEP_TOLERANCE = {torch.float32: 1e-4, torch.float64: 1e-10}
+NEWTON_RESIDUAL_TOLERANCE = {torch.float32: 1e-5, torch.float64: 1e-12}
 
 
 class CosmoSolver(torch.autograd.Function):
@@ -145,15 +145,20 @@ class CosmoSolver(torch.autograd.Function):
         log_gamma = -torch.logsumexp(log_A, dim=-1, keepdim=True) + 0.5 * log_t
         log_A_gamma = log_matmul_exp(log_A, log_gamma)
         f = log_gamma + log_A_gamma - log_t
+        failed = torch.zeros(f.shape[:-2], dtype=torch.bool, device=f.device)
         for _ in range(max_iter):
             J = torch.exp(log_gamma.mT + log_A - log_A_gamma) + Id
-            delta = torch.linalg.solve(J, -f)
+            delta, info = torch.linalg.solve_ex(J, -f, check_errors=False)
+            solved = info.eq(0) & torch.isfinite(delta).all(dim=(-2, -1))
+            solved &= ~failed
+            failed |= ~solved
+            delta = torch.where(solved[..., None, None], delta, torch.zeros_like(delta))
             log_gamma = log_gamma + delta
             log_A_gamma = log_matmul_exp(log_A, log_gamma)
             f = log_gamma + log_A_gamma - log_t
             delta_norm = delta.abs().amax(dim=(-2, -1))
             f_norm = f.abs().amax(dim=(-2, -1))
-            converged = (delta_norm < step_tol) & (f_norm < resid_tol)
+            converged = ~failed & (delta_norm < step_tol) & (f_norm < resid_tol)
             if bool(converged.all()):
                 break
         return log_gamma, converged
@@ -180,7 +185,7 @@ class CosmoSolver(torch.autograd.Function):
             log_gamma, converged = CosmoSolver.logspace_newton_solver(
                 p, U_RT, max_iter=max_iter
             )
-        ctx.save_for_backward(log_gamma, p, U_RT)
+        ctx.save_for_backward(log_gamma, p, U_RT, converged)
 
         return log_gamma.squeeze(-1), converged
 
@@ -194,34 +199,64 @@ class CosmoSolver(torch.autograd.Function):
             return None, None, None
 
         ctx_any: Any = ctx
-        log_gamma, p, U_RT = ctx_any.saved_tensors
+        log_gamma, p, U_RT, converged = ctx_any.saved_tensors
+        n_types = log_gamma.shape[-2]
+        batch_shape = log_gamma.shape[:-2]
+        p_expanded = torch.broadcast_to(p, (*batch_shape, n_types))
+        U_expanded = torch.broadcast_to(U_RT, (*batch_shape, n_types, n_types))
+        upstream = grad_log_gamma.reshape(-1, n_types)
+        log_gamma_flat = log_gamma.reshape(-1, n_types, 1)
+        p_flat = p_expanded.reshape(-1, n_types)
+        U_flat = U_expanded.reshape(-1, n_types, n_types)
 
-        gamma = log_gamma.exp()
-        B = torch.exp(-U_RT)
+        active = torch.broadcast_to(converged, batch_shape).reshape(-1).clone()
+        active &= torch.isfinite(upstream).all(dim=-1)
+        active &= torch.isfinite(log_gamma_flat).all(dim=(-2, -1))
+        active &= torch.isfinite(p_flat).all(dim=-1)
+        active &= torch.isfinite(U_flat).all(dim=(-2, -1))
 
-        t = p.sum(dim=-1, keepdim=True)
+        grad_p_expanded = torch.zeros_like(p_expanded)
+        grad_U_expanded = torch.zeros_like(U_expanded)
+        active_indices = active.nonzero(as_tuple=False).flatten()
+        if active_indices.numel():
+            p_active = p_flat[active_indices]
+            U_active = U_flat[active_indices]
+            log_gamma_active = log_gamma_flat[active_indices]
+            log_A = p_active.log().unsqueeze(-2) - U_active
+            log_A_gamma = log_matmul_exp(log_A, log_gamma_active)
+            Id = torch.eye(n_types, dtype=log_A.dtype, device=log_A.device)
+            J = torch.exp(log_gamma_active.mT + log_A - log_A_gamma) + Id
+            v, info = torch.linalg.solve_ex(
+                J.mT, upstream[active_indices].unsqueeze(-1), check_errors=False
+            )
+            solved = info.eq(0) & torch.isfinite(v).all(dim=(-2, -1))
 
-        # Rebuild log_A, log_A_gamma, and J (same as forward)
-        log_A = p.log().unsqueeze(-2) - U_RT
-        log_A_gamma = log_matmul_exp(log_A, log_gamma)
-        Id = torch.eye(log_A.shape[-1], dtype=log_A.dtype, device=log_A.device)
-        J = torch.exp(log_gamma.mT + log_A - log_A_gamma) + Id
+            if bool(solved.any()):
+                solved_indices = active_indices[solved]
+                p_solved = p_active[solved]
+                U_solved = U_active[solved]
+                log_gamma_solved = log_gamma_active[solved]
+                log_A_gamma_solved = log_A_gamma[solved]
+                v_solved = v[solved]
 
-        # Solve (∂F/∂log_gamma)^T v = dL/dlog_gamma
-        v = torch.linalg.solve(J.mT, grad_log_gamma.unsqueeze(-1))
+                gamma = log_gamma_solved.exp()
+                B = torch.exp(-U_solved)
+                r = v_solved / log_A_gamma_solved.exp()
+                t = p_solved.sum(dim=-1, keepdim=True)
+                grad_p = -(gamma * (B.mT @ r)).squeeze(-1) + v_solved.sum(dim=-2) / t
+                pg = p_solved * gamma.squeeze(-1)
+                grad_U_RT = r * B * pg.unsqueeze(-2)
 
-        # r = v / (A @ gamma)
-        r = v / log_A_gamma.exp()
+                finite_p = torch.isfinite(grad_p).all(dim=-1)
+                finite_U = torch.isfinite(grad_U_RT).all(dim=(-2, -1))
+                grad_p_expanded.reshape(-1, n_types)[solved_indices[finite_p]] = grad_p[
+                    finite_p
+                ]
+                grad_U_expanded.reshape(-1, n_types, n_types)[
+                    solved_indices[finite_U]
+                ] = grad_U_RT[finite_U]
 
-        # grad_p: -gamma * (B^T r) + (sum(v)/t)
-        grad_p = -(gamma * (B.mT @ r)).squeeze(-1) + v.sum(dim=-2) / t
+        grad_p_result = grad_p_expanded.sum_to_size(ctx_any.p_shape)
+        grad_U_result = grad_U_expanded.sum_to_size(ctx_any.u_shape)
 
-        # grad_U_RT: r_i * B_ij * (p_j * gamma_j)
-        pg = p * gamma.squeeze(-1)
-        grad_U_RT = r * B * pg.unsqueeze(-2)
-
-        # Reduce to original shapes if broadcasting happened
-        grad_p = grad_p.sum_to_size(ctx_any.p_shape)
-        grad_U_RT = grad_U_RT.sum_to_size(ctx_any.u_shape)
-
-        return grad_p, grad_U_RT, None
+        return grad_p_result, grad_U_result, None
