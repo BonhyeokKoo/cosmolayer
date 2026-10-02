@@ -83,6 +83,10 @@ class LogGammaLightningModule(pl.LightningModule):
           ``(num_segment_types, num_segment_types)``.
 
         Default is ``42``.
+    symmetric_matrices : bool, optional
+        Whether to keep the learnable interaction matrices symmetric by using only
+        their symmetric parts (see the ``symmetric`` argument of
+        :class:`~cosmolayer.CosmoLayer`). Default is ``False``.
 
     Examples
     --------
@@ -124,6 +128,7 @@ class LogGammaLightningModule(pl.LightningModule):
         normalize_targets: bool = False,
         loss_function: str = "mse_loss",
         initialization: Sequence[NDArray[np.float64]] | int = 42,
+        symmetric_matrices: bool = False,
     ) -> None:
         super().__init__()
 
@@ -164,6 +169,7 @@ class LogGammaLightningModule(pl.LightningModule):
             reference_temperature=reference_temperature,
             max_iter=max_iter,
             learn_matrices=True,
+            symmetric=symmetric_matrices,
         )
 
         self.test_mae = MeanAbsoluteError()

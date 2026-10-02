@@ -56,6 +56,11 @@ class CosmoLayer(torch.nn.Module):
     learn_matrices : bool, optional
         Whether to register all scaled interaction energy matrices as trainable
         parameters. Default is False.
+    symmetric : bool, optional
+        Whether to use only the symmetric part of each scaled interaction energy
+        matrix, :math:`(\hat{\mathbf{U}}_n + \hat{\mathbf{U}}_n^\mathsf{T})/2`, so that
+        the interaction energies stay symmetric even when the matrices are learned.
+        Default is False.
     implicit_diff : bool, optional
         Whether to differentiate through the Newton solver using the implicit
         function theorem (:class:`~cosmolayer.cosmosolver.CosmoSolver`), rather than
@@ -117,6 +122,7 @@ class CosmoLayer(torch.nn.Module):
         *,
         reference_temperature: float = 298.15,  # K
         learn_matrices: bool = False,
+        symmetric: bool = False,
         implicit_diff: bool = True,
         max_iter: int | None = None,
     ) -> None:
@@ -154,6 +160,7 @@ class CosmoLayer(torch.nn.Module):
             self._matrix_names_and_exponents.append((name, exponents[idx]))
 
         self._exponents = tuple(exponents)
+        self._symmetric = symmetric
         self._ref_temp = reference_temperature
         self._area_per_segment = area_per_segment
         self._kappa = COORDINATION_NUMBER / (2 * AREA_PER_CONTACT)
@@ -257,10 +264,12 @@ class CosmoLayer(torch.nn.Module):
             Shape: (..., num_segment_types, num_segment_types).
         """
         beta = (self._ref_temp / temp).unsqueeze(-1).unsqueeze(-1)
-        matrices = [
-            getattr(self, name) * beta**exponent
-            for name, exponent in self._matrix_names_and_exponents
-        ]
+        matrices = []
+        for name, exponent in self._matrix_names_and_exponents:
+            matrix = getattr(self, name)
+            if self._symmetric:
+                matrix = 0.5 * (matrix + matrix.mT)
+            matrices.append(matrix * beta**exponent)
         return torch.stack(matrices).sum(dim=0)
 
     def log_pure_segment_activity_coefficients(
