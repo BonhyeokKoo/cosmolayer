@@ -61,6 +61,11 @@ class CosmoLayer(torch.nn.Module):
         matrix, :math:`(\hat{\mathbf{U}}_n + \hat{\mathbf{U}}_n^\mathsf{T})/2`, so that
         the interaction energies stay symmetric even when the matrices are learned.
         Default is False.
+    newton_max_step : float, optional
+        Largest allowed change of the segment log-activity coefficients per Newton
+        step of the solver (see the ``max_step`` argument of
+        :class:`~cosmolayer.cosmosolver.CosmoSolver`). Capping the step helps stiff
+        systems converge. Default is None (no cap).
     implicit_diff : bool, optional
         Whether to differentiate through the Newton solver using the implicit
         function theorem (:class:`~cosmolayer.cosmosolver.CosmoSolver`), rather than
@@ -123,6 +128,7 @@ class CosmoLayer(torch.nn.Module):
         reference_temperature: float = 298.15,  # K
         learn_matrices: bool = False,
         symmetric: bool = False,
+        newton_max_step: float | None = None,
         implicit_diff: bool = True,
         max_iter: int | None = None,
     ) -> None:
@@ -161,6 +167,7 @@ class CosmoLayer(torch.nn.Module):
 
         self._exponents = tuple(exponents)
         self._symmetric = symmetric
+        self._newton_max_step = newton_max_step
         self._ref_temp = reference_temperature
         self._area_per_segment = area_per_segment
         self._kappa = COORDINATION_NUMBER / (2 * AREA_PER_CONTACT)
@@ -302,7 +309,12 @@ class CosmoLayer(torch.nn.Module):
             iterations of :meth:`CosmoSolver.logspace_newton_solver
             <cosmolayer.cosmosolver.CosmoSolver.logspace_newton_solver>` otherwise.
         """
-        args = (probs, scaled_interactions.unsqueeze(-3), self._max_iter)
+        args = (
+            probs,
+            scaled_interactions.unsqueeze(-3),
+            self._max_iter,
+            self._newton_max_step,
+        )
         if self._implicit_diff:
             log_gamma_pure, converged = CosmoSolver.apply(*args)
         else:
@@ -353,6 +365,7 @@ class CosmoLayer(torch.nn.Module):
             self.mixture_probabilities(fracs, areas, probs),
             scaled_interactions,
             self._max_iter,
+            self._newton_max_step,
         )
         if self._implicit_diff:
             log_gamma_mix, converged = CosmoSolver.apply(*args)
@@ -459,11 +472,17 @@ class CosmoLayer(torch.nn.Module):
     ) -> tuple[torch.Tensor, torch.Tensor]:
         """Return activity coefficients and a component-level convergence mask."""
         scaled_interactions = self.scaled_interactions(temp)
-        pure_args = (probs, scaled_interactions.unsqueeze(-3), self._max_iter)
+        pure_args = (
+            probs,
+            scaled_interactions.unsqueeze(-3),
+            self._max_iter,
+            self._newton_max_step,
+        )
         mixture_args = (
             self.mixture_probabilities(fracs, areas, probs),
             scaled_interactions,
             self._max_iter,
+            self._newton_max_step,
         )
         if self._implicit_diff:
             log_gamma_pure, pure_converged = CosmoSolver.apply(*pure_args)

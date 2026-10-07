@@ -57,6 +57,10 @@ class CosmoSolver(torch.autograd.Function):
         Shape: (..., num_segment_types, num_segment_types).
     max_iter : int
         Maximum number of iterations.
+    max_step : float, optional
+        Largest allowed change of :math:`\ln \boldsymbol{\gamma}` per Newton step.
+        Each step is rescaled as a whole, keeping its direction, so that its largest
+        component does not exceed ``max_step``. Default is None (no cap).
 
     Returns
     -------
@@ -108,6 +112,7 @@ class CosmoSolver(torch.autograd.Function):
         p: torch.Tensor,
         U_RT: torch.Tensor,
         max_iter: int,
+        max_step: float | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         r"""Solve the COSMO self-consistent equations with a log-space Newton method.
 
@@ -127,6 +132,10 @@ class CosmoSolver(torch.autograd.Function):
             Shape: (..., num_segment_types, num_segment_types).
         max_iter : int
             Maximum number of Newton iterations.
+        max_step : float, optional
+            Largest allowed change of :math:`\ln \boldsymbol{\gamma}` per Newton
+            step; each step is rescaled as a whole to respect it. Default is None
+            (no cap).
 
         Returns
         -------
@@ -153,6 +162,9 @@ class CosmoSolver(torch.autograd.Function):
             solved &= ~failed
             failed |= ~solved
             delta = torch.where(solved[..., None, None], delta, torch.zeros_like(delta))
+            if max_step is not None:
+                scale = max_step / delta.abs().amax(dim=(-2, -1), keepdim=True)
+                delta = delta * scale.clamp(max=1.0)
             log_gamma = log_gamma + delta
             log_A_gamma = log_matmul_exp(log_A, log_gamma)
             f = log_gamma + log_A_gamma - log_t
@@ -169,6 +181,7 @@ class CosmoSolver(torch.autograd.Function):
         p: torch.Tensor,
         U_RT: torch.Tensor,
         max_iter: int = 100,
+        max_step: float | None = None,
     ) -> tuple[torch.Tensor, torch.Tensor]:
         ctx_any: Any = ctx
         ctx_any.p_shape = tuple(p.shape)
@@ -183,7 +196,7 @@ class CosmoSolver(torch.autograd.Function):
 
         with torch.no_grad():
             log_gamma, converged = CosmoSolver.logspace_newton_solver(
-                p, U_RT, max_iter=max_iter
+                p, U_RT, max_iter=max_iter, max_step=max_step
             )
         ctx.save_for_backward(log_gamma, p, U_RT, converged)
 
@@ -193,10 +206,10 @@ class CosmoSolver(torch.autograd.Function):
     def backward(
         ctx: FunctionCtx,
         *grad_outputs: torch.Tensor | None,
-    ) -> tuple[torch.Tensor | None, torch.Tensor | None, None]:
+    ) -> tuple[torch.Tensor | None, torch.Tensor | None, None, None]:
         grad_log_gamma = grad_outputs[0] if grad_outputs else None
         if grad_log_gamma is None:
-            return None, None, None
+            return None, None, None, None
 
         ctx_any: Any = ctx
         log_gamma, p, U_RT, converged = ctx_any.saved_tensors
@@ -259,4 +272,4 @@ class CosmoSolver(torch.autograd.Function):
         grad_p_result = grad_p_expanded.sum_to_size(ctx_any.p_shape)
         grad_U_result = grad_U_expanded.sum_to_size(ctx_any.u_shape)
 
-        return grad_p_result, grad_U_result, None
+        return grad_p_result, grad_U_result, None, None

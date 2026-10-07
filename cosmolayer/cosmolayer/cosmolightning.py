@@ -87,6 +87,9 @@ class LogGammaLightningModule(pl.LightningModule):
         Whether to keep the learnable interaction matrices symmetric by using only
         their symmetric parts (see the ``symmetric`` argument of
         :class:`~cosmolayer.CosmoLayer`). Default is ``False``.
+    newton_max_step : float, optional
+        Cap on each Newton step of the COSMO solver (see the ``newton_max_step``
+        argument of :class:`~cosmolayer.CosmoLayer`). Default is ``None`` (no cap).
 
     Examples
     --------
@@ -129,6 +132,7 @@ class LogGammaLightningModule(pl.LightningModule):
         loss_function: str = "mse_loss",
         initialization: Sequence[NDArray[np.float64]] | int = 42,
         symmetric_matrices: bool = False,
+        newton_max_step: float | None = None,
     ) -> None:
         super().__init__()
 
@@ -146,6 +150,8 @@ class LogGammaLightningModule(pl.LightningModule):
             raise ValueError("learning_rate must be positive")
         if weight_decay < 0.0:
             raise ValueError("weight_decay must be non-negative")
+        if newton_max_step is not None and newton_max_step <= 0.0:
+            raise ValueError("newton_max_step must be positive")
         loss_callable = getattr(F, loss_function, None)
         if not is_loss_function(loss_callable):
             raise ValueError(f"Unsupported loss_function '{loss_function}'.")
@@ -170,6 +176,7 @@ class LogGammaLightningModule(pl.LightningModule):
             max_iter=max_iter,
             learn_matrices=True,
             symmetric=symmetric_matrices,
+            newton_max_step=newton_max_step,
         )
 
         self.test_mae = MeanAbsoluteError()
